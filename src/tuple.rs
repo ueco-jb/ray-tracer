@@ -1,4 +1,5 @@
 use num_traits::cast::ToPrimitive;
+use std::ops::Add;
 
 #[derive(Debug, PartialEq)]
 pub struct Tuple {
@@ -33,6 +34,19 @@ impl Tuple {
     }
     pub fn get_z(&self) -> &f64 {
         &self.z
+    }
+}
+
+impl Add for Tuple {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+            w: self.w + other.w,
+        }
     }
 }
 
@@ -96,5 +110,12 @@ mod tests {
     #[test]
     fn point_creates_tuple_with_w_zero() {
         assert_eq!(tuple(4, -4, 3.0, 0), vector(4.0, -4.0, 3.0));
+    }
+
+    #[test]
+    fn add_two_tuples() {
+        let a1 = tuple(3.0, -2, 5, 1);
+        let a2 = tuple(-2, 3, 1, 0);
+        assert_eq!(tuple(1, 1, 6, 1), a1 + a2);
     }
 }
