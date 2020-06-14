@@ -1,9 +1,11 @@
+use num_traits::cast::ToPrimitive;
+
 #[derive(Debug, PartialEq)]
 pub struct Tuple {
     x: f64,
     y: f64,
     z: f64,
-    w: u32,
+    w: u8,
 }
 
 impl Tuple {
@@ -32,17 +34,17 @@ impl Tuple {
     pub fn get_z(&self) -> &f64 {
         &self.z
     }
-
 }
 
-pub fn tuple (x: f64, y: f64, z: f64, w: u32) -> Tuple {
+pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w: u8) -> Tuple {
     Tuple {
-        x,
-        y,
-        z,
+        x: x.to_f64().unwrap(),
+        y: y.to_f64().unwrap(),
+        z: z.to_f64().unwrap(),
         w,
     }
 }
+
 
 pub fn point(x: f64, y: f64, z: f64) -> Tuple {
     Tuple {
@@ -93,6 +95,6 @@ mod tests {
 
     #[test]
     fn point_creates_tuple_with_w_zero() {
-        assert_eq!(tuple(4.0, -4.0, 3.0, 0), vector(4.0, -4.0, 3.0));
+        assert_eq!(tuple(4, -4, 3.0, 0), vector(4.0, -4.0, 3.0));
     }
 }
