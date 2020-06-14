@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Tuple {
     x: f64,
     y: f64,
@@ -34,14 +34,6 @@ impl Tuple {
     }
 
 }
-
-impl PartialEq for Tuple {
-        fn eq(&self, other: &Self) -> bool {
-            (self.x == other.x) && (self.y == other.y) && (self.z == other.z) && (self.w == other.w)
-        }
-}
-
-impl Eq for Tuple {}
 
 pub fn tuple (x: f64, y: f64, z: f64, w: u32) -> Tuple {
     Tuple {
