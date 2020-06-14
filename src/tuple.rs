@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Tuple {
     x: f64,
     y: f64,
@@ -31,7 +32,16 @@ impl Tuple {
     pub fn get_z(&self) -> &f64 {
         &self.z
     }
+
 }
+
+impl PartialEq for Tuple {
+        fn eq(&self, other: &Self) -> bool {
+            (self.x == other.x) && (self.y == other.y) && (self.z == other.z) && (self.w == other.w)
+        }
+}
+
+impl Eq for Tuple {}
 
 pub fn tuple (x: f64, y: f64, z: f64, w: u32) -> Tuple {
     Tuple {
@@ -82,5 +92,15 @@ mod tests {
         assert_eq!(&3.1, t.get_z());
         assert!(!t.is_point().unwrap());
         assert!(t.is_vector().unwrap());
+    }
+
+    #[test]
+    fn point_creates_tuple_with_w_one() {
+        assert_eq!(tuple(4.0, -4.0, 3.0, 1), point(4.0, -4.0, 3.0));
+    }
+
+    #[test]
+    fn point_creates_tuple_with_w_zero() {
+        assert_eq!(tuple(4.0, -4.0, 3.0, 0), vector(4.0, -4.0, 3.0));
     }
 }
