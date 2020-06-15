@@ -1,5 +1,5 @@
 use num_traits::cast::ToPrimitive;
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
 #[derive(Debug, PartialEq)]
 pub struct Tuple {
@@ -50,6 +50,19 @@ impl Add for Tuple {
     }
 }
 
+impl Sub for Tuple {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+            w: self.w - other.w,
+        }
+    }
+}
+
 pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w: u8) -> Tuple {
     Tuple {
         x: x.to_f64().unwrap(),
@@ -60,20 +73,20 @@ pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w
 }
 
 
-pub fn point(x: f64, y: f64, z: f64) -> Tuple {
+pub fn point<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) -> Tuple {
     Tuple {
-        x: x,
-        y: y,
-        z: z,
+        x: x.to_f64().unwrap(),
+        y: y.to_f64().unwrap(),
+        z: z.to_f64().unwrap(),
         w: 1
     }
 }
 
-pub fn vector(x: f64, y: f64, z: f64) -> Tuple {
+pub fn vector<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) -> Tuple {
     Tuple {
-        x: x,
-        y: y,
-        z: z,
+        x: x.to_f64().unwrap(),
+        y: y.to_f64().unwrap(),
+        z: z.to_f64().unwrap(),
         w: 0
     }
 }
@@ -113,9 +126,30 @@ mod tests {
     }
 
     #[test]
-    fn add_two_tuples() {
+    fn add_tuples() {
         let a1 = tuple(3.0, -2, 5, 1);
         let a2 = tuple(-2, 3, 1, 0);
         assert_eq!(tuple(1, 1, 6, 1), a1 + a2);
+    }
+
+    #[test]
+    fn subtract_two_points() {
+        let p1 = point(3, 2, 1);
+        let p2 = point(5, 6, 7);
+        assert_eq!(vector(-2, -4, -6), p1 - p2);
+    }
+
+    #[test]
+    fn subtract_vector_from_point() {
+        let p1 = point(3, 2, 1);
+        let p2 = vector(5, 6, 7);
+        assert_eq!(point(-2, -4, -6), p1 - p2);
+    }
+
+    #[test]
+    fn subtract_two_vectors() {
+        let p1 = vector(3, 2, 1);
+        let p2 = vector(5, 6, 7);
+        assert_eq!(vector(-2, -4, -6), p1 - p2);
     }
 }
