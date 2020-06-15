@@ -85,13 +85,12 @@ pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w
     }
 }
 
-
 pub fn point<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) -> Tuple {
     Tuple {
         x: x.to_f64().unwrap(),
         y: y.to_f64().unwrap(),
         z: z.to_f64().unwrap(),
-        w: 1
+        w: 1,
     }
 }
 
@@ -100,7 +99,7 @@ pub fn vector<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) 
         x: x.to_f64().unwrap(),
         y: y.to_f64().unwrap(),
         z: z.to_f64().unwrap(),
-        w: 0
+        w: 0,
     }
 }
 
@@ -170,7 +169,7 @@ mod tests {
     fn subtract_vector_from_zero_vector() {
         let zero = vector(0, 0, 0);
         let v = vector(1, -2, 3);
-        assert_eq!(vector(-1, 2, -3), zero -v);
+        assert_eq!(vector(-1, 2, -3), zero - v);
     }
 
     #[test]
