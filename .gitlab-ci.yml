@@ -1,0 +1,29 @@
+image: rust:1.44-slim
+
+stages:
+- test
+
+.template: &prepare
+  before_script:
+  - apt update
+
+debug:
+  <<: *prepare
+  stage: test
+  script:
+  - cargo build
+  - cargo test --all --all-features
+
+clippy:
+  <<: *prepare
+  stage: test
+  script:
+  - rustup component add clippy
+  - cargo clippy --all-targets --all-features -- -D warnings
+
+fmt:
+  <<: *prepare
+  stage: test
+  script:
+  - rustup component add rustfmt
+  - cargo fmt -- --check
