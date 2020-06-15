@@ -141,6 +141,11 @@ pub fn vector<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) 
     }
 }
 
+#[allow(dead_code)]
+pub fn magnitude(v: Tuple) -> f64 {
+    (v.x.powi(2) + v.y.powi(2) + v.z.powi(2) + v.w.powi(2)).sqrt()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -235,5 +240,24 @@ mod tests {
     fn divide_tuple_by_scalar() {
         let a = tuple(1, -2, 3, -4);
         assert_eq!(tuple(0.5, -1, 1.5, -2), a / 2);
+    }
+
+    #[test]
+    fn magnitude_of_vector() {
+        let v = vector(1, 0, 0);
+        assert_eq!(1.0, magnitude(v));
+
+        let v = vector(0, 1, 0);
+        assert_eq!(1.0, magnitude(v));
+
+        let v = vector(0, 0, 1);
+        assert_eq!(1.0, magnitude(v));
+
+        let v = vector(1, 2, 3);
+        let m: f64 = 14.0;
+        assert_eq!(m.sqrt(), magnitude(v));
+
+        let v = vector(-1, -2, -3);
+        assert_eq!(m.sqrt(), magnitude(v));
     }
 }
