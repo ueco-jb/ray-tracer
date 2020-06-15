@@ -1,29 +1,31 @@
 use num_traits::cast::ToPrimitive;
-use std::ops::{Add, Neg, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, PartialEq)]
 pub struct Tuple {
     x: f64,
     y: f64,
     z: f64,
-    w: i8,
+    w: f64,
 }
 
 impl Tuple {
     #[allow(dead_code)]
+    #[allow(illegal_floating_point_literal_pattern)]
     pub fn is_vector(&self) -> Result<bool, &'static str> {
         match self.w {
-            0 => Ok(true),
-            1 => Ok(false),
+            0.0 => Ok(true),
+            1.0 => Ok(false),
             _ => Err("invalid w value"),
         }
     }
 
     #[allow(dead_code)]
+    #[allow(illegal_floating_point_literal_pattern)]
     pub fn is_point(&self) -> Result<bool, &'static str> {
         match self.w {
-            1 => Ok(true),
-            0 => Ok(false),
+            1.0 => Ok(true),
+            0.0 => Ok(false),
             _ => Err("invalid w value"),
         }
     }
@@ -83,13 +85,39 @@ impl Neg for Tuple {
     }
 }
 
+impl<T: ToPrimitive> Mul<T> for Tuple {
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self {
+        Self {
+            x: self.x * rhs.to_f64().unwrap(),
+            y: self.y * rhs.to_f64().unwrap(),
+            z: self.z * rhs.to_f64().unwrap(),
+            w: self.w * rhs.to_f64().unwrap(),
+        }
+    }
+}
+
+impl<T: ToPrimitive> Div<T> for Tuple {
+    type Output = Self;
+
+    fn div(self, rhs: T) -> Self {
+        Self {
+            x: self.x / rhs.to_f64().unwrap(),
+            y: self.y / rhs.to_f64().unwrap(),
+            z: self.z / rhs.to_f64().unwrap(),
+            w: self.w / rhs.to_f64().unwrap(),
+        }
+    }
+}
+
 #[allow(dead_code)]
 pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w: i8) -> Tuple {
     Tuple {
         x: x.to_f64().unwrap(),
         y: y.to_f64().unwrap(),
         z: z.to_f64().unwrap(),
-        w,
+        w: w.to_f64().unwrap(),
     }
 }
 
@@ -99,7 +127,7 @@ pub fn point<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) -
         x: x.to_f64().unwrap(),
         y: y.to_f64().unwrap(),
         z: z.to_f64().unwrap(),
-        w: 1,
+        w: 1.0,
     }
 }
 
@@ -109,7 +137,7 @@ pub fn vector<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) 
         x: x.to_f64().unwrap(),
         y: y.to_f64().unwrap(),
         z: z.to_f64().unwrap(),
-        w: 0,
+        w: 0.0,
     }
 }
 
@@ -189,5 +217,23 @@ mod tests {
     fn negating_tuple() {
         let a = tuple(1, -2, 3, -4);
         assert_eq!(tuple(-1, 2, -3, 4), -a);
+    }
+
+    #[test]
+    fn multiple_tuple_by_scalar() {
+        let a = tuple(1, -2, 3, -4);
+        assert_eq!(tuple(3.5, -7, 10.5, -14), a * 3.5);
+    }
+
+    #[test]
+    fn multiply_tuple_by_fraction() {
+        let a = tuple(1, -2, 3, -4);
+        assert_eq!(tuple(0.5, -1, 1.5, -2), a * 0.5);
+    }
+
+    #[test]
+    fn divide_tuple_by_scalar() {
+        let a = tuple(1, -2, 3, -4);
+        assert_eq!(tuple(0.5, -1, 1.5, -2), a / 2);
     }
 }
