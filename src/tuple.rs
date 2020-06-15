@@ -1,12 +1,12 @@
 use num_traits::cast::ToPrimitive;
-use std::ops::{Add, Sub};
+use std::ops::{Add, Neg, Sub};
 
 #[derive(Debug, PartialEq)]
 pub struct Tuple {
     x: f64,
     y: f64,
     z: f64,
-    w: u8,
+    w: i8,
 }
 
 impl Tuple {
@@ -63,7 +63,20 @@ impl Sub for Tuple {
     }
 }
 
-pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w: u8) -> Tuple {
+impl Neg for Tuple {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        Self {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+            w: -self.w,
+        }
+    }
+}
+
+pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w: i8) -> Tuple {
     Tuple {
         x: x.to_f64().unwrap(),
         y: y.to_f64().unwrap(),
@@ -141,15 +154,28 @@ mod tests {
 
     #[test]
     fn subtract_vector_from_point() {
-        let p1 = point(3, 2, 1);
-        let p2 = vector(5, 6, 7);
-        assert_eq!(point(-2, -4, -6), p1 - p2);
+        let p = point(3, 2, 1);
+        let v = vector(5, 6, 7);
+        assert_eq!(point(-2, -4, -6), p - v);
     }
 
     #[test]
     fn subtract_two_vectors() {
-        let p1 = vector(3, 2, 1);
-        let p2 = vector(5, 6, 7);
-        assert_eq!(vector(-2, -4, -6), p1 - p2);
+        let v1 = vector(3, 2, 1);
+        let v2 = vector(5, 6, 7);
+        assert_eq!(vector(-2, -4, -6), v1 - v2);
+    }
+
+    #[test]
+    fn subtract_vector_from_zero_vector() {
+        let zero = vector(0, 0, 0);
+        let v = vector(1, -2, 3);
+        assert_eq!(vector(-1, 2, -3), zero -v);
+    }
+
+    #[test]
+    fn negating_tuple() {
+        let a = tuple(1, -2, 3, -4);
+        assert_eq!(tuple(-1, 2, -3, 4), -a);
     }
 }
