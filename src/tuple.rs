@@ -10,6 +10,7 @@ pub struct Tuple {
 }
 
 impl Tuple {
+    #[allow(dead_code)]
     pub fn is_vector(&self) -> Result<bool, &'static str> {
         match self.w {
             0 => Ok(true),
@@ -18,6 +19,7 @@ impl Tuple {
         }
     }
 
+    #[allow(dead_code)]
     pub fn is_point(&self) -> Result<bool, &'static str> {
         match self.w {
             1 => Ok(true),
@@ -26,12 +28,17 @@ impl Tuple {
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_x(&self) -> &f64 {
         &self.x
     }
+
+    #[allow(dead_code)]
     pub fn get_y(&self) -> &f64 {
         &self.y
     }
+
+    #[allow(dead_code)]
     pub fn get_z(&self) -> &f64 {
         &self.z
     }
@@ -76,6 +83,7 @@ impl Neg for Tuple {
     }
 }
 
+#[allow(dead_code)]
 pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w: i8) -> Tuple {
     Tuple {
         x: x.to_f64().unwrap(),
@@ -85,6 +93,7 @@ pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w
     }
 }
 
+#[allow(dead_code)]
 pub fn point<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) -> Tuple {
     Tuple {
         x: x.to_f64().unwrap(),
@@ -94,6 +103,7 @@ pub fn point<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) -
     }
 }
 
+#[allow(dead_code)]
 pub fn vector<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) -> Tuple {
     Tuple {
         x: x.to_f64().unwrap(),
@@ -106,13 +116,16 @@ pub fn vector<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use num::abs;
+
+    const EPSILON: f64 = 0.00001;
 
     #[test]
     fn tuple_is_point() {
         let t: Tuple = tuple(4.3, -4.2, 3.1, 1);
-        assert_eq!(&4.3, t.get_x());
-        assert_eq!(&-4.2, t.get_y());
-        assert_eq!(&3.1, t.get_z());
+        assert!(abs(t.get_x() - 4.3) < EPSILON);
+        assert!(abs(t.get_y() - -4.2) < EPSILON);
+        assert!(abs(t.get_z() - 3.1) < EPSILON);
         assert!(t.is_point().unwrap());
         assert!(!t.is_vector().unwrap());
     }
@@ -120,9 +133,9 @@ mod tests {
     #[test]
     fn tuple_is_vector() {
         let t: Tuple = tuple(4.3, -4.2, 3.1, 0);
-        assert_eq!(&4.3, t.get_x());
-        assert_eq!(&-4.2, t.get_y());
-        assert_eq!(&3.1, t.get_z());
+        assert!(abs(t.get_x() - 4.3) < EPSILON);
+        assert!(abs(t.get_y() - -4.2) < EPSILON);
+        assert!(abs(t.get_z() - 3.1) < EPSILON);
         assert!(!t.is_point().unwrap());
         assert!(t.is_vector().unwrap());
     }
