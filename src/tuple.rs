@@ -149,13 +149,18 @@ pub fn magnitude(v: &Tuple) -> f64 {
 }
 
 #[allow(dead_code)]
-pub fn normalize(v: Tuple) -> Tuple {
+pub fn normalize(v: &Tuple) -> Tuple {
     Tuple {
         x: v.x / magnitude(&v),
         y: v.y / magnitude(&v),
         z: v.z / magnitude(&v),
         w: v.w / magnitude(&v),
     }
+}
+
+#[allow(dead_code)]
+pub fn dot(a: &Tuple, b: &Tuple) -> f64 {
+    a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w
 }
 
 #[cfg(test)]
@@ -272,11 +277,11 @@ mod tests {
     #[test]
     fn normalize_vector() {
         let v = vector(4, 0, 0);
-        assert_eq!(normalize(v), vector(1, 0, 0));
+        assert_eq!(normalize(&v), vector(1, 0, 0));
 
         let v = vector(1, 2, 3);
         assert_eq!(
-            normalize(v),
+            normalize(&v),
             vector(
                 1.0_f64 / (14.0_f64).sqrt(),
                 2_f64 / (14.0_f64).sqrt(),
@@ -288,7 +293,14 @@ mod tests {
     #[test]
     fn magnitude_of_normalized_vector() {
         let v = vector(1, 2, 3);
-        let norm = normalize(v);
+        let norm = normalize(&v);
         assert!(eq_with_eps(1.0, magnitude(&norm)));
+    }
+
+    #[test]
+    fn dot_product_of_two_tuples() {
+        let a = vector(1, 2, 3);
+        let b = vector(2, 3, 4);
+        assert_eq!(20.0_f64, dot(&a, &b));
     }
 }
