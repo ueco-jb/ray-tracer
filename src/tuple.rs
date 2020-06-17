@@ -301,6 +301,6 @@ mod tests {
     fn dot_product_of_two_tuples() {
         let a = vector(1, 2, 3);
         let b = vector(2, 3, 4);
-        assert_eq!(20.0_f64, dot(&a, &b));
+        assert!(eq_with_eps(20.0_f64, dot(&a, &b)));
     }
 }
