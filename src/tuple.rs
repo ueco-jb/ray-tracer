@@ -9,40 +9,42 @@ pub struct Tuple {
     w: f64,
 }
 
+pub fn eq_with_eps(a: f64, b: f64) -> bool {
+    (a - b).abs() < f64::EPSILON
+}
+
 impl Tuple {
     #[allow(dead_code)]
-    #[allow(illegal_floating_point_literal_pattern)]
     pub fn is_vector(&self) -> Result<bool, &'static str> {
         match self.w {
-            0.0 => Ok(true),
-            1.0 => Ok(false),
+            w if eq_with_eps(w, 0.0) => Ok(true),
+            w if eq_with_eps(w, 1.0) => Ok(false),
             _ => Err("invalid w value"),
         }
     }
 
     #[allow(dead_code)]
-    #[allow(illegal_floating_point_literal_pattern)]
     pub fn is_point(&self) -> Result<bool, &'static str> {
         match self.w {
-            1.0 => Ok(true),
-            0.0 => Ok(false),
+            w if eq_with_eps(w, 1.0) => Ok(true),
+            w if eq_with_eps(w, 0.0) => Ok(false),
             _ => Err("invalid w value"),
         }
     }
 
     #[allow(dead_code)]
-    pub fn get_x(&self) -> &f64 {
-        &self.x
+    pub fn get_x(&self) -> f64 {
+        self.x
     }
 
     #[allow(dead_code)]
-    pub fn get_y(&self) -> &f64 {
-        &self.y
+    pub fn get_y(&self) -> f64 {
+        self.y
     }
 
     #[allow(dead_code)]
-    pub fn get_z(&self) -> &f64 {
-        &self.z
+    pub fn get_z(&self) -> f64 {
+        self.z
     }
 }
 
@@ -149,16 +151,13 @@ pub fn magnitude(v: Tuple) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use num::abs;
-
-    const EPSILON: f64 = 0.00001;
 
     #[test]
     fn tuple_is_point() {
         let t: Tuple = tuple(4.3, -4.2, 3.1, 1);
-        assert!(abs(t.get_x() - 4.3) < EPSILON);
-        assert!(abs(t.get_y() - -4.2) < EPSILON);
-        assert!(abs(t.get_z() - 3.1) < EPSILON);
+        assert!(eq_with_eps(t.get_x(), 4.3));
+        assert!(eq_with_eps(t.get_y(), -4.2));
+        assert!(eq_with_eps(t.get_z(), 3.1));
         assert!(t.is_point().unwrap());
         assert!(!t.is_vector().unwrap());
     }
@@ -166,9 +165,9 @@ mod tests {
     #[test]
     fn tuple_is_vector() {
         let t: Tuple = tuple(4.3, -4.2, 3.1, 0);
-        assert!(abs(t.get_x() - 4.3) < EPSILON);
-        assert!(abs(t.get_y() - -4.2) < EPSILON);
-        assert!(abs(t.get_z() - 3.1) < EPSILON);
+        assert!(eq_with_eps(t.get_x(), 4.3));
+        assert!(eq_with_eps(t.get_y(), -4.2));
+        assert!(eq_with_eps(t.get_z(), 3.1));
         assert!(!t.is_point().unwrap());
         assert!(t.is_vector().unwrap());
     }
@@ -245,19 +244,19 @@ mod tests {
     #[test]
     fn magnitude_of_vector() {
         let v = vector(1, 0, 0);
-        assert_eq!(1.0, magnitude(v));
+        assert!(eq_with_eps(1.0, magnitude(v)));
 
         let v = vector(0, 1, 0);
-        assert_eq!(1.0, magnitude(v));
+        assert!(eq_with_eps(1.0, magnitude(v)));
 
         let v = vector(0, 0, 1);
-        assert_eq!(1.0, magnitude(v));
+        assert!(eq_with_eps(1.0, magnitude(v)));
 
         let v = vector(1, 2, 3);
         let m: f64 = 14.0;
-        assert_eq!(m.sqrt(), magnitude(v));
+        assert!(eq_with_eps(m.sqrt(), magnitude(v)));
 
         let v = vector(-1, -2, -3);
-        assert_eq!(m.sqrt(), magnitude(v));
+        assert!(eq_with_eps(m.sqrt(), magnitude(v)));
     }
 }
