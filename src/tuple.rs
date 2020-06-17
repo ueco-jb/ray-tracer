@@ -144,8 +144,18 @@ pub fn vector<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) 
 }
 
 #[allow(dead_code)]
-pub fn magnitude(v: Tuple) -> f64 {
+pub fn magnitude(v: &Tuple) -> f64 {
     (v.x.powi(2) + v.y.powi(2) + v.z.powi(2) + v.w.powi(2)).sqrt()
+}
+
+#[allow(dead_code)]
+pub fn normalize(v: Tuple) -> Tuple {
+    Tuple {
+        x: v.x / magnitude(&v),
+        y: v.y / magnitude(&v),
+        z: v.z / magnitude(&v),
+        w: v.w / magnitude(&v),
+    }
 }
 
 #[cfg(test)]
@@ -244,19 +254,41 @@ mod tests {
     #[test]
     fn magnitude_of_vector() {
         let v = vector(1, 0, 0);
-        assert!(eq_with_eps(1.0, magnitude(v)));
+        assert!(eq_with_eps(1.0, magnitude(&v)));
 
         let v = vector(0, 1, 0);
-        assert!(eq_with_eps(1.0, magnitude(v)));
+        assert!(eq_with_eps(1.0, magnitude(&v)));
 
         let v = vector(0, 0, 1);
-        assert!(eq_with_eps(1.0, magnitude(v)));
+        assert!(eq_with_eps(1.0, magnitude(&v)));
 
         let v = vector(1, 2, 3);
-        let m: f64 = 14.0;
-        assert!(eq_with_eps(m.sqrt(), magnitude(v)));
+        assert!(eq_with_eps(14.0_f64.sqrt(), magnitude(&v)));
 
         let v = vector(-1, -2, -3);
-        assert!(eq_with_eps(m.sqrt(), magnitude(v)));
+        assert!(eq_with_eps(14.0_f64.sqrt(), magnitude(&v)));
+    }
+
+    #[test]
+    fn normalize_vector() {
+        let v = vector(4, 0, 0);
+        assert_eq!(normalize(v), vector(1, 0, 0));
+
+        let v = vector(1, 2, 3);
+        assert_eq!(
+            normalize(v),
+            vector(
+                1.0_f64 / (14.0_f64).sqrt(),
+                2_f64 / (14.0_f64).sqrt(),
+                3_f64 / (14.0_f64).sqrt()
+            )
+        );
+    }
+
+    #[test]
+    fn magnitude_of_normalized_vector() {
+        let v = vector(1, 2, 3);
+        let norm = normalize(v);
+        assert!(eq_with_eps(1.0, magnitude(&norm)));
     }
 }
