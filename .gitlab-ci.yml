@@ -33,5 +33,6 @@ coverage:
   <<: *prepare
   stage: coverage
   script:
+  - apt install -y openssl-sys
   - cargo install cargo-tarpaulin
   - cargo tarpaulin -v --all-features --force-clean --offline
