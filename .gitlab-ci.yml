@@ -2,6 +2,7 @@ image: rust:1.44-slim
 
 stages:
 - test
+- coverage
 
 .template: &prepare
   before_script:
@@ -27,3 +28,10 @@ fmt:
   script:
   - rustup component add rustfmt
   - cargo fmt -- --check
+
+coverage:
+  <<: *prepare
+  stage: coverage
+  script:
+  - cargo install cargo-tarpaulin
+  - cargo tarpaulin -v --all-features --force-clean --offline
