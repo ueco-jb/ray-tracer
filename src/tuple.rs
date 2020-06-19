@@ -163,6 +163,13 @@ pub fn dot(a: &Tuple, b: &Tuple) -> f64 {
     a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w
 }
 
+#[allow(dead_code)]
+pub fn cross(a: &Tuple, b: &Tuple) -> Tuple {
+    vector(a.y * b.z - a.z * b.y,
+           a.z * b.x - a.x * b.z,
+           a.x * b.y - a.y * b.x)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -302,5 +309,13 @@ mod tests {
         let a = vector(1, 2, 3);
         let b = vector(2, 3, 4);
         assert!(eq_with_eps(20.0_f64, dot(&a, &b)));
+    }
+
+    #[test]
+    fn cross_product_of_two_vectors() {
+        let a = vector(1, 2, 3);
+        let b = vector(2, 3, 4);
+        assert_eq!(vector(-1, 2, -1), cross(&a, &b));
+        assert_eq!(vector(1, -2, 1), cross(&b, &a));
     }
 }
