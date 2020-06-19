@@ -70,9 +70,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "ray_tracing"
+name = "tuple"
 version = "0.1.0"
 dependencies = [
  "num",
  "num-traits",
+]
+
+[[package]]
+name = "virtual_projectiles"
+version = "0.1.0"
+dependencies = [
+ "tuple",
 ]
