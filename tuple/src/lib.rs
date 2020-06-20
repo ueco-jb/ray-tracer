@@ -1,7 +1,7 @@
 use num_traits::cast::ToPrimitive;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug)]
 pub struct Tuple {
     x: f64,
     y: f64,
@@ -40,6 +40,15 @@ impl Tuple {
 
     pub fn get_z(&self) -> f64 {
         self.z
+    }
+}
+
+impl PartialEq for Tuple {
+    fn eq(&self, other: &Tuple) -> bool {
+        eq_with_eps(self.x, other.x)
+            && eq_with_eps(self.y, other.y)
+            && eq_with_eps(self.z, other.z)
+            && eq_with_eps(self.w, other.w)
     }
 }
 
