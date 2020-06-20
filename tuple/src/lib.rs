@@ -14,7 +14,6 @@ pub fn eq_with_eps(a: f64, b: f64) -> bool {
 }
 
 impl Tuple {
-    #[allow(dead_code)]
     pub fn is_vector(&self) -> Result<bool, &'static str> {
         match self.w {
             w if eq_with_eps(w, 0.0) => Ok(true),
@@ -23,7 +22,6 @@ impl Tuple {
         }
     }
 
-    #[allow(dead_code)]
     pub fn is_point(&self) -> Result<bool, &'static str> {
         match self.w {
             w if eq_with_eps(w, 1.0) => Ok(true),
@@ -32,17 +30,14 @@ impl Tuple {
         }
     }
 
-    #[allow(dead_code)]
     pub fn get_x(&self) -> f64 {
         self.x
     }
 
-    #[allow(dead_code)]
     pub fn get_y(&self) -> f64 {
         self.y
     }
 
-    #[allow(dead_code)]
     pub fn get_z(&self) -> f64 {
         self.z
     }
@@ -113,7 +108,6 @@ impl<T: ToPrimitive> Div<T> for Tuple {
     }
 }
 
-#[allow(dead_code)]
 pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w: i8) -> Tuple {
     Tuple {
         x: x.to_f64().unwrap(),
@@ -123,7 +117,6 @@ pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w
     }
 }
 
-#[allow(dead_code)]
 pub fn point<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) -> Tuple {
     Tuple {
         x: x.to_f64().unwrap(),
@@ -133,7 +126,6 @@ pub fn point<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) -
     }
 }
 
-#[allow(dead_code)]
 pub fn vector<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) -> Tuple {
     Tuple {
         x: x.to_f64().unwrap(),
@@ -143,12 +135,10 @@ pub fn vector<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) 
     }
 }
 
-#[allow(dead_code)]
 pub fn magnitude(v: &Tuple) -> f64 {
     (v.x.powi(2) + v.y.powi(2) + v.z.powi(2) + v.w.powi(2)).sqrt()
 }
 
-#[allow(dead_code)]
 pub fn normalize(v: &Tuple) -> Tuple {
     Tuple {
         x: v.x / magnitude(&v),
@@ -158,12 +148,10 @@ pub fn normalize(v: &Tuple) -> Tuple {
     }
 }
 
-#[allow(dead_code)]
 pub fn dot(a: &Tuple, b: &Tuple) -> f64 {
     a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w
 }
 
-#[allow(dead_code)]
 pub fn cross(a: &Tuple, b: &Tuple) -> Tuple {
     vector(
         a.y * b.z - a.z * b.y,
