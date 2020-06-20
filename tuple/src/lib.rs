@@ -1,7 +1,7 @@
 use num_traits::cast::ToPrimitive;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-#[derive(Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Tuple {
     x: f64,
     y: f64,
