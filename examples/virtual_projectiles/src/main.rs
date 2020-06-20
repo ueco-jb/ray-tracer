@@ -7,16 +7,13 @@ struct Projectile {
 #[derive(Debug)]
 struct Environment {
     gravity: tuple::Tuple, // vector
-    wind: tuple::Tuple, // vector
+    wind: tuple::Tuple,    // vector
 }
 
 fn tick(env: &Environment, proj: &Projectile) -> Projectile {
     let position = proj.position + proj.velocity;
     let velocity = proj.velocity + env.gravity + env.wind;
-    Projectile {
-        position,
-        velocity,
-    }
+    Projectile { position, velocity }
 }
 
 fn main() {
