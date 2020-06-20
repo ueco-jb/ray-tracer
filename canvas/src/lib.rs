@@ -2,12 +2,21 @@
 
 use num_traits::cast::ToPrimitive;
 use std::ops::{Add, Mul, Sub};
+use tuple::eq_with_eps;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct Color {
     red: f64,
     green: f64,
     blue: f64,
+}
+
+impl PartialEq for Color {
+    fn eq(&self, other: &Color) -> bool {
+        eq_with_eps(self.red, other.red)
+            && eq_with_eps(self.green, other.green)
+            && eq_with_eps(self.blue, other.blue)
+    }
 }
 
 pub fn color<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(r: T, g: U, b: V) -> Color {
@@ -57,7 +66,6 @@ impl<T: ToPrimitive> Mul<T> for Color {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tuple::eq_with_eps;
 
     #[test]
     fn test_colors() {
