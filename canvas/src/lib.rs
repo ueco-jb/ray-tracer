@@ -63,6 +63,18 @@ impl<T: ToPrimitive> Mul<T> for Color {
     }
 }
 
+impl Mul for Color {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self {
+        Self {
+            red: self.red * rhs.red,
+            green: self.green * rhs.green,
+            blue: self.blue * rhs.blue,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -93,5 +105,12 @@ mod tests {
     fn multiplying_color_by_scalar() {
         let c = color(0.2, 0.3, 0.4);
         assert_eq!(color(0.4, 0.6, 0.8), c * 2);
+    }
+
+    #[test]
+    fn multiplying_color_by_color() {
+        let c1 = color(1, 0.2, 0.4);
+        let c2 = color(0.9, 1, 0.1);
+        assert_eq!(color(0.9, 0.2, 0.04), c1 * c2);
     }
 }
