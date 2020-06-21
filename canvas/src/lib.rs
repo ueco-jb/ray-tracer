@@ -63,10 +63,32 @@ pub struct PPM {
     body: String,
 }
 
+pub fn scale_color(color: f64, max: f64) -> u32 {
+    if color < 0.0_f64 || tuple::eq_with_eps(0.0_f64, color) {
+        0
+    } else if color > max || tuple::eq_with_eps(max, color) {
+        max as u32
+    } else {
+        (color * max) as u32
+    }
+}
+
+pub fn color_to_scaled_integers(c: &color::Color, max: f64) -> Box<[u32]> {
+    let mut scaled = Box::new([0; 3]);
+    scaled[0] = scale_color(c.get_red(), max);
+    scaled[1] = scale_color(c.get_green(), max);
+    scaled[2] = scale_color(c.get_blue(), max);
+    scaled
+}
+
 pub fn canvas_to_ppm(c: &Canvas) -> PPM {
     let magic_number = "P3";
-    let maximum_color_value = "255";
-    let header = format!("{}\n{} {}\n{}", magic_number, c.width, c.height, maximum_color_value);
+    let maximum_color_value: u32 = 255;
+    let header = format!(
+        "{}\n{} {}\n{}",
+        magic_number, c.width, c.height, maximum_color_value
+    );
+
     PPM {
         header,
         body: "".to_string(),
@@ -99,6 +121,19 @@ mod tests {
     fn constructing_ppm_header() {
         let c = canvas(5, 3);
         let ppm = canvas_to_ppm(&c);
-        assert_eq!(format!("P3\n5 3\n255"), ppm.header);
+        assert_eq!("P3\n5 3\n255".to_string(), ppm.header);
     }
+
+    // #[test]
+    // fn constructing_ppm_body() {
+    //     let c = canvas(5, 3);
+    //     let c1 = color::color(1.5, 0, 0);
+    //     let c2 = color::color(0, 0.5, 0);
+    //     let c3 = color::color(-0.5, 0, 1);
+    //     c.write_pixel(0, 0, c1);
+    //     c.write_pixel(2, 1, c2);
+    //     c.write_pixel(4, 2, c3);
+    //     let ppm = canvas_to_ppm(&c);
+    //     assert_eq!(format!("{}\n{}\n{}", "255 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "0 0 0 0 0 0 128 0 0 0 0 0 0 0", "0 0 0 0 0 0 0 0 0 0 0 0 0 0 255"), ppm.body);
+    // }
 }

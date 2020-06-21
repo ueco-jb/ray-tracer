@@ -11,19 +11,25 @@ pub struct Color {
     blue: f64,
 }
 
+impl Color {
+    pub fn get_red(&self) -> f64 {
+        self.red
+    }
+
+    pub fn get_green(&self) -> f64 {
+        self.green
+    }
+
+    pub fn get_blue(&self) -> f64 {
+        self.blue
+    }
+}
+
 impl PartialEq for Color {
     fn eq(&self, other: &Color) -> bool {
         eq_with_eps(self.red, other.red)
             && eq_with_eps(self.green, other.green)
             && eq_with_eps(self.blue, other.blue)
-    }
-}
-
-pub fn color<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(r: T, g: U, b: V) -> Color {
-    Color {
-        red: r.to_f64().unwrap(),
-        green: g.to_f64().unwrap(),
-        blue: b.to_f64().unwrap(),
     }
 }
 
@@ -72,6 +78,14 @@ impl Mul for Color {
             green: self.green * rhs.green,
             blue: self.blue * rhs.blue,
         }
+    }
+}
+
+pub fn color<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(r: T, g: U, b: V) -> Color {
+    Color {
+        red: r.to_f64().unwrap(),
+        green: g.to_f64().unwrap(),
+        blue: b.to_f64().unwrap(),
     }
 }
 
