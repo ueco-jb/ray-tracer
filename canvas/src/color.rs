@@ -4,7 +4,7 @@ use num_traits::cast::ToPrimitive;
 use std::ops::{Add, Mul, Sub};
 use tuple::eq_with_eps;
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Color {
     red: f64,
     green: f64,
