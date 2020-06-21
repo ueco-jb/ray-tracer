@@ -43,7 +43,7 @@ impl Canvas {
     }
 }
 
-pub fn canvas(w: usize, h: usize) -> Canvas {
+pub fn canvas(h: usize, w: usize) -> Canvas {
     let vec = vec![vec![color::color(0, 0, 0); w]; h];
     Canvas {
         width: w,
@@ -120,7 +120,7 @@ pub fn canvas_to_ppm(c: &Canvas) -> PPM {
     let maximum_color_value: u32 = 255;
     let header = format!(
         "{}\n{} {}\n{}",
-        magic_number, c.width, c.height, maximum_color_value
+        magic_number, c.height, c.width, maximum_color_value
     );
 
     println!(
@@ -163,16 +163,16 @@ mod tests {
         assert_eq!("P3\n5 3\n255".to_string(), ppm.header);
     }
 
-    // #[test]
-    // fn constructing_ppm_body() {
-    //     let c = canvas(5, 3);
-    //     let c1 = color::color(1.5, 0, 0);
-    //     let c2 = color::color(0, 0.5, 0);
-    //     let c3 = color::color(-0.5, 0, 1);
-    //     c.write_pixel(0, 0, c1);
-    //     c.write_pixel(2, 1, c2);
-    //     c.write_pixel(4, 2, c3);
-    //     let ppm = canvas_to_ppm(&c);
+    #[test]
+    fn constructing_ppm_body() {
+        let mut c = canvas(5, 3);
+        let c1 = color::color(1.5, 0, 0);
+        let c2 = color::color(0, 0.5, 0);
+        let c3 = color::color(-0.5, 0, 1);
+        c.write_pixel(0, 0, c1).unwrap();
+        c.write_pixel(2, 1, c2).unwrap();
+        c.write_pixel(4, 2, c3).unwrap();
+        let ppm = canvas_to_ppm(&c);
     //     assert_eq!(format!("{}\n{}\n{}", "255 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "0 0 0 0 0 0 128 0 0 0 0 0 0 0", "0 0 0 0 0 0 0 0 0 0 0 0 0 0 255"), ppm.body);
-    // }
+    }
 }
