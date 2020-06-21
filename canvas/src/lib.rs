@@ -25,26 +25,26 @@ impl Canvas {
         self.height
     }
 
-    pub fn pixel_at(&self, h: usize, w: usize) -> Result<color::Color, CanvasError> {
+    pub fn pixel_at(&self, w: usize, h: usize) -> Result<color::Color, CanvasError> {
         if w > self.width - 1 || h > self.height - 1 {
             Err(CanvasError::OutOfCanvasBorder)
         } else {
-            Ok(self.canvas[h][w])
+            Ok(self.canvas[w][h])
         }
     }
 
-    pub fn write_pixel(&mut self, h: usize, w: usize, c: color::Color) -> Result<(), CanvasError> {
+    pub fn write_pixel(&mut self, w: usize, h: usize, c: color::Color) -> Result<(), CanvasError> {
         if w > self.width - 1 || h > self.height - 1 {
             Err(CanvasError::OutOfCanvasBorder)
         } else {
-            self.canvas[h][w] = c;
+            self.canvas[w][h] = c;
             Ok(())
         }
     }
 }
 
-pub fn canvas(h: usize, w: usize) -> Canvas {
-    let vec = vec![vec![color::color(0, 0, 0); w]; h];
+pub fn canvas(w: usize, h: usize) -> Canvas {
+    let vec = vec![vec![color::color(0, 0, 0); h]; w];
     Canvas {
         width: w,
         height: h,
@@ -52,11 +52,11 @@ pub fn canvas(h: usize, w: usize) -> Canvas {
     }
 }
 
-pub fn pixel_at(canvas: &Canvas, h: usize, w: usize) -> color::Color {
+pub fn pixel_at(canvas: &Canvas, w: usize, h: usize) -> color::Color {
     canvas.pixel_at(h, w).unwrap()
 }
 
-pub fn write_pixel(canvas: &mut Canvas, h: usize, w: usize, c: color::Color) {
+pub fn write_pixel(canvas: &mut Canvas, w: usize, h: usize, c: color::Color) {
     canvas.write_pixel(h, w, c).unwrap();
 }
 
@@ -68,7 +68,7 @@ pub struct PPM {
 pub fn scale_color(color: f64, max: f64) -> u32 {
     if color < 0.0_f64 || tuple::eq_with_eps(0.0_f64, color) {
         0
-    } else if color > max || tuple::eq_with_eps(max, color) {
+    } else if color > 1.0_f64 || tuple::eq_with_eps(1.0_f64, color) {
         max as u32
     } else {
         (color * max) as u32
@@ -83,34 +83,69 @@ pub fn color_to_scaled_integers(c: &color::Color, max: f64) -> Box<[u32]> {
     scaled
 }
 
-pub fn write_scaled_color_to_vector(
-    scaled_color: u32,
-    row: usize,
-    column: usize,
-    final_vector: &mut std::vec::Vec<std::vec::Vec<u32>>,
-) {
-    let total = row * column;
-    if total < MAX_LINE_LENGTH {
-        final_vector[0][total] = scaled_color;
-    } else {
-        let position_h = (total + MAX_LINE_LENGTH - 1) / MAX_LINE_LENGTH;
-        let position_w = (total) - (MAX_LINE_LENGTH * (column - 1));
-        final_vector[position_h][position_w] = scaled_color;
-    }
-}
+// pub fn write_scaled_color_to_vector(
+//     scaled_color: u32,
+//     row: usize,
+//     column: usize,
+//     final_vector: &mut std::vec::Vec<std::vec::Vec<u32>>,
+// ) {
+//     println!("ROW: {} | COLUMNT: {}", row, column);
+//     if scaled_color != 0 {
+//         println!("COLOR: {}", scaled_color);
+//     }
+//     let total = row * column;
+//     println!("TOTAL: {}", total);
+//     if total < MAX_LINE_LENGTH {
+//         println!("TOTAL < MAX_LINE_LENGTH, final_vector[{}][{}]", 0, column);
+//         final_vector[0][total] = scaled_color;
+//     } else {
+//         let position_h = (total + MAX_LINE_LENGTH - 1) / MAX_LINE_LENGTH;
+//         let position_w = (total) - (MAX_LINE_LENGTH * (column - 1));
+//         println!("POSITION_H: {} | POSITION_W: {}\nFINAL_VECTOR[{}][{}]", position_h, position_w, position_h, position_w);
+//         final_vector[position_h][position_w] = scaled_color;
+//     }
+// }
 
-pub fn colors_to_scaled_vector(can: &Canvas, max: f64) -> std::vec::Vec<std::vec::Vec<u32>> {
+pub fn colors_to_scaled_vector(can: &Canvas, max: f64) -> String {
     let all_length = can.get_width() * can.get_height() * 3;
     let vec_height = (all_length + MAX_LINE_LENGTH - 1) / 70;
-    let mut scaled_colors = vec![vec![0_u32; MAX_LINE_LENGTH]; vec_height];
+    // let mut scaled_colors = vec![vec![0_u32; MAX_LINE_LENGTH]; vec_height];
+    let mut scaled_colors: String = "".to_string();
+    let mut i = 0;
     for row in 0..can.get_height() {
         for col in 0..can.get_width() {
-            let pixel = can.pixel_at(row, col).unwrap();
+            let pixel = can.pixel_at(col, row).unwrap();
             let scaled_pixel = color_to_scaled_integers(&pixel, max);
-            write_scaled_color_to_vector(scaled_pixel[0], row, col, &mut scaled_colors);
-            write_scaled_color_to_vector(scaled_pixel[1], row + 1, col, &mut scaled_colors);
-            write_scaled_color_to_vector(scaled_pixel[2], row + 2, col, &mut scaled_colors);
+            scaled_colors += &scaled_pixel[0].to_string();
+            i += 1;
+            if i == 70 {
+                scaled_colors += "\n";
+                i = 0;
+            } else {
+                scaled_colors += " ";
+            }
+            scaled_colors += &scaled_pixel[1].to_string();
+            i += 1;
+            if i == 70 {
+                scaled_colors += "\n";
+                i = 0;
+            } else {
+                scaled_colors += " ";
+            }
+            scaled_colors += &scaled_pixel[1].to_string();
+            i += 1;
+            if i == 70 {
+                scaled_colors += "\n";
+                i = 0;
+            } else {
+                scaled_colors += " ";
+            }
+            // write_scaled_color_to_vector(scaled_pixel[0], row, col, &mut scaled_colors);
+            // write_scaled_color_to_vector(scaled_pixel[1], row, col + 1, &mut scaled_colors);
+            // write_scaled_color_to_vector(scaled_pixel[2], row, col + 2, &mut scaled_colors);
         }
+        scaled_colors += "\n";
+        i = 0;
     }
     scaled_colors
 }
@@ -118,7 +153,7 @@ pub fn colors_to_scaled_vector(can: &Canvas, max: f64) -> std::vec::Vec<std::vec
 pub fn canvas_to_ppm(c: &Canvas) -> PPM {
     let magic_number = "P3";
     let maximum_color_value: u32 = 255;
-    let header = format!(
+    let header: String = format!(
         "{}\n{} {}\n{}",
         magic_number, c.height, c.width, maximum_color_value
     );
