@@ -36,6 +36,14 @@ pub fn canvas(w: usize, h: usize) -> Canvas {
     }
 }
 
+pub fn pixel_at(canvas: &Canvas, w: usize, h: usize) -> color::Color {
+    canvas.pixel_at(w, h)
+}
+
+pub fn write_pixel(canvas: &mut Canvas, w: usize, h: usize, c: color::Color) {
+    canvas.write_pixel(w, h, c);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
