@@ -58,6 +58,21 @@ pub fn write_pixel(canvas: &mut Canvas, w: usize, h: usize, c: color::Color) {
     canvas.write_pixel(w, h, c).unwrap();
 }
 
+pub struct PPM {
+    header: String,
+    body: String,
+}
+
+pub fn canvas_to_ppm(c: &Canvas) -> PPM {
+    let magic_number = "P3";
+    let maximum_color_value = "255";
+    let header = format!("{}\n{} {}\n{}", magic_number, c.width, c.height, maximum_color_value);
+    PPM {
+        header,
+        body: "".to_string(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -78,5 +93,12 @@ mod tests {
         let get_result = c.pixel_at(20, 30);
         assert!(write_result.is_err());
         assert!(get_result.is_err());
+    }
+
+    #[test]
+    fn constructing_ppm_header() {
+        let c = canvas(5, 3);
+        let ppm = canvas_to_ppm(&c);
+        assert_eq!(format!("P3\n5 3\n255"), ppm.header);
     }
 }
