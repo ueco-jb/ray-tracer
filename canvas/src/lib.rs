@@ -52,6 +52,15 @@ pub fn canvas(w: usize, h: usize) -> Canvas {
     }
 }
 
+pub fn canvas_with_color(w: usize, h: usize, c: color::Color) -> Canvas {
+    let vec = vec![vec![c; h]; w];
+    Canvas {
+        width: w,
+        height: h,
+        canvas: vec,
+    }
+}
+
 pub fn pixel_at(canvas: &Canvas, w: usize, h: usize) -> color::Color {
     canvas.pixel_at(h, w).unwrap()
 }
@@ -71,7 +80,7 @@ pub fn scale_color(color: f64, max: f64) -> u32 {
     } else if color > 1.0_f64 || tuple::eq_with_eps(1.0_f64, color) {
         max as u32
     } else {
-        (color * max) as u32
+        (color * max).round() as u32
     }
 }
 
@@ -83,69 +92,44 @@ pub fn color_to_scaled_integers(c: &color::Color, max: f64) -> Box<[u32]> {
     scaled
 }
 
-// pub fn write_scaled_color_to_vector(
-//     scaled_color: u32,
-//     row: usize,
-//     column: usize,
-//     final_vector: &mut std::vec::Vec<std::vec::Vec<u32>>,
-// ) {
-//     println!("ROW: {} | COLUMNT: {}", row, column);
-//     if scaled_color != 0 {
-//         println!("COLOR: {}", scaled_color);
-//     }
-//     let total = row * column;
-//     println!("TOTAL: {}", total);
-//     if total < MAX_LINE_LENGTH {
-//         println!("TOTAL < MAX_LINE_LENGTH, final_vector[{}][{}]", 0, column);
-//         final_vector[0][total] = scaled_color;
-//     } else {
-//         let position_h = (total + MAX_LINE_LENGTH - 1) / MAX_LINE_LENGTH;
-//         let position_w = (total) - (MAX_LINE_LENGTH * (column - 1));
-//         println!("POSITION_H: {} | POSITION_W: {}\nFINAL_VECTOR[{}][{}]", position_h, position_w, position_h, position_w);
-//         final_vector[position_h][position_w] = scaled_color;
-//     }
-// }
-
 pub fn colors_to_scaled_vector(can: &Canvas, max: f64) -> String {
-    let all_length = can.get_width() * can.get_height() * 3;
-    let vec_height = (all_length + MAX_LINE_LENGTH - 1) / 70;
-    // let mut scaled_colors = vec![vec![0_u32; MAX_LINE_LENGTH]; vec_height];
     let mut scaled_colors: String = "".to_string();
-    let mut i = 0;
     for row in 0..can.get_height() {
+        let mut temp_scaled_colors: String = "".to_string();
         for col in 0..can.get_width() {
             let pixel = can.pixel_at(col, row).unwrap();
             let scaled_pixel = color_to_scaled_integers(&pixel, max);
-            scaled_colors += &scaled_pixel[0].to_string();
-            i += 1;
-            if i == 70 {
-                scaled_colors += "\n";
-                i = 0;
-            } else {
-                scaled_colors += " ";
-            }
-            scaled_colors += &scaled_pixel[1].to_string();
-            i += 1;
-            if i == 70 {
-                scaled_colors += "\n";
-                i = 0;
-            } else {
-                scaled_colors += " ";
-            }
-            scaled_colors += &scaled_pixel[1].to_string();
-            i += 1;
-            if i == 70 {
-                scaled_colors += "\n";
-                i = 0;
-            } else {
-                scaled_colors += " ";
-            }
-            // write_scaled_color_to_vector(scaled_pixel[0], row, col, &mut scaled_colors);
-            // write_scaled_color_to_vector(scaled_pixel[1], row, col + 1, &mut scaled_colors);
-            // write_scaled_color_to_vector(scaled_pixel[2], row, col + 2, &mut scaled_colors);
+            temp_scaled_colors += &scaled_pixel[0].to_string();
+            temp_scaled_colors += " ";
+            temp_scaled_colors += &scaled_pixel[1].to_string();
+            temp_scaled_colors += " ";
+            temp_scaled_colors += &scaled_pixel[2].to_string();
+            temp_scaled_colors += " ";
         }
-        scaled_colors += "\n";
-        i = 0;
+        let len = temp_scaled_colors.len();
+        temp_scaled_colors.truncate(len - 1);
+        temp_scaled_colors += "\n";
+
+        scaled_colors += &temp_scaled_colors
+            .chars()
+            .enumerate()
+            .flat_map(|(i, c)| {
+                if i != 0
+                    && c == ' '
+                    && (i % MAX_LINE_LENGTH == 0
+                        || i % MAX_LINE_LENGTH == 67
+                        || i % MAX_LINE_LENGTH == 68
+                        || i % MAX_LINE_LENGTH == 69)
+                {
+                    Some('\n')
+                } else {
+                    None
+                }
+                .into_iter()
+                .chain(std::iter::once(c))
+            })
+            .collect::<String>()
+            .replace("\n ", "\n")[..];
     }
     scaled_colors
 }
@@ -155,18 +139,10 @@ pub fn canvas_to_ppm(c: &Canvas) -> PPM {
     let maximum_color_value: u32 = 255;
     let header: String = format!(
         "{}\n{} {}\n{}",
-        magic_number, c.height, c.width, maximum_color_value
+        magic_number, c.width, c.height, maximum_color_value
     );
-
-    println!(
-        "SCALED COLORS:\n{:?}",
-        colors_to_scaled_vector(c, maximum_color_value as f64)
-    );
-
-    PPM {
-        header,
-        body: "".to_string(),
-    }
+    let body: String = colors_to_scaled_vector(c, maximum_color_value as f64);
+    PPM { header, body }
 }
 
 #[cfg(test)]
@@ -208,6 +184,31 @@ mod tests {
         c.write_pixel(2, 1, c2).unwrap();
         c.write_pixel(4, 2, c3).unwrap();
         let ppm = canvas_to_ppm(&c);
-    //     assert_eq!(format!("{}\n{}\n{}", "255 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "0 0 0 0 0 0 128 0 0 0 0 0 0 0", "0 0 0 0 0 0 0 0 0 0 0 0 0 0 255"), ppm.body);
+        assert_eq!(
+            format!(
+                "{}\n{}\n{}\n",
+                "255 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+                "0 0 0 0 0 0 0 128 0 0 0 0 0 0 0",
+                "0 0 0 0 0 0 0 0 0 0 0 0 0 0 255"
+            ),
+            ppm.body
+        );
+    }
+
+    #[test]
+    fn constructing_ppm_body_splitting_lines() {
+        let color = color::color(1, 0.8, 0.6);
+        let c = canvas_with_color(10, 2, color);
+        let ppm = canvas_to_ppm(&c);
+        assert_eq!(
+            format!(
+                "{}\n{}\n{}\n{}\n",
+                "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204",
+                "153 255 204 153 255 204 153 255 204 153 255 204 153",
+                "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204",
+                "153 255 204 153 255 204 153 255 204 153 255 204 153",
+            ),
+            ppm.body
+        );
     }
 }
