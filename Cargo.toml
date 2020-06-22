@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "canvas",
     "tuple",
     "examples/virtual_projectiles"
 ]

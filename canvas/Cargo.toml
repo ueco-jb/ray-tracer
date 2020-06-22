@@ -1,0 +1,9 @@
+[package]
+name = "canvas"
+version = "0.1.0"
+authors = ["ueco <ueco@libertymail.net>"]
+edition = "2018"
+
+[dependencies]
+num-traits = { version = "0.2", default-features = false }
+tuple = { path = "../tuple" }
