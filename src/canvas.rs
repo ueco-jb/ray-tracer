@@ -75,6 +75,20 @@ pub struct PPM {
     body: String,
 }
 
+impl PPM {
+    pub fn get_header(&self) -> String {
+        self.header.clone()
+    }
+
+    pub fn get_body(&self) -> String {
+        self.body.clone()
+    }
+
+    pub fn get(&self) -> String {
+        format!("{}\n{}", self.header, self.body)
+    }
+}
+
 pub fn scale_color(color: f64, max: f64) -> u32 {
     if color < 0.0_f64 || tuple::eq_with_eps(0.0_f64, color) {
         0
