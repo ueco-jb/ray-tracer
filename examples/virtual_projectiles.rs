@@ -1,3 +1,7 @@
+extern crate ray_tracer as rt;
+
+use rt::tuple;
+
 #[derive(Debug)]
 struct Projectile {
     position: tuple::Tuple, // point
