@@ -1,8 +1,8 @@
-use std::fs::{File, write};
-use std::path::Path;
+use std::fs::File;
+use std::io::Write;
 
-fn save(data: &String, path: Path) -> std::io::Result<()> {
+fn save(data: &String, path: &String) -> std::io::Result<()> {
     let mut file = File::create(path)?;
-    write(path, data).expect("Unable to write file");
+    file.write_all(data.as_bytes()).expect("Unable to write file");
     Ok(())
 }
