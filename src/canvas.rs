@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
-mod color;
+use crate::color;
+use crate::tuple;
 
 const MAX_LINE_LENGTH: usize = 70;
 

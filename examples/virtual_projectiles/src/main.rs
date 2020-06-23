@@ -1,3 +1,5 @@
+use ray_tracer::tuple;
+
 #[derive(Debug)]
 struct Projectile {
     position: tuple::Tuple, // point

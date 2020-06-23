@@ -5,4 +5,4 @@ authors = ["ueco <ueco@libertymail.net>"]
 edition = "2018"
 
 [dependencies]
-tuple = { path = "../../tuple" }
+ray_tracer = { path = "../../ray_tracer" }

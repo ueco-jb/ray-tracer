@@ -1,6 +1,9 @@
-[workspace]
-members = [
-    "canvas",
-    "tuple",
-    "examples/virtual_projectiles"
-]
+[package]
+name = "ray_tracer"
+version = "0.1.0"
+authors = ["ueco <ueco@libertymail.net>"]
+edition = "2018"
+
+[dependencies]
+num = { version = "0.3", default-features = false }
+num-traits = { version = "0.2", default-features = false }
