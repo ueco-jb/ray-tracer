@@ -41,9 +41,13 @@ fn main() {
             println!("Final position {:?}", p);
             break;
         } else {
-            c.write_pixel(xposition as usize, yposition as usize, color::color(1, 1, 1)).unwrap();
+            c.write_pixel(
+                xposition as usize,
+                yposition as usize,
+                color::color(1, 1, 1),
+            )
+            .unwrap();
         }
-
     }
     let data: canvas::PPM = canvas::canvas_to_ppm(&c);
     serialize::save(&data.get(), "saved.ppm").unwrap();
