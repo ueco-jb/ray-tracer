@@ -43,7 +43,7 @@ fn main() {
         } else {
             c.write_pixel(
                 xposition as usize,
-                yposition as usize,
+                c.get_height() - yposition as usize,
                 color::color(1, 1, 1),
             )
             .unwrap();
