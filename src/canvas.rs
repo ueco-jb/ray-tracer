@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use crate::color;
 use crate::utils::eq_with_eps;
 
