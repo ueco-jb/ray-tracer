@@ -13,12 +13,20 @@ impl Matrix4 {
     }
 
     pub fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
-        self.matrix[row][column] = value;
-        Ok(())
+        if row >= 4 || column >= 4 {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            self.matrix[row][column] = value;
+            Ok(())
+        }
     }
 
     pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        Ok(self.matrix[row][column])
+        if row >= 4 || column >= 4 {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            Ok(self.matrix[row][column])
+        }
     }
 }
 
@@ -83,6 +91,10 @@ mod tests {
         assert!(eq_with_eps(0.0, m.get(1, 2).unwrap()));
         assert!(eq_with_eps(0.0, m.get(3, 1).unwrap()));
         assert!(eq_with_eps(0.0, m.get(3, 3).unwrap()));
+
+        assert!(m.get(4, 4).is_err());
+        assert!(m.get(0, 4).is_err());
+        assert!(m.get(4, 0).is_err());
     }
 
     #[test]
