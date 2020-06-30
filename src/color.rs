@@ -1,6 +1,4 @@
-#![allow(dead_code)]
-
-use crate::tuple::eq_with_eps;
+use crate::utils::eq_with_eps;
 use num_traits::cast::ToPrimitive;
 use std::ops::{Add, Mul, Sub};
 

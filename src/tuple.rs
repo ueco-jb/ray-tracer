@@ -1,3 +1,4 @@
+use crate::utils::eq_with_eps;
 use num_traits::cast::ToPrimitive;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
@@ -7,10 +8,6 @@ pub struct Tuple {
     y: f64,
     z: f64,
     w: f64,
-}
-
-pub fn eq_with_eps(a: f64, b: f64) -> bool {
-    (a - b).abs() < f64::EPSILON
 }
 
 impl Tuple {

@@ -37,7 +37,7 @@ fn main() {
         p = tick(&e, &p);
         let xposition = p.position.get_x();
         let yposition = p.position.get_y();
-        if tuple::eq_with_eps(0.0_f64, yposition) || yposition < 0.0_f64 {
+        if utils::eq_with_eps(0.0_f64, yposition) || yposition < 0.0_f64 {
             println!("Final position {:?}", p);
             break;
         } else {

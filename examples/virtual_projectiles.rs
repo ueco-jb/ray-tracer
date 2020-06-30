@@ -1,6 +1,6 @@
 extern crate ray_tracer as rt;
 
-use rt::tuple;
+use rt::{tuple, utils};
 
 #[derive(Debug)]
 struct Projectile {
@@ -36,7 +36,7 @@ fn main() {
         p = tick(&e, &p);
         println!("New tick #{}", i);
         i += 1;
-        if tuple::eq_with_eps(0.0_f64, p.position.get_y()) || p.position.get_y() < 0.0_f64 {
+        if utils::eq_with_eps(0.0_f64, p.position.get_y()) || p.position.get_y() < 0.0_f64 {
             println!("Final position {:?}", p);
             break;
         }
