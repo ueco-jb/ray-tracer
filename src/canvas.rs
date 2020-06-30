@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::color;
-use crate::tuple;
+use crate::utils::eq_with_eps;
 
 const MAX_LINE_LENGTH: usize = 70;
 
@@ -90,9 +90,9 @@ impl PPM {
 }
 
 pub fn scale_color(color: f64, max: f64) -> u32 {
-    if color < 0.0_f64 || tuple::eq_with_eps(0.0_f64, color) {
+    if color < 0.0_f64 || eq_with_eps(0.0_f64, color) {
         0
-    } else if color > 1.0_f64 || tuple::eq_with_eps(1.0_f64, color) {
+    } else if color > 1.0_f64 || eq_with_eps(1.0_f64, color) {
         max as u32
     } else {
         (color * max).round() as u32
