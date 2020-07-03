@@ -1,8 +1,11 @@
+use crate::utils::eq_with_eps;
+
 #[derive(Debug)]
 pub enum MatrixError {
     OutOfMatrixBorder,
 }
 
+#[derive(Debug)]
 pub struct Matrix4 {
     matrix: [[f64; 4]; 4],
 }
@@ -27,6 +30,27 @@ impl Matrix4 {
         } else {
             Ok(self.matrix[row][column])
         }
+    }
+}
+
+impl PartialEq for Matrix4 {
+    fn eq(&self, other: &Matrix4) -> bool {
+        eq_with_eps(self.matrix[0][0], other.matrix[0][0])
+            && eq_with_eps(self.matrix[0][1], other.matrix[0][1])
+            && eq_with_eps(self.matrix[0][2], other.matrix[0][2])
+            && eq_with_eps(self.matrix[0][3], other.matrix[0][3])
+            && eq_with_eps(self.matrix[1][0], other.matrix[1][0])
+            && eq_with_eps(self.matrix[1][1], other.matrix[1][1])
+            && eq_with_eps(self.matrix[1][2], other.matrix[1][2])
+            && eq_with_eps(self.matrix[1][3], other.matrix[1][3])
+            && eq_with_eps(self.matrix[2][0], other.matrix[2][0])
+            && eq_with_eps(self.matrix[2][1], other.matrix[2][1])
+            && eq_with_eps(self.matrix[2][2], other.matrix[2][2])
+            && eq_with_eps(self.matrix[2][3], other.matrix[2][3])
+            && eq_with_eps(self.matrix[3][0], other.matrix[3][0])
+            && eq_with_eps(self.matrix[3][1], other.matrix[3][1])
+            && eq_with_eps(self.matrix[3][2], other.matrix[3][2])
+            && eq_with_eps(self.matrix[3][3], other.matrix[3][3])
     }
 }
 
@@ -77,6 +101,7 @@ pub fn matrix4_values(
     m
 }
 
+#[derive(Debug)]
 pub struct Matrix3 {
     matrix: [[f64; 3]; 3],
 }
@@ -101,6 +126,20 @@ impl Matrix3 {
         } else {
             Ok(self.matrix[row][column])
         }
+    }
+}
+
+impl PartialEq for Matrix3 {
+    fn eq(&self, other: &Matrix3) -> bool {
+        eq_with_eps(self.matrix[0][0], other.matrix[0][0])
+            && eq_with_eps(self.matrix[0][1], other.matrix[0][1])
+            && eq_with_eps(self.matrix[0][2], other.matrix[0][2])
+            && eq_with_eps(self.matrix[1][0], other.matrix[1][0])
+            && eq_with_eps(self.matrix[1][1], other.matrix[1][1])
+            && eq_with_eps(self.matrix[1][2], other.matrix[1][2])
+            && eq_with_eps(self.matrix[2][0], other.matrix[2][0])
+            && eq_with_eps(self.matrix[2][1], other.matrix[2][1])
+            && eq_with_eps(self.matrix[2][2], other.matrix[2][2])
     }
 }
 
@@ -137,6 +176,7 @@ pub fn matrix3_values(
     m
 }
 
+#[derive(Debug)]
 pub struct Matrix2 {
     matrix: [[f64; 2]; 2],
 }
@@ -161,6 +201,15 @@ impl Matrix2 {
         } else {
             Ok(self.matrix[row][column])
         }
+    }
+}
+
+impl PartialEq for Matrix2 {
+    fn eq(&self, other: &Matrix2) -> bool {
+        eq_with_eps(self.matrix[0][0], other.matrix[0][0])
+            && eq_with_eps(self.matrix[0][1], other.matrix[0][1])
+            && eq_with_eps(self.matrix[1][0], other.matrix[1][0])
+            && eq_with_eps(self.matrix[1][1], other.matrix[1][1])
     }
 }
 
@@ -258,5 +307,43 @@ mod tests {
         assert!(eq_with_eps(5.0, m.get(0, 1).unwrap()));
         assert!(eq_with_eps(1.0, m.get(1, 0).unwrap()));
         assert!(eq_with_eps(-2.0, m.get(1, 1).unwrap()));
+    }
+
+    #[test]
+    fn equality_with_identical_matrices() {
+        let a = matrix4_values(
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
+        );
+        let b = matrix4_values(
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
+        );
+        assert_eq!(b, a);
+
+        let a = matrix3_values(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
+        let b = matrix3_values(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
+        assert_eq!(b, a);
+
+        let a = matrix2_values(1.0, 2.0, 3.0, 4.0);
+        let b = matrix2_values(1.0, 2.0, 3.0, 4.0);
+        assert_eq!(b, a);
+    }
+
+    #[test]
+    fn equality_with_different_matrices() {
+        let a = matrix4_values(
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
+        );
+        let b = matrix4_values(
+            2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0,
+        );
+        assert_ne!(b, a);
+
+        let a = matrix3_values(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
+        let b = matrix3_values(2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0);
+        assert_ne!(b, a);
+
+        let a = matrix2_values(1.0, 2.0, 3.0, 4.0);
+        let b = matrix2_values(2.0, 3.0, 4.0, 5.0);
+        assert_ne!(b, a);
     }
 }
