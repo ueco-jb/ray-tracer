@@ -11,7 +11,12 @@ pub struct Tuple {
 }
 
 impl Tuple {
-    pub fn new<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w: i8) -> Tuple {
+    pub fn new<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive, X: ToPrimitive>(
+        x: T,
+        y: U,
+        z: V,
+        w: X,
+    ) -> Tuple {
         Tuple {
             x: x.to_f64().unwrap(),
             y: y.to_f64().unwrap(),
@@ -46,6 +51,10 @@ impl Tuple {
 
     pub fn get_z(&self) -> f64 {
         self.z
+    }
+
+    pub fn get_w(&self) -> f64 {
+        self.w
     }
 }
 

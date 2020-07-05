@@ -1,3 +1,4 @@
+use crate::tuple::Tuple;
 use crate::utils::eq_with_eps;
 use std::ops::Mul;
 
@@ -112,6 +113,30 @@ impl Mul for Matrix4 {
             }
         }
         m
+    }
+}
+
+impl Mul<Tuple> for Matrix4 {
+    type Output = Tuple;
+
+    fn mul(self, rhs: Tuple) -> Tuple {
+        let v1 = self.matrix[0][0] * rhs.get_x()
+            + self.matrix[0][1] * rhs.get_y()
+            + self.matrix[0][2] * rhs.get_z()
+            + self.matrix[0][3] * rhs.get_w();
+        let v2 = self.matrix[1][0] * rhs.get_x()
+            + self.matrix[1][1] * rhs.get_y()
+            + self.matrix[1][2] * rhs.get_z()
+            + self.matrix[1][3] * rhs.get_w();
+        let v3 = self.matrix[2][0] * rhs.get_x()
+            + self.matrix[2][1] * rhs.get_y()
+            + self.matrix[2][2] * rhs.get_z()
+            + self.matrix[2][3] * rhs.get_w();
+        let v4 = self.matrix[3][0] * rhs.get_x()
+            + self.matrix[3][1] * rhs.get_y()
+            + self.matrix[3][2] * rhs.get_z()
+            + self.matrix[3][3] * rhs.get_w();
+        Tuple::new(v1, v2, v3, v4)
     }
 }
 
@@ -302,5 +327,14 @@ mod tests {
             ),
             a * b
         );
+    }
+
+    #[test]
+    fn multiply_matrix_by_tuple() {
+        let a = Matrix4::new_with_values(
+            1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 4.0, 2.0, 8.0, 6.0, 4.0, 1.0, 0.0, 0.0, 0.0, 1.0,
+        );
+        let b = Tuple::new(1, 2, 3, 1);
+        assert_eq!(Tuple::new(18, 24, 33, 1), a * b);
     }
 }
