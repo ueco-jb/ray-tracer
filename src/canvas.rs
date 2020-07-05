@@ -16,6 +16,24 @@ pub enum CanvasError {
 }
 
 impl Canvas {
+    pub fn new(w: usize, h: usize) -> Canvas {
+        let vec = vec![vec![color::color(0, 0, 0); h]; w];
+        Canvas {
+            width: w,
+            height: h,
+            canvas: vec,
+        }
+    }
+
+    pub fn new_with_color(w: usize, h: usize, c: color::Color) -> Canvas {
+        let vec = vec![vec![c; h]; w];
+        Canvas {
+            width: w,
+            height: h,
+            canvas: vec,
+        }
+    }
+
     pub fn get_width(&self) -> usize {
         self.width
     }
@@ -42,24 +60,6 @@ impl Canvas {
     }
 }
 
-pub fn canvas(w: usize, h: usize) -> Canvas {
-    let vec = vec![vec![color::color(0, 0, 0); h]; w];
-    Canvas {
-        width: w,
-        height: h,
-        canvas: vec,
-    }
-}
-
-pub fn canvas_with_color(w: usize, h: usize, c: color::Color) -> Canvas {
-    let vec = vec![vec![c; h]; w];
-    Canvas {
-        width: w,
-        height: h,
-        canvas: vec,
-    }
-}
-
 pub fn pixel_at(canvas: &Canvas, w: usize, h: usize) -> color::Color {
     canvas.pixel_at(h, w).unwrap()
 }
@@ -68,6 +68,7 @@ pub fn write_pixel(canvas: &mut Canvas, w: usize, h: usize, c: color::Color) {
     canvas.write_pixel(h, w, c).unwrap();
 }
 
+#[derive(Default)]
 pub struct PPM {
     header: String,
     body: String,
@@ -164,7 +165,7 @@ mod tests {
 
     #[test]
     fn color_pixel_on_canvas() {
-        let mut c = canvas(10, 20);
+        let mut c = Canvas::new(10, 20);
         let red = color::color(1, 0, 0);
         c.write_pixel(2, 3, red).unwrap();
         assert_eq!(red, c.pixel_at(2, 3).unwrap());
@@ -172,7 +173,7 @@ mod tests {
 
     #[test]
     fn write_pixel_out_of_canvas_border() {
-        let mut c = canvas(1, 2);
+        let mut c = Canvas::new(1, 2);
         let red = color::color(1, 0, 0);
         let write_result = c.write_pixel(20, 30, red);
         let get_result = c.pixel_at(20, 30);
@@ -182,14 +183,14 @@ mod tests {
 
     #[test]
     fn constructing_ppm_header() {
-        let c = canvas(5, 3);
+        let c = Canvas::new(5, 3);
         let ppm = canvas_to_ppm(&c);
         assert_eq!("P3\n5 3\n255".to_string(), ppm.header);
     }
 
     #[test]
     fn constructing_ppm_body() {
-        let mut c = canvas(5, 3);
+        let mut c = Canvas::new(5, 3);
         let c1 = color::color(1.5, 0, 0);
         let c2 = color::color(0, 0.5, 0);
         let c3 = color::color(-0.5, 0, 1);
@@ -211,7 +212,7 @@ mod tests {
     #[test]
     fn constructing_ppm_body_splitting_lines() {
         let color = color::color(1, 0.8, 0.6);
-        let c = canvas_with_color(10, 2, color);
+        let c = Canvas::new_with_color(10, 2, color);
         let ppm = canvas_to_ppm(&c);
         assert_eq!(
             format!(
