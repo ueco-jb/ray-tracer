@@ -1,9 +1,12 @@
+use crate::utils::eq_with_eps;
+use std::ops::Mul;
+
 #[derive(Debug)]
 pub enum MatrixError {
     OutOfMatrixBorder,
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Matrix4 {
     matrix: [[f64; 4]; 4],
 }
@@ -69,6 +72,46 @@ impl Matrix4 {
         } else {
             Ok(self.matrix[row][column])
         }
+    }
+}
+
+impl PartialEq for Matrix4 {
+    fn eq(&self, other: &Matrix4) -> bool {
+        eq_with_eps(self.matrix[0][0], other.matrix[0][0])
+            && eq_with_eps(self.matrix[0][1], other.matrix[0][1])
+            && eq_with_eps(self.matrix[0][2], other.matrix[0][2])
+            && eq_with_eps(self.matrix[0][3], other.matrix[0][3])
+            && eq_with_eps(self.matrix[1][0], other.matrix[1][0])
+            && eq_with_eps(self.matrix[1][1], other.matrix[1][1])
+            && eq_with_eps(self.matrix[1][2], other.matrix[1][2])
+            && eq_with_eps(self.matrix[1][3], other.matrix[1][3])
+            && eq_with_eps(self.matrix[2][0], other.matrix[2][0])
+            && eq_with_eps(self.matrix[2][1], other.matrix[2][1])
+            && eq_with_eps(self.matrix[2][2], other.matrix[2][2])
+            && eq_with_eps(self.matrix[2][3], other.matrix[2][3])
+            && eq_with_eps(self.matrix[3][0], other.matrix[3][0])
+            && eq_with_eps(self.matrix[3][1], other.matrix[3][1])
+            && eq_with_eps(self.matrix[3][2], other.matrix[3][2])
+            && eq_with_eps(self.matrix[3][3], other.matrix[3][3])
+    }
+}
+
+impl Mul for Matrix4 {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self {
+        let mut m = Self {
+            matrix: [[0.0f64; 4]; 4],
+        };
+        for (i, row) in self.matrix.iter().enumerate() {
+            for (j, _col) in row.iter().enumerate() {
+                m.matrix[i][j] = self.matrix[i][0] * rhs.matrix[0][j]
+                    + self.matrix[i][1] * rhs.matrix[1][j]
+                    + self.matrix[i][2] * rhs.matrix[2][j]
+                    + self.matrix[i][3] * rhs.matrix[3][j];
+            }
+        }
+        m
     }
 }
 
@@ -242,5 +285,22 @@ mod tests {
         assert!(eq_with_eps(5.0, m.get(0, 1).unwrap()));
         assert!(eq_with_eps(1.0, m.get(1, 0).unwrap()));
         assert!(eq_with_eps(-2.0, m.get(1, 1).unwrap()));
+    }
+
+    #[test]
+    fn multiplying_two_matrices() {
+        let a = Matrix4::new_with_values(
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
+        );
+        let b = Matrix4::new_with_values(
+            -2.0, 1.0, 2.0, 3.0, 3.0, 2.0, 1.0, -1.0, 4.0, 3.0, 6.0, 5.0, 1.0, 2.0, 7.0, 8.0,
+        );
+        assert_eq!(
+            Matrix4::new_with_values(
+                20.0, 22.0, 50.0, 48.0, 44.0, 54.0, 114.0, 108.0, 40.0, 58.0, 110.0, 102.0, 16.0,
+                26.0, 46.0, 42.0
+            ),
+            a * b
+        );
     }
 }
