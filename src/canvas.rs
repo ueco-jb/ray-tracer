@@ -1,4 +1,4 @@
-use crate::color;
+use crate::color::Color;
 use crate::utils::eq_with_eps;
 
 const MAX_LINE_LENGTH: usize = 70;
@@ -7,7 +7,7 @@ const MAX_LINE_LENGTH: usize = 70;
 pub struct Canvas {
     width: usize,
     height: usize,
-    canvas: std::vec::Vec<std::vec::Vec<color::Color>>,
+    canvas: std::vec::Vec<std::vec::Vec<Color>>,
 }
 
 #[derive(Debug)]
@@ -17,7 +17,7 @@ pub enum CanvasError {
 
 impl Canvas {
     pub fn new(w: usize, h: usize) -> Canvas {
-        let vec = vec![vec![color::color(0, 0, 0); h]; w];
+        let vec = vec![vec![Color::new(0, 0, 0); h]; w];
         Canvas {
             width: w,
             height: h,
@@ -25,7 +25,7 @@ impl Canvas {
         }
     }
 
-    pub fn new_with_color(w: usize, h: usize, c: color::Color) -> Canvas {
+    pub fn new_with_color(w: usize, h: usize, c: Color) -> Canvas {
         let vec = vec![vec![c; h]; w];
         Canvas {
             width: w,
@@ -42,7 +42,7 @@ impl Canvas {
         self.height
     }
 
-    pub fn pixel_at(&self, w: usize, h: usize) -> Result<color::Color, CanvasError> {
+    pub fn pixel_at(&self, w: usize, h: usize) -> Result<Color, CanvasError> {
         if w > self.width - 1 || h > self.height - 1 {
             Err(CanvasError::OutOfCanvasBorder)
         } else {
@@ -50,7 +50,7 @@ impl Canvas {
         }
     }
 
-    pub fn write_pixel(&mut self, w: usize, h: usize, c: color::Color) -> Result<(), CanvasError> {
+    pub fn write_pixel(&mut self, w: usize, h: usize, c: Color) -> Result<(), CanvasError> {
         if w > self.width - 1 || h > self.height - 1 {
             Err(CanvasError::OutOfCanvasBorder)
         } else {
@@ -60,11 +60,11 @@ impl Canvas {
     }
 }
 
-pub fn pixel_at(canvas: &Canvas, w: usize, h: usize) -> color::Color {
+pub fn pixel_at(canvas: &Canvas, w: usize, h: usize) -> Color {
     canvas.pixel_at(h, w).unwrap()
 }
 
-pub fn write_pixel(canvas: &mut Canvas, w: usize, h: usize, c: color::Color) {
+pub fn write_pixel(canvas: &mut Canvas, w: usize, h: usize, c: Color) {
     canvas.write_pixel(h, w, c).unwrap();
 }
 
@@ -98,7 +98,7 @@ pub fn scale_color(color: f64, max: f64) -> u32 {
     }
 }
 
-pub fn color_to_scaled_integers(c: &color::Color, max: f64) -> Box<[u32]> {
+pub fn color_to_scaled_integers(c: &Color, max: f64) -> Box<[u32]> {
     let mut scaled = Box::new([0; 3]);
     scaled[0] = scale_color(c.get_red(), max);
     scaled[1] = scale_color(c.get_green(), max);
@@ -166,7 +166,7 @@ mod tests {
     #[test]
     fn color_pixel_on_canvas() {
         let mut c = Canvas::new(10, 20);
-        let red = color::color(1, 0, 0);
+        let red = Color::new(1, 0, 0);
         c.write_pixel(2, 3, red).unwrap();
         assert_eq!(red, c.pixel_at(2, 3).unwrap());
     }
@@ -174,7 +174,7 @@ mod tests {
     #[test]
     fn write_pixel_out_of_canvas_border() {
         let mut c = Canvas::new(1, 2);
-        let red = color::color(1, 0, 0);
+        let red = Color::new(1, 0, 0);
         let write_result = c.write_pixel(20, 30, red);
         let get_result = c.pixel_at(20, 30);
         assert!(write_result.is_err());
@@ -191,9 +191,9 @@ mod tests {
     #[test]
     fn constructing_ppm_body() {
         let mut c = Canvas::new(5, 3);
-        let c1 = color::color(1.5, 0, 0);
-        let c2 = color::color(0, 0.5, 0);
-        let c3 = color::color(-0.5, 0, 1);
+        let c1 = Color::new(1.5, 0, 0);
+        let c2 = Color::new(0, 0.5, 0);
+        let c3 = Color::new(-0.5, 0, 1);
         c.write_pixel(0, 0, c1).unwrap();
         c.write_pixel(2, 1, c2).unwrap();
         c.write_pixel(4, 2, c3).unwrap();
@@ -211,7 +211,7 @@ mod tests {
 
     #[test]
     fn constructing_ppm_body_splitting_lines() {
-        let color = color::color(1, 0.8, 0.6);
+        let color = Color::new(1, 0.8, 0.6);
         let c = Canvas::new_with_color(10, 2, color);
         let ppm = canvas_to_ppm(&c);
         assert_eq!(
