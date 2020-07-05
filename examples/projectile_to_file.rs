@@ -30,7 +30,8 @@ fn main() {
         wind: tuple::vector(-0.01, 0, 0),
     };
 
-    let mut c: canvas::Canvas = canvas::Canvas::new_with_color(900, 550, color::Color::new(0, 0, 0));
+    let mut c: canvas::Canvas =
+        canvas::Canvas::new_with_color(900, 550, color::Color::new(0, 0, 0));
 
     println!("Starting conditions: {:?}", p);
     loop {
