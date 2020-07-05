@@ -11,6 +11,15 @@ pub struct Tuple {
 }
 
 impl Tuple {
+    pub fn new<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w: i8) -> Tuple {
+        Tuple {
+            x: x.to_f64().unwrap(),
+            y: y.to_f64().unwrap(),
+            z: z.to_f64().unwrap(),
+            w: w.to_f64().unwrap(),
+        }
+    }
+
     pub fn is_vector(&self) -> Result<bool, &'static str> {
         match self.w {
             w if eq_with_eps(w, 0.0) => Ok(true),
@@ -114,15 +123,6 @@ impl<T: ToPrimitive> Div<T> for Tuple {
     }
 }
 
-pub fn tuple<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V, w: i8) -> Tuple {
-    Tuple {
-        x: x.to_f64().unwrap(),
-        y: y.to_f64().unwrap(),
-        z: z.to_f64().unwrap(),
-        w: w.to_f64().unwrap(),
-    }
-}
-
 pub fn point<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(x: T, y: U, z: V) -> Tuple {
     Tuple {
         x: x.to_f64().unwrap(),
@@ -172,7 +172,7 @@ mod tests {
 
     #[test]
     fn tuple_is_point() {
-        let t: Tuple = tuple(4.3, -4.2, 3.1, 1);
+        let t: Tuple = Tuple::new(4.3, -4.2, 3.1, 1);
         assert!(eq_with_eps(t.get_x(), 4.3));
         assert!(eq_with_eps(t.get_y(), -4.2));
         assert!(eq_with_eps(t.get_z(), 3.1));
@@ -182,7 +182,7 @@ mod tests {
 
     #[test]
     fn tuple_is_vector() {
-        let t: Tuple = tuple(4.3, -4.2, 3.1, 0);
+        let t: Tuple = Tuple::new(4.3, -4.2, 3.1, 0);
         assert!(eq_with_eps(t.get_x(), 4.3));
         assert!(eq_with_eps(t.get_y(), -4.2));
         assert!(eq_with_eps(t.get_z(), 3.1));
@@ -192,19 +192,19 @@ mod tests {
 
     #[test]
     fn point_creates_tuple_with_w_one() {
-        assert_eq!(tuple(4.0, -4.0, 3.0, 1), point(4.0, -4.0, 3.0));
+        assert_eq!(Tuple::new(4.0, -4.0, 3.0, 1), point(4.0, -4.0, 3.0));
     }
 
     #[test]
     fn point_creates_tuple_with_w_zero() {
-        assert_eq!(tuple(4, -4, 3.0, 0), vector(4.0, -4.0, 3.0));
+        assert_eq!(Tuple::new(4, -4, 3.0, 0), vector(4.0, -4.0, 3.0));
     }
 
     #[test]
     fn add_tuples() {
-        let a1 = tuple(3.0, -2, 5, 1);
-        let a2 = tuple(-2, 3, 1, 0);
-        assert_eq!(tuple(1, 1, 6, 1), a1 + a2);
+        let a1 = Tuple::new(3.0, -2, 5, 1);
+        let a2 = Tuple::new(-2, 3, 1, 0);
+        assert_eq!(Tuple::new(1, 1, 6, 1), a1 + a2);
     }
 
     #[test]
@@ -237,26 +237,26 @@ mod tests {
 
     #[test]
     fn negating_tuple() {
-        let a = tuple(1, -2, 3, -4);
-        assert_eq!(tuple(-1, 2, -3, 4), -a);
+        let a = Tuple::new(1, -2, 3, -4);
+        assert_eq!(Tuple::new(-1, 2, -3, 4), -a);
     }
 
     #[test]
     fn multiple_tuple_by_scalar() {
-        let a = tuple(1, -2, 3, -4);
-        assert_eq!(tuple(3.5, -7, 10.5, -14), a * 3.5);
+        let a = Tuple::new(1, -2, 3, -4);
+        assert_eq!(Tuple::new(3.5, -7, 10.5, -14), a * 3.5);
     }
 
     #[test]
     fn multiply_tuple_by_fraction() {
-        let a = tuple(1, -2, 3, -4);
-        assert_eq!(tuple(0.5, -1, 1.5, -2), a * 0.5);
+        let a = Tuple::new(1, -2, 3, -4);
+        assert_eq!(Tuple::new(0.5, -1, 1.5, -2), a * 0.5);
     }
 
     #[test]
     fn divide_tuple_by_scalar() {
-        let a = tuple(1, -2, 3, -4);
-        assert_eq!(tuple(0.5, -1, 1.5, -2), a / 2);
+        let a = Tuple::new(1, -2, 3, -4);
+        assert_eq!(Tuple::new(0.5, -1, 1.5, -2), a / 2);
     }
 
     #[test]
