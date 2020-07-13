@@ -7,12 +7,18 @@ pub enum MatrixError {
     OutOfMatrixBorder,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Matrix4 {
     matrix: [[f64; 4]; 4],
 }
 
 impl Matrix4 {
+    pub fn identity_matrix() -> Matrix4 {
+        Matrix4::new_with_values(
+            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+        )
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub fn new_with_values(
         v1: f64,
@@ -336,5 +342,21 @@ mod tests {
         );
         let b = Tuple::new(1, 2, 3, 1);
         assert_eq!(Tuple::new(18, 24, 33, 1), a * b);
+    }
+
+    #[test]
+    fn multiply_matrix_by_identity_matrix() {
+        let a = Matrix4::new_with_values(
+            0.0, 1.0, 2.0, 4.0, 1.0, 2.0, 4.0, 8.0, 2.0, 4.0, 8.0, 16.0, 4.0, 8.0, 16.0, 32.0,
+        );
+        let i = Matrix4::identity_matrix();
+        assert_eq!(a, a.clone() * i);
+    }
+
+    #[test]
+    fn multiply_identity_matrix_by_tuple() {
+        let i = Matrix4::identity_matrix();
+        let a = Tuple::new(1, 2, 3, 4);
+        assert_eq!(a, i * a);
     }
 }
