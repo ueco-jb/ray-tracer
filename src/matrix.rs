@@ -80,6 +80,16 @@ impl Matrix4 {
             Ok(self.matrix[row][column])
         }
     }
+
+    pub fn transpose(&self) -> Result<Matrix4, MatrixError> {
+        let mut output: Matrix4 = Default::default();
+        for (i, row) in self.matrix.iter().enumerate() {
+            for (j, _col) in row.iter().enumerate() {
+                output.set(j, i, self.matrix[i][j])?;
+            }
+        }
+        Ok(output)
+    }
 }
 
 impl PartialEq for Matrix4 {
@@ -358,5 +368,24 @@ mod tests {
         let i = Matrix4::identity_matrix();
         let a = Tuple::new(1, 2, 3, 4);
         assert_eq!(a, i * a);
+    }
+
+    #[test]
+    fn transpose_matrix() {
+        let a = Matrix4::new_with_values(
+            0.0, 9.0, 3.0, 0.0, 9.0, 8.0, 0.0, 8.0, 1.0, 8.0, 5.0, 3.0, 0.0, 0.0, 5.0, 8.0,
+        );
+        assert_eq!(
+            Matrix4::new_with_values(
+                0.0, 9.0, 1.0, 0.0, 9.0, 8.0, 8.0, 0.0, 3.0, 0.0, 5.0, 5.0, 0.0, 8.0, 3.0, 8.0
+            ),
+            a.transpose().unwrap()
+        );
+    }
+
+    #[test]
+    fn transpose_identity_matrix() {
+        let a = Matrix4::identity_matrix();
+        assert_eq!(a, a.transpose().unwrap());
     }
 }
