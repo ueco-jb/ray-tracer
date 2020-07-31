@@ -148,6 +148,10 @@ impl Matrix2 {
             Ok(self.0[row * 2 + column])
         }
     }
+
+    pub fn determiant(&self) -> f64 {
+        self.matrix[0][0] * self.matrix[1][1] - self.matrix[0][1] * self.matrix[1][0]
+    }
 }
 
 #[cfg(test)]
@@ -288,5 +292,11 @@ mod tests {
     fn transpose_identity_matrix() {
         let a = Matrix4::identity_matrix();
         assert_eq!(a, a.transpose().unwrap());
+    }
+
+    #[test]
+    fn calculating_determiant_of_2x2_matrix() {
+        let a = Matrix2::new_with_values(1.0, 5.0, -3.0, 2.0);
+        assert_eq!(a.determiant(), 17.0);
     }
 }
