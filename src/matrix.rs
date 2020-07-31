@@ -43,6 +43,14 @@ impl Matrix4 {
         }
         Ok(output)
     }
+
+    pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix3, MatrixError> {
+        if row >= 4 || column >= 4 {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            Ok(self.matrix[row][column])
+        }
+    }
 }
 
 impl PartialEq for Matrix4 {
@@ -298,5 +306,21 @@ mod tests {
     fn calculating_determiant_of_2x2_matrix() {
         let a = Matrix2::new_with_values(1.0, 5.0, -3.0, 2.0);
         assert_eq!(a.determiant(), 17.0);
+    }
+
+    #[test]
+    fn submatrix_of_3x3_is_2x2() {
+        let a = Matrix3::new_with_values(1.0, 5.0, 0.0, -3.0, 2.0, 7.0, 0.0, 6.0, -3.0);
+        let sub_a = Matrix2::new_with_values(-3.0, 2.0, 0.0, 6.0);
+        assert_eq!(a.submatrix(0, 2), sub_a);
+    }
+
+    #[test]
+    fn submatrix_of_4x4_is_3x3() {
+        let a = Matrix4::new_with_values(
+            -6.0, 1.0, 1.0, 6.0, -8.0, 5.0, 8.0, 6.0, -1.0, 0.0, 8.0, 2.0, -7.0, 1.0, -1.0, 1.0,
+        );
+        let sub_a = Matrix3::new_with_values(-6.0, 1.0, 6.0, -8.0, 8.0, 6.0, -7.0, -1.0, 1.0);
+        assert_eq!(a.submatrix(2, 1), sub_a);
     }
 }
