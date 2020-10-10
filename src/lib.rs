@@ -1,3 +1,5 @@
+#![feature(iter_order_by)]
+
 pub mod canvas;
 pub mod color;
 pub mod matrix;

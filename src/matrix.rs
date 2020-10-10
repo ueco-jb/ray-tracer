@@ -47,22 +47,7 @@ impl Matrix4 {
 
 impl PartialEq for Matrix4 {
     fn eq(&self, other: &Matrix4) -> bool {
-        eq_with_eps(self.0[0], other.0[0])
-            && eq_with_eps(self.0[1], other.0[1])
-            && eq_with_eps(self.0[2], other.0[2])
-            && eq_with_eps(self.0[3], other.0[3])
-            && eq_with_eps(self.0[4], other.0[4])
-            && eq_with_eps(self.0[5], other.0[5])
-            && eq_with_eps(self.0[6], other.0[6])
-            && eq_with_eps(self.0[7], other.0[7])
-            && eq_with_eps(self.0[8], other.0[8])
-            && eq_with_eps(self.0[9], other.0[9])
-            && eq_with_eps(self.0[10], other.0[10])
-            && eq_with_eps(self.0[11], other.0[11])
-            && eq_with_eps(self.0[12], other.0[12])
-            && eq_with_eps(self.0[13], other.0[13])
-            && eq_with_eps(self.0[14], other.0[14])
-            && eq_with_eps(self.0[15], other.0[15])
+        self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
     }
 }
 
@@ -72,22 +57,26 @@ impl Mul for Matrix4 {
     fn mul(self, rhs: Self) -> Self {
         let mut m = Self([0.0f64; 16]);
         for i in 0..4 {
-            m.0[i * 4] = self.0[i * 4] * rhs.0[0]
-                + self.0[i * 4 + 1] * rhs.0[4]
-                + self.0[i * 4 + 2] * rhs.0[8]
-                + self.0[i * 4 + 3] * rhs.0[12];
-            m.0[i * 4 + 1] = self.0[i * 4] * rhs.0[1]
-                + self.0[i * 4 + 1] * rhs.0[5]
-                + self.0[i * 4 + 2] * rhs.0[9]
-                + self.0[i * 4 + 3] * rhs.0[13];
-            m.0[i * 4 + 2] = self.0[i * 4] * rhs.0[2]
-                + self.0[i * 4 + 1] * rhs.0[6]
-                + self.0[i * 4 + 2] * rhs.0[10]
-                + self.0[i * 4 + 3] * rhs.0[14];
-            m.0[i * 4 + 3] = self.0[i * 4] * rhs.0[3]
-                + self.0[i * 4 + 1] * rhs.0[7]
-                + self.0[i * 4 + 2] * rhs.0[11]
-                + self.0[i * 4 + 3] * rhs.0[15];
+            let a = i * 4;
+            let b = i * 4 + 1;
+            let c = i * 4 + 2;
+            let d = i * 4 + 3;
+            m.0[a] = self.0[a] * rhs.0[0]
+                + self.0[b] * rhs.0[4]
+                + self.0[c] * rhs.0[8]
+                + self.0[d] * rhs.0[12];
+            m.0[b] = self.0[a] * rhs.0[1]
+                + self.0[b] * rhs.0[5]
+                + self.0[c] * rhs.0[9]
+                + self.0[d] * rhs.0[13];
+            m.0[c] = self.0[a] * rhs.0[2]
+                + self.0[b] * rhs.0[6]
+                + self.0[c] * rhs.0[10]
+                + self.0[d] * rhs.0[14];
+            m.0[d] = self.0[a] * rhs.0[3]
+                + self.0[b] * rhs.0[7]
+                + self.0[c] * rhs.0[11]
+                + self.0[d] * rhs.0[15];
         }
         m
     }
