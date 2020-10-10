@@ -114,7 +114,7 @@ impl Mul<Tuple> for Matrix4 {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Matrix3([f64; 9]);
 
 impl Matrix3 {
@@ -136,7 +136,7 @@ impl Matrix3 {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Matrix2([f64; 4]);
 
 impl Matrix2 {
