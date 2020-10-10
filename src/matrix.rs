@@ -44,13 +44,13 @@ impl Matrix4 {
         Ok(output)
     }
 
-    pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix3, MatrixError> {
-        if row >= 4 || column >= 4 {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            Ok(self.matrix[row][column])
-        }
-    }
+    // pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix3, MatrixError> {
+    //     if row >= 4 || column >= 4 {
+    //         Err(MatrixError::OutOfMatrixBorder)
+    //     } else {
+    //         Ok(self.matrix[row][column])
+    //     }
+    // }
 }
 
 impl PartialEq for Matrix4 {
@@ -133,6 +133,32 @@ impl Matrix3 {
         } else {
             Ok(self.0[row * 3 + column])
         }
+
+        // submatrix: something like this:
+        // let a: Vec<f64> = mat
+        // .0
+        // .iter()
+        // .enumerate()
+        // .filter(|&(n, _)| {
+        //     n != x * 4
+        //         || n != x * 4 + 1
+        //         || n != x * 4 + 2
+        //         || n != x * 4 + 3
+        //         || n != y
+        //         || n != y + 4
+        //         || n != y + 8
+        //         || n != y + 12
+        // })
+        // .map(|(_, e)| e)
+        // .collect();
+
+        pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix2, MatrixError> {
+            if row >= 3 || column >= 3 {
+                Err(MatrixError::OutOfMatrixBorder)
+            } else {
+                Ok(self.matrix[row][column])
+            }
+        }
     }
 }
 
@@ -158,7 +184,7 @@ impl Matrix2 {
     }
 
     pub fn determiant(&self) -> f64 {
-        self.matrix[0][0] * self.matrix[1][1] - self.matrix[0][1] * self.matrix[1][0]
+        self.0[0] * self.0[3] - self.0[1] * self.0[2]
     }
 }
 
@@ -304,23 +330,23 @@ mod tests {
 
     #[test]
     fn calculating_determiant_of_2x2_matrix() {
-        let a = Matrix2::new_with_values(1.0, 5.0, -3.0, 2.0);
+        let a = Matrix2([1.0, 5.0, -3.0, 2.0]);
         assert_eq!(a.determiant(), 17.0);
     }
 
     #[test]
     fn submatrix_of_3x3_is_2x2() {
-        let a = Matrix3::new_with_values(1.0, 5.0, 0.0, -3.0, 2.0, 7.0, 0.0, 6.0, -3.0);
-        let sub_a = Matrix2::new_with_values(-3.0, 2.0, 0.0, 6.0);
+        let a = Matrix3([1.0, 5.0, 0.0, -3.0, 2.0, 7.0, 0.0, 6.0, -3.0]);
+        let sub_a = Matrix2([-3.0, 2.0, 0.0, 6.0]);
         assert_eq!(a.submatrix(0, 2), sub_a);
     }
 
-    #[test]
-    fn submatrix_of_4x4_is_3x3() {
-        let a = Matrix4::new_with_values(
-            -6.0, 1.0, 1.0, 6.0, -8.0, 5.0, 8.0, 6.0, -1.0, 0.0, 8.0, 2.0, -7.0, 1.0, -1.0, 1.0,
-        );
-        let sub_a = Matrix3::new_with_values(-6.0, 1.0, 6.0, -8.0, 8.0, 6.0, -7.0, -1.0, 1.0);
-        assert_eq!(a.submatrix(2, 1), sub_a);
-    }
+    // #[test]
+    // fn submatrix_of_4x4_is_3x3() {
+    //     let a = Matrix4([
+    //         -6.0, 1.0, 1.0, 6.0, -8.0, 5.0, 8.0, 6.0, -1.0, 0.0, 8.0, 2.0, -7.0, 1.0, -1.0, 1.0,
+    //     ]);
+    //     let sub_a = Matrix3([-6.0, 1.0, 6.0, -8.0, 8.0, 6.0, -7.0, -1.0, 1.0]);
+    //     assert_eq!(a.submatrix(2, 1), sub_a);
+    // }
 }
