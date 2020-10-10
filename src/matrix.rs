@@ -57,26 +57,26 @@ impl Mul for Matrix4 {
     fn mul(self, rhs: Self) -> Self {
         let mut m = Self([0.0f64; 16]);
         for i in 0..4 {
-            let a = i * 4;
-            let b = i * 4 + 1;
-            let c = i * 4 + 2;
-            let d = i * 4 + 3;
-            m.0[a] = self.0[a] * rhs.0[0]
-                + self.0[b] * rhs.0[4]
-                + self.0[c] * rhs.0[8]
-                + self.0[d] * rhs.0[12];
-            m.0[b] = self.0[a] * rhs.0[1]
-                + self.0[b] * rhs.0[5]
-                + self.0[c] * rhs.0[9]
-                + self.0[d] * rhs.0[13];
-            m.0[c] = self.0[a] * rhs.0[2]
-                + self.0[b] * rhs.0[6]
-                + self.0[c] * rhs.0[10]
-                + self.0[d] * rhs.0[14];
-            m.0[d] = self.0[a] * rhs.0[3]
-                + self.0[b] * rhs.0[7]
-                + self.0[c] * rhs.0[11]
-                + self.0[d] * rhs.0[15];
+            let pos_a = i * 4;
+            let pos_b = i * 4 + 1;
+            let pos_c = i * 4 + 2;
+            let pos_d = i * 4 + 3;
+            m.0[pos_a] = self.0[pos_a] * rhs.0[0]
+                + self.0[pos_b] * rhs.0[4]
+                + self.0[pos_c] * rhs.0[8]
+                + self.0[pos_d] * rhs.0[12];
+            m.0[pos_b] = self.0[pos_a] * rhs.0[1]
+                + self.0[pos_b] * rhs.0[5]
+                + self.0[pos_c] * rhs.0[9]
+                + self.0[pos_d] * rhs.0[13];
+            m.0[pos_c] = self.0[pos_a] * rhs.0[2]
+                + self.0[pos_b] * rhs.0[6]
+                + self.0[pos_c] * rhs.0[10]
+                + self.0[pos_d] * rhs.0[14];
+            m.0[pos_d] = self.0[pos_a] * rhs.0[3]
+                + self.0[pos_b] * rhs.0[7]
+                + self.0[pos_c] * rhs.0[11]
+                + self.0[pos_d] * rhs.0[15];
         }
         m
     }
