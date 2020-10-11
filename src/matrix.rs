@@ -189,6 +189,14 @@ impl Matrix3 {
             Ok(submatrix)
         }
     }
+
+    pub fn minor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            Ok(self.submatrix(row, column)?.determiant())
+        }
+    }
 }
 
 impl PartialEq for Matrix3 {
@@ -372,7 +380,7 @@ mod tests {
     }
 
     #[test]
-    fn calculating_determiant_of_2x2_matrix() {
+    fn determiant_of_2x2_matrix() {
         let a = Matrix2([1.0, 5.0, -3.0, 2.0]);
         assert!(eq_with_eps(a.determiant(), 17.0));
     }
@@ -391,5 +399,13 @@ mod tests {
         ]);
         let sub_a = Matrix3([-6.0, 1.0, 6.0, -8.0, 8.0, 6.0, -7.0, -1.0, 1.0]);
         assert_eq!(a.submatrix(2, 1).unwrap(), sub_a);
+    }
+
+    #[test]
+    fn minor_of_3x3_matrix() {
+        let a = Matrix3([3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
+        let b = a.submatrix(1, 0).unwrap();
+        assert!(eq_with_eps(b.determiant(), 25.0));
+        assert!(eq_with_eps(a.minor(1, 0).unwrap(), 25.0));
     }
 }
