@@ -76,6 +76,27 @@ impl Matrix4 {
             Ok(submatrix)
         }
     }
+
+    pub fn cofactor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+        if row >= Matrix4::SIZE || column >= Matrix4::SIZE {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            let d = self.submatrix(row, column)?.determiant()?;
+            if (row + column) % 2 == 0 {
+                Ok(d)
+            } else {
+                Ok(d * -1.0)
+            }
+        }
+    }
+
+    pub fn determiant(&self) -> Result<f64, MatrixError> {
+        let mut d = 0.0f64;
+        for c in 0..Matrix4::SIZE {
+            d = d + self.get(0, c)? * self.cofactor(0, c)?;
+        }
+        Ok(d)
+    }
 }
 
 impl PartialEq for Matrix4 {
@@ -209,6 +230,14 @@ impl Matrix3 {
                 Ok(d * -1.0)
             }
         }
+    }
+
+    pub fn determiant(&self) -> Result<f64, MatrixError> {
+        let mut d = 0.0f64;
+        for c in 0..Matrix3::SIZE {
+            d = d + self.get(0, c)? * self.cofactor(0, c)?;
+        }
+        Ok(d)
     }
 }
 
@@ -429,5 +458,26 @@ mod tests {
         assert!(eq_with_eps(a.cofactor(0, 0).unwrap(), -12.0));
         assert!(eq_with_eps(a.minor(1, 0).unwrap(), 25.0));
         assert!(eq_with_eps(a.cofactor(1, 0).unwrap(), -25.0));
+    }
+
+    #[test]
+    fn determiant_of_3x3_matrix() {
+        let a = Matrix3([1.0, 2.0, 6.0, -5.0, 8.0, -4.0, 2.0, 6.0, 4.0]);
+        assert!(eq_with_eps(a.cofactor(0, 0).unwrap(), 56.0));
+        assert!(eq_with_eps(a.cofactor(0, 1).unwrap(), 12.0));
+        assert!(eq_with_eps(a.cofactor(0, 2).unwrap(), -46.0));
+        assert!(eq_with_eps(a.determiant().unwrap(), -196.0));
+    }
+
+    #[test]
+    fn determiant_of_4x4_matrix() {
+        let a = Matrix4([
+            -2.0, -8.0, 3.0, 5.0, -3.0, 1.0, 7.0, 3.0, 1.0, 2.0, -9.0, 6.0, -6.0, 7.0, 7.0, -9.0,
+        ]);
+        assert!(eq_with_eps(a.cofactor(0, 0).unwrap(), 690.0));
+        assert!(eq_with_eps(a.cofactor(0, 1).unwrap(), 447.0));
+        assert!(eq_with_eps(a.cofactor(0, 2).unwrap(), 210.0));
+        assert!(eq_with_eps(a.cofactor(0, 3).unwrap(), 51.0));
+        assert!(eq_with_eps(a.determiant().unwrap(), -4071.0));
     }
 }
