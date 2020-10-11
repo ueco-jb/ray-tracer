@@ -6,6 +6,7 @@ use std::ops::Mul;
 #[derive(Debug)]
 pub enum MatrixError {
     OutOfMatrixBorder,
+    MatrixNotInvertible,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -100,6 +101,22 @@ impl Matrix4 {
 
     pub fn is_invertible(&self) -> Result<bool, MatrixError> {
         Ok(!eq_with_eps(self.determiant()?, 0.0))
+    }
+
+    pub fn inverse(&self) -> Result<Matrix4, MatrixError> {
+        if self.is_invertible()? == false {
+            Err(MatrixError::MatrixNotInvertible)
+        } else {
+            let d = self.determiant()?;
+            let mut m: Matrix4 = Default::default();
+            for row in 0..Matrix4::SIZE {
+                for col in 0..Matrix4::SIZE {
+                    let c = self.cofactor(row, col)?;
+                    m.set(col, row, c / d)?
+                }
+            }
+            Ok(m)
+        }
     }
 }
 
@@ -507,4 +524,36 @@ mod tests {
         assert!(eq_with_eps(a.determiant().unwrap(), 0.0));
         assert!(!a.is_invertible().unwrap());
     }
+
+    #[test]
+    fn inverse_matrix() {
+        let a = Matrix4([
+            -5.0, 2.0, 6.0, -8.0, 1.0, -5.0, 1.0, 8.0, 7.0, 7.0, -6.0, -7.0, 1.0, -3.0, 7.0, 4.0,
+        ]);
+        let b = a.inverse().unwrap();
+        assert!(eq_with_eps(a.determiant().unwrap(), 532.0));
+        assert!(eq_with_eps(a.cofactor(2, 3).unwrap(), -160.0));
+        assert!(eq_with_eps(b.get(3, 2).unwrap(), (-160.0) / 532.0));
+        assert!(eq_with_eps(a.cofactor(3, 2).unwrap(), 105.0));
+        assert!(eq_with_eps(b.get(2, 3).unwrap(), 105.0 / 532.0));
+        // assert_eq!(
+        //     b,
+        //     Matrix4([
+        //         0.21805, 0.45113, 0.24060, -0.04511, -0.80827, -1.45677, -0.44361, 0.52068,
+        //         -0.07895, -0.22368, -0.05263, 0.19737, -0.52256, -0.81391, -0.30075, 0.30639
+        //     ])
+        // );
+    }
+
+    // #[test]
+    // fn multiply_product_by_its_inverse() {
+    //     let a = Matrix4([
+    //         3.0, -9.0, 7.0, 3.0, 3.0, -8.0, 2.0, -9.0, -4.0, 4.0, 4.0, 1.0, -6.0, 5.0, -1.0, 1.0,
+    //     ]);
+    //     let b = Matrix4([
+    //         8.0, 2.0, 2.0, 2.0, 3.0, -1.0, 7.0, 0.0, 7.0, 0.0, 5.0, 4.0, 6.0, -2.0, 0.0, 5.0,
+    //     ]);
+    //     let c = a.clone() * b.clone();
+    //     assert_eq!(c * b.inverse().unwrap(), a);
+    // }
 }
