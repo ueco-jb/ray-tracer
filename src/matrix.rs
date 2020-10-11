@@ -374,7 +374,7 @@ mod tests {
     #[test]
     fn calculating_determiant_of_2x2_matrix() {
         let a = Matrix2([1.0, 5.0, -3.0, 2.0]);
-        assert_eq!(a.determiant(), 17.0);
+        assert!(eq_with_eps(a.determiant(), 17.0));
     }
 
     #[test]
