@@ -1,5 +1,5 @@
 use crate::tuple::Tuple;
-use crate::utils::eq_with_eps;
+use float_cmp::*;
 use std::collections::HashSet;
 use std::ops::Mul;
 
@@ -100,7 +100,7 @@ impl Matrix4 {
     }
 
     pub fn is_invertible(&self) -> Result<bool, MatrixError> {
-        Ok(!eq_with_eps(self.determiant()?, 0.0))
+        Ok(!approx_eq!(f64, self.determiant()?, 0.0, ulps = 5))
     }
 
     pub fn inverse(&self) -> Result<Matrix4, MatrixError> {
@@ -122,7 +122,9 @@ impl Matrix4 {
 
 impl PartialEq for Matrix4 {
     fn eq(&self, other: &Matrix4) -> bool {
-        self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
+        self.0
+            .iter()
+            .eq_by(&other.0, |&x, &y| approx_eq!(f64, x, y, ulps = 4))
     }
 }
 
@@ -262,13 +264,15 @@ impl Matrix3 {
     }
 
     pub fn is_invertible(&self) -> Result<bool, MatrixError> {
-        Ok(!eq_with_eps(self.determiant()?, 0.0))
+        Ok(!approx_eq!(f64, self.determiant()?, 0.0, ulps = 5))
     }
 }
 
 impl PartialEq for Matrix3 {
     fn eq(&self, other: &Matrix3) -> bool {
-        self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
+        self.0
+            .iter()
+            .eq_by(&other.0, |&x, &y| approx_eq!(f64, x, y, ulps = 5))
     }
 }
 
@@ -300,30 +304,31 @@ impl Matrix2 {
     }
 
     pub fn is_invertible(&self) -> bool {
-        !eq_with_eps(self.determiant(), 0.0)
+        !approx_eq!(f64, self.determiant(), 0.0, ulps = 5)
     }
 }
 
 impl PartialEq for Matrix2 {
     fn eq(&self, other: &Matrix2) -> bool {
-        self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
+        self.0
+            .iter()
+            .eq_by(&other.0, |&x, &y| approx_eq!(f64, x, y, ulps = 5))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::eq_with_eps;
 
     #[test]
     fn constructing_4_matrix() {
         let m: Matrix4 = Default::default();
-        assert!(eq_with_eps(0.0, m.get(0, 0).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(0, 3).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(1, 0).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(1, 2).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(3, 1).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(3, 3).unwrap()));
+        assert!(approx_eq!(f64, 0.0, m.get(0, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(0, 3).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(1, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(1, 2).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(3, 1).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(3, 3).unwrap(), ulps = 5));
 
         assert!(m.get(4, 4).is_err());
         assert!(m.get(0, 4).is_err());
@@ -335,24 +340,24 @@ mod tests {
         let m = Matrix4([
             1.0, 2.0, 3.0, 4.0, 5.5, 6.5, 7.5, 8.5, 9.0, 10.0, 11.0, 12.0, 13.5, 14.5, 15.5, 16.5,
         ]);
-        assert!(eq_with_eps(1.0, m.get(0, 0).unwrap()));
-        assert!(eq_with_eps(4.0, m.get(0, 3).unwrap()));
-        assert!(eq_with_eps(5.5, m.get(1, 0).unwrap()));
-        assert!(eq_with_eps(7.5, m.get(1, 2).unwrap()));
-        assert!(eq_with_eps(11.0, m.get(2, 2).unwrap()));
-        assert!(eq_with_eps(13.5, m.get(3, 0).unwrap()));
-        assert!(eq_with_eps(15.5, m.get(3, 2).unwrap()));
+        assert!(approx_eq!(f64, 1.0, m.get(0, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 4.0, m.get(0, 3).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 5.5, m.get(1, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 7.5, m.get(1, 2).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 11.0, m.get(2, 2).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 13.5, m.get(3, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 15.5, m.get(3, 2).unwrap(), ulps = 5));
     }
 
     #[test]
     fn constructing_3_matrix() {
         let m: Matrix3 = Default::default();
-        assert!(eq_with_eps(0.0, m.get(0, 0).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(0, 2).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(1, 0).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(1, 2).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(2, 1).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(2, 2).unwrap()));
+        assert!(approx_eq!(f64, 0.0, m.get(0, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(0, 2).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(1, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(1, 2).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(2, 1).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(2, 2).unwrap(), ulps = 5));
 
         assert!(m.get(3, 3).is_err());
         assert!(m.get(0, 3).is_err());
@@ -362,18 +367,18 @@ mod tests {
     #[test]
     fn constructing_with_values_3_matrix() {
         let m = Matrix3([-3.0, 5.0, 0.0, 1.0, -2.0, -7.0, 0.0, 1.0, 1.0]);
-        assert!(eq_with_eps(-3.0, m.get(0, 0).unwrap()));
-        assert!(eq_with_eps(-2.0, m.get(1, 1).unwrap()));
-        assert!(eq_with_eps(1.0, m.get(2, 2).unwrap()));
+        assert!(approx_eq!(f64, -3.0, m.get(0, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, -2.0, m.get(1, 1).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 1.0, m.get(2, 2).unwrap(), ulps = 5));
     }
 
     #[test]
     fn constructing_2_matrix() {
         let m: Matrix2 = Default::default();
-        assert!(eq_with_eps(0.0, m.get(0, 0).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(0, 1).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(1, 0).unwrap()));
-        assert!(eq_with_eps(0.0, m.get(1, 1).unwrap()));
+        assert!(approx_eq!(f64, 0.0, m.get(0, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(0, 1).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(1, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 0.0, m.get(1, 1).unwrap(), ulps = 5));
 
         assert!(m.get(2, 2).is_err());
         assert!(m.get(0, 2).is_err());
@@ -383,10 +388,10 @@ mod tests {
     #[test]
     fn constructing_with_values_2_matrix() {
         let m = Matrix2([-3.0, 5.0, 1.0, -2.0]);
-        assert!(eq_with_eps(-3.0, m.get(0, 0).unwrap()));
-        assert!(eq_with_eps(5.0, m.get(0, 1).unwrap()));
-        assert!(eq_with_eps(1.0, m.get(1, 0).unwrap()));
-        assert!(eq_with_eps(-2.0, m.get(1, 1).unwrap()));
+        assert!(approx_eq!(f64, -3.0, m.get(0, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 5.0, m.get(0, 1).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, 1.0, m.get(1, 0).unwrap(), ulps = 5));
+        assert!(approx_eq!(f64, -2.0, m.get(1, 1).unwrap(), ulps = 5));
     }
 
     #[test]
@@ -453,7 +458,7 @@ mod tests {
     #[test]
     fn determiant_of_2x2_matrix() {
         let a = Matrix2([1.0, 5.0, -3.0, 2.0]);
-        assert!(eq_with_eps(a.determiant(), 17.0));
+        assert!(approx_eq!(f64, a.determiant(), 17.0, ulps = 5));
     }
 
     #[test]
@@ -476,26 +481,26 @@ mod tests {
     fn minor_of_3x3_matrix() {
         let a = Matrix3([3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
         let b = a.submatrix(1, 0).unwrap();
-        assert!(eq_with_eps(b.determiant(), 25.0));
-        assert!(eq_with_eps(a.minor(1, 0).unwrap(), 25.0));
+        assert!(approx_eq!(f64, b.determiant(), 25.0, ulps = 5));
+        assert!(approx_eq!(f64, a.minor(1, 0).unwrap(), 25.0, ulps = 5));
     }
 
     #[test]
     fn cofactor_of_3x3_matrix() {
         let a = Matrix3([3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
-        assert!(eq_with_eps(a.minor(0, 0).unwrap(), -12.0));
-        assert!(eq_with_eps(a.cofactor(0, 0).unwrap(), -12.0));
-        assert!(eq_with_eps(a.minor(1, 0).unwrap(), 25.0));
-        assert!(eq_with_eps(a.cofactor(1, 0).unwrap(), -25.0));
+        assert!(approx_eq!(f64, a.minor(0, 0).unwrap(), -12.0, ulps = 5));
+        assert!(approx_eq!(f64, a.cofactor(0, 0).unwrap(), -12.0, ulps = 5));
+        assert!(approx_eq!(f64, a.minor(1, 0).unwrap(), 25.0, ulps = 5));
+        assert!(approx_eq!(f64, a.cofactor(1, 0).unwrap(), -25.0, ulps = 5));
     }
 
     #[test]
     fn determiant_of_3x3_matrix() {
         let a = Matrix3([1.0, 2.0, 6.0, -5.0, 8.0, -4.0, 2.0, 6.0, 4.0]);
-        assert!(eq_with_eps(a.cofactor(0, 0).unwrap(), 56.0));
-        assert!(eq_with_eps(a.cofactor(0, 1).unwrap(), 12.0));
-        assert!(eq_with_eps(a.cofactor(0, 2).unwrap(), -46.0));
-        assert!(eq_with_eps(a.determiant().unwrap(), -196.0));
+        assert!(approx_eq!(f64, a.cofactor(0, 0).unwrap(), 56.0, ulps = 5));
+        assert!(approx_eq!(f64, a.cofactor(0, 1).unwrap(), 12.0, ulps = 5));
+        assert!(approx_eq!(f64, a.cofactor(0, 2).unwrap(), -46.0, ulps = 5));
+        assert!(approx_eq!(f64, a.determiant().unwrap(), -196.0, ulps = 5));
     }
 
     #[test]
@@ -503,11 +508,11 @@ mod tests {
         let a = Matrix4([
             -2.0, -8.0, 3.0, 5.0, -3.0, 1.0, 7.0, 3.0, 1.0, 2.0, -9.0, 6.0, -6.0, 7.0, 7.0, -9.0,
         ]);
-        assert!(eq_with_eps(a.cofactor(0, 0).unwrap(), 690.0));
-        assert!(eq_with_eps(a.cofactor(0, 1).unwrap(), 447.0));
-        assert!(eq_with_eps(a.cofactor(0, 2).unwrap(), 210.0));
-        assert!(eq_with_eps(a.cofactor(0, 3).unwrap(), 51.0));
-        assert!(eq_with_eps(a.determiant().unwrap(), -4071.0));
+        assert!(approx_eq!(f64, a.cofactor(0, 0).unwrap(), 690.0, ulps = 5));
+        assert!(approx_eq!(f64, a.cofactor(0, 1).unwrap(), 447.0, ulps = 5));
+        assert!(approx_eq!(f64, a.cofactor(0, 2).unwrap(), 210.0, ulps = 5));
+        assert!(approx_eq!(f64, a.cofactor(0, 3).unwrap(), 51.0, ulps = 5));
+        assert!(approx_eq!(f64, a.determiant().unwrap(), -4071.0, ulps = 5));
     }
 
     #[test]
@@ -515,13 +520,13 @@ mod tests {
         let a = Matrix4([
             6.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 6.0, 4.0, -9.0, 3.0, -7.0, 9.0, 1.0, 7.0, -6.0,
         ]);
-        assert!(eq_with_eps(a.determiant().unwrap(), -2120.0));
+        assert!(approx_eq!(f64, a.determiant().unwrap(), -2120.0, ulps = 5));
         assert!(a.is_invertible().unwrap());
 
         let a = Matrix4([
             -4.0, 2.0, -2.0, -3.0, 9.0, 6.0, 2.0, 6.0, 0.0, -5.0, 1.0, -5.0, 0.0, 0.0, 0.0, 0.0,
         ]);
-        assert!(eq_with_eps(a.determiant().unwrap(), 0.0));
+        assert!(approx_eq!(f64, a.determiant().unwrap(), 0.0, ulps = 5));
         assert!(!a.is_invertible().unwrap());
     }
 
@@ -531,18 +536,28 @@ mod tests {
             -5.0, 2.0, 6.0, -8.0, 1.0, -5.0, 1.0, 8.0, 7.0, 7.0, -6.0, -7.0, 1.0, -3.0, 7.0, 4.0,
         ]);
         let b = a.inverse().unwrap();
-        assert!(eq_with_eps(a.determiant().unwrap(), 532.0));
-        assert!(eq_with_eps(a.cofactor(2, 3).unwrap(), -160.0));
-        assert!(eq_with_eps(b.get(3, 2).unwrap(), (-160.0) / 532.0));
-        assert!(eq_with_eps(a.cofactor(3, 2).unwrap(), 105.0));
-        assert!(eq_with_eps(b.get(2, 3).unwrap(), 105.0 / 532.0));
-        // assert_eq!(
-        //     b,
-        //     Matrix4([
-        //         0.21805, 0.45113, 0.24060, -0.04511, -0.80827, -1.45677, -0.44361, 0.52068,
-        //         -0.07895, -0.22368, -0.05263, 0.19737, -0.52256, -0.81391, -0.30075, 0.30639
-        //     ])
-        // );
+        assert!(approx_eq!(f64, a.determiant().unwrap(), 532.0, ulps = 5));
+        assert!(approx_eq!(f64, a.cofactor(2, 3).unwrap(), -160.0, ulps = 5));
+        assert!(approx_eq!(
+            f64,
+            b.get(3, 2).unwrap(),
+            (-160.0) / 532.0,
+            ulps = 5
+        ));
+        assert!(approx_eq!(f64, a.cofactor(3, 2).unwrap(), 105.0, ulps = 5));
+        assert!(approx_eq!(
+            f64,
+            b.get(2, 3).unwrap(),
+            105.0 / 532.0,
+            ulps = 5
+        ));
+        assert_eq!(
+            b,
+            Matrix4([
+                0.21805, 0.45113, 0.24060, -0.04511, -0.80827, -1.45677, -0.44361, 0.52068,
+                -0.07895, -0.22368, -0.05263, 0.19737, -0.52256, -0.81391, -0.30075, 0.30639
+            ])
+        );
     }
 
     // #[test]
