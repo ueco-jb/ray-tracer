@@ -1,5 +1,6 @@
 use crate::tuple::Tuple;
 use crate::utils::eq_with_eps;
+use std::collections::HashSet;
 use std::ops::Mul;
 
 #[derive(Debug)]
@@ -44,13 +45,39 @@ impl Matrix4 {
         Ok(output)
     }
 
-    // pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix3, MatrixError> {
-    //     if row >= 4 || column >= 4 {
-    //         Err(MatrixError::OutOfMatrixBorder)
-    //     } else {
-    //         Ok(self.matrix[row][column])
-    //     }
-    // }
+    fn calculate_submatrix_remove_indexes(
+        matrix_size: usize,
+        row: usize,
+        column: usize,
+    ) -> HashSet<usize> {
+        let mut position_to_remove = HashSet::with_capacity(matrix_size + 1);
+        position_to_remove.insert(row * matrix_size);
+        position_to_remove.insert(row * matrix_size + 1);
+        position_to_remove.insert(row * matrix_size + 2);
+        position_to_remove.insert(row * matrix_size + 3);
+        position_to_remove.insert(column);
+        position_to_remove.insert(column + matrix_size);
+        position_to_remove.insert(column + matrix_size * 2);
+        position_to_remove.insert(column + matrix_size * 3);
+        position_to_remove
+    }
+
+    pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix3, MatrixError> {
+        if row >= 4 || column >= 4 {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            let to_remove = Matrix4::calculate_submatrix_remove_indexes(4, row, column);
+            let mut submatrix: Matrix3 = Default::default();
+            let mut i = 0;
+            for (index, elem) in self.0.iter().enumerate() {
+                if !to_remove.contains(&index) {
+                    submatrix.0[i] = *elem;
+                    i += 1;
+                }
+            }
+            Ok(submatrix)
+        }
+    }
 }
 
 impl PartialEq for Matrix4 {
@@ -133,32 +160,44 @@ impl Matrix3 {
         } else {
             Ok(self.0[row * 3 + column])
         }
+    }
 
-        // submatrix: something like this:
-        // let a: Vec<f64> = mat
-        // .0
-        // .iter()
-        // .enumerate()
-        // .filter(|&(n, _)| {
-        //     n != x * 4
-        //         || n != x * 4 + 1
-        //         || n != x * 4 + 2
-        //         || n != x * 4 + 3
-        //         || n != y
-        //         || n != y + 4
-        //         || n != y + 8
-        //         || n != y + 12
-        // })
-        // .map(|(_, e)| e)
-        // .collect();
+    fn calculate_submatrix_remove_indexes(
+        matrix_size: usize,
+        row: usize,
+        column: usize,
+    ) -> HashSet<usize> {
+        let mut position_to_remove = HashSet::with_capacity(matrix_size + 1);
+        position_to_remove.insert(row * matrix_size);
+        position_to_remove.insert(row * matrix_size + 1);
+        position_to_remove.insert(row * matrix_size + 2);
+        position_to_remove.insert(column);
+        position_to_remove.insert(column + matrix_size);
+        position_to_remove.insert(column + matrix_size * 2);
+        position_to_remove
+    }
 
-        pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix2, MatrixError> {
-            if row >= 3 || column >= 3 {
-                Err(MatrixError::OutOfMatrixBorder)
-            } else {
-                Ok(self.matrix[row][column])
+    pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix2, MatrixError> {
+        if row >= 3 || column >= 3 {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            let to_remove = Matrix3::calculate_submatrix_remove_indexes(3, row, column);
+            let mut submatrix: Matrix2 = Default::default();
+            let mut i = 0;
+            for (index, elem) in self.0.iter().enumerate() {
+                if !to_remove.contains(&index) {
+                    submatrix.0[i] = *elem;
+                    i += 1;
+                }
             }
+            Ok(submatrix)
         }
+    }
+}
+
+impl PartialEq for Matrix3 {
+    fn eq(&self, other: &Matrix3) -> bool {
+        self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
     }
 }
 
@@ -185,6 +224,12 @@ impl Matrix2 {
 
     pub fn determiant(&self) -> f64 {
         self.0[0] * self.0[3] - self.0[1] * self.0[2]
+    }
+}
+
+impl PartialEq for Matrix2 {
+    fn eq(&self, other: &Matrix2) -> bool {
+        self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
     }
 }
 
@@ -338,15 +383,15 @@ mod tests {
     fn submatrix_of_3x3_is_2x2() {
         let a = Matrix3([1.0, 5.0, 0.0, -3.0, 2.0, 7.0, 0.0, 6.0, -3.0]);
         let sub_a = Matrix2([-3.0, 2.0, 0.0, 6.0]);
-        assert_eq!(a.submatrix(0, 2), sub_a);
+        assert_eq!(a.submatrix(0, 2).unwrap(), sub_a);
     }
 
-    // #[test]
-    // fn submatrix_of_4x4_is_3x3() {
-    //     let a = Matrix4([
-    //         -6.0, 1.0, 1.0, 6.0, -8.0, 5.0, 8.0, 6.0, -1.0, 0.0, 8.0, 2.0, -7.0, 1.0, -1.0, 1.0,
-    //     ]);
-    //     let sub_a = Matrix3([-6.0, 1.0, 6.0, -8.0, 8.0, 6.0, -7.0, -1.0, 1.0]);
-    //     assert_eq!(a.submatrix(2, 1), sub_a);
-    // }
+    #[test]
+    fn submatrix_of_4x4_is_3x3() {
+        let a = Matrix4([
+            -6.0, 1.0, 1.0, 6.0, -8.0, 5.0, 8.0, 6.0, -1.0, 0.0, 8.0, 2.0, -7.0, 1.0, -1.0, 1.0,
+        ]);
+        let sub_a = Matrix3([-6.0, 1.0, 6.0, -8.0, 8.0, 6.0, -7.0, -1.0, 1.0]);
+        assert_eq!(a.submatrix(2, 1).unwrap(), sub_a);
+    }
 }
