@@ -1,16 +1,20 @@
 use crate::tuple::Tuple;
 use crate::utils::eq_with_eps;
+use std::collections::HashSet;
 use std::ops::Mul;
 
 #[derive(Debug)]
 pub enum MatrixError {
     OutOfMatrixBorder,
+    MatrixNotInvertible,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct Matrix4([f64; 16]);
 
 impl Matrix4 {
+    const SIZE: usize = 4;
+
     pub fn identity_matrix() -> Matrix4 {
         Matrix4([
             1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
@@ -18,30 +22,101 @@ impl Matrix4 {
     }
 
     pub fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
-        if row >= 4 || column >= 4 {
+        if row >= Matrix4::SIZE || column >= Matrix4::SIZE {
             Err(MatrixError::OutOfMatrixBorder)
         } else {
-            self.0[row * 4 + column] = value;
+            self.0[row * Matrix4::SIZE + column] = value;
             Ok(())
         }
     }
 
     pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        if row >= 4 || column >= 4 {
+        if row >= Matrix4::SIZE || column >= Matrix4::SIZE {
             Err(MatrixError::OutOfMatrixBorder)
         } else {
-            Ok(self.0[row * 4 + column])
+            Ok(self.0[row * Matrix4::SIZE + column])
         }
     }
 
     pub fn transpose(&self) -> Result<Matrix4, MatrixError> {
         let mut output: Matrix4 = Default::default();
-        for i in 0..4 {
-            for j in 0..4 {
+        for i in 0..Matrix4::SIZE {
+            for j in 0..Matrix4::SIZE {
                 output.set(j, i, self.get(i, j)?)?;
             }
         }
         Ok(output)
+    }
+
+    fn calculate_submatrix_remove_indexes(row: usize, column: usize) -> HashSet<usize> {
+        let mut position_to_remove = HashSet::with_capacity(Matrix4::SIZE + 1);
+        position_to_remove.insert(row * Matrix4::SIZE);
+        position_to_remove.insert(row * Matrix4::SIZE + 1);
+        position_to_remove.insert(row * Matrix4::SIZE + 2);
+        position_to_remove.insert(row * Matrix4::SIZE + 3);
+        position_to_remove.insert(column);
+        position_to_remove.insert(column + Matrix4::SIZE);
+        position_to_remove.insert(column + Matrix4::SIZE * 2);
+        position_to_remove.insert(column + Matrix4::SIZE * 3);
+        position_to_remove
+    }
+
+    pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix3, MatrixError> {
+        if row >= Matrix4::SIZE || column >= Matrix4::SIZE {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            let to_remove = Matrix4::calculate_submatrix_remove_indexes(row, column);
+            let mut submatrix: Matrix3 = Default::default();
+            let mut i = 0;
+            for (index, elem) in self.0.iter().enumerate() {
+                if !to_remove.contains(&index) {
+                    submatrix.0[i] = *elem;
+                    i += 1;
+                }
+            }
+            Ok(submatrix)
+        }
+    }
+
+    pub fn cofactor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+        if row >= Matrix4::SIZE || column >= Matrix4::SIZE {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            let d = self.submatrix(row, column)?.determiant()?;
+            if (row + column) % 2 == 0 {
+                Ok(d)
+            } else {
+                Ok(d * -1.0)
+            }
+        }
+    }
+
+    pub fn determiant(&self) -> Result<f64, MatrixError> {
+        let mut d = 0.0f64;
+        for c in 0..Matrix4::SIZE {
+            d += self.get(0, c)? * self.cofactor(0, c)?;
+        }
+        Ok(d)
+    }
+
+    pub fn is_invertible(&self) -> Result<bool, MatrixError> {
+        Ok(!eq_with_eps(self.determiant()?, 0.0))
+    }
+
+    pub fn inverse(&self) -> Result<Matrix4, MatrixError> {
+        if !self.is_invertible()? {
+            Err(MatrixError::MatrixNotInvertible)
+        } else {
+            let d = self.determiant()?;
+            let mut m: Matrix4 = Default::default();
+            for row in 0..Matrix4::SIZE {
+                for col in 0..Matrix4::SIZE {
+                    let c = self.cofactor(row, col)?;
+                    m.set(col, row, c / d)?
+                }
+            }
+            Ok(m)
+        }
     }
 }
 
@@ -56,11 +131,11 @@ impl Mul for Matrix4 {
 
     fn mul(self, rhs: Self) -> Self {
         let mut m = Self([0.0f64; 16]);
-        for i in 0..4 {
-            let pos_a = i * 4;
-            let pos_b = i * 4 + 1;
-            let pos_c = i * 4 + 2;
-            let pos_d = i * 4 + 3;
+        for i in 0..Matrix4::SIZE {
+            let pos_a = i * Matrix4::SIZE;
+            let pos_b = i * Matrix4::SIZE + 1;
+            let pos_c = i * Matrix4::SIZE + 2;
+            let pos_d = i * Matrix4::SIZE + 3;
             m.0[pos_a] = self.0[pos_a] * rhs.0[0]
                 + self.0[pos_b] * rhs.0[4]
                 + self.0[pos_c] * rhs.0[8]
@@ -106,47 +181,132 @@ impl Mul<Tuple> for Matrix4 {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Matrix3([f64; 9]);
 
 impl Matrix3 {
+    const SIZE: usize = 3;
+
     pub fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
-        if row >= 3 || column >= 3 {
+        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
             Err(MatrixError::OutOfMatrixBorder)
         } else {
-            self.0[row * 3 + column] = value;
+            self.0[row * Matrix3::SIZE + column] = value;
             Ok(())
         }
     }
 
     pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        if row >= 3 || column >= 3 {
+        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
             Err(MatrixError::OutOfMatrixBorder)
         } else {
-            Ok(self.0[row * 3 + column])
+            Ok(self.0[row * Matrix3::SIZE + column])
         }
+    }
+
+    fn calculate_submatrix_remove_indexes(row: usize, column: usize) -> HashSet<usize> {
+        let mut position_to_remove = HashSet::with_capacity(Matrix3::SIZE + 1);
+        position_to_remove.insert(row * Matrix3::SIZE);
+        position_to_remove.insert(row * Matrix3::SIZE + 1);
+        position_to_remove.insert(row * Matrix3::SIZE + 2);
+        position_to_remove.insert(column);
+        position_to_remove.insert(column + Matrix3::SIZE);
+        position_to_remove.insert(column + Matrix3::SIZE * 2);
+        position_to_remove
+    }
+
+    pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix2, MatrixError> {
+        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            let to_remove = Matrix3::calculate_submatrix_remove_indexes(row, column);
+            let mut submatrix: Matrix2 = Default::default();
+            let mut i = 0;
+            for (index, elem) in self.0.iter().enumerate() {
+                if !to_remove.contains(&index) {
+                    submatrix.0[i] = *elem;
+                    i += 1;
+                }
+            }
+            Ok(submatrix)
+        }
+    }
+
+    pub fn minor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            Ok(self.submatrix(row, column)?.determiant())
+        }
+    }
+
+    pub fn cofactor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            let d = self.submatrix(row, column)?.determiant();
+            if (row + column) % 2 == 0 {
+                Ok(d)
+            } else {
+                Ok(d * -1.0)
+            }
+        }
+    }
+
+    pub fn determiant(&self) -> Result<f64, MatrixError> {
+        let mut d = 0.0f64;
+        for c in 0..Matrix3::SIZE {
+            d += self.get(0, c)? * self.cofactor(0, c)?;
+        }
+        Ok(d)
+    }
+
+    pub fn is_invertible(&self) -> Result<bool, MatrixError> {
+        Ok(!eq_with_eps(self.determiant()?, 0.0))
     }
 }
 
-#[derive(Default)]
+impl PartialEq for Matrix3 {
+    fn eq(&self, other: &Matrix3) -> bool {
+        self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
+    }
+}
+
+#[derive(Debug, Default)]
 pub struct Matrix2([f64; 4]);
 
 impl Matrix2 {
+    const SIZE: usize = 2;
+
     pub fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
-        if row >= 2 || column >= 2 {
+        if row >= Matrix2::SIZE || column >= Matrix2::SIZE {
             Err(MatrixError::OutOfMatrixBorder)
         } else {
-            self.0[row * 2 + column] = value;
+            self.0[row * Matrix2::SIZE + column] = value;
             Ok(())
         }
     }
 
     pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        if row >= 2 || column >= 2 {
+        if row >= Matrix2::SIZE || column >= Matrix2::SIZE {
             Err(MatrixError::OutOfMatrixBorder)
         } else {
-            Ok(self.0[row * 2 + column])
+            Ok(self.0[row * Matrix2::SIZE + column])
         }
+    }
+
+    pub fn determiant(&self) -> f64 {
+        self.0[0] * self.0[3] - self.0[1] * self.0[2]
+    }
+
+    pub fn is_invertible(&self) -> bool {
+        !eq_with_eps(self.determiant(), 0.0)
+    }
+}
+
+impl PartialEq for Matrix2 {
+    fn eq(&self, other: &Matrix2) -> bool {
+        self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
     }
 }
 
@@ -288,5 +448,112 @@ mod tests {
     fn transpose_identity_matrix() {
         let a = Matrix4::identity_matrix();
         assert_eq!(a, a.transpose().unwrap());
+    }
+
+    #[test]
+    fn determiant_of_2x2_matrix() {
+        let a = Matrix2([1.0, 5.0, -3.0, 2.0]);
+        assert!(eq_with_eps(a.determiant(), 17.0));
+    }
+
+    #[test]
+    fn submatrix_of_3x3_is_2x2() {
+        let a = Matrix3([1.0, 5.0, 0.0, -3.0, 2.0, 7.0, 0.0, 6.0, -3.0]);
+        let sub_a = Matrix2([-3.0, 2.0, 0.0, 6.0]);
+        assert_eq!(a.submatrix(0, 2).unwrap(), sub_a);
+    }
+
+    #[test]
+    fn submatrix_of_4x4_is_3x3() {
+        let a = Matrix4([
+            -6.0, 1.0, 1.0, 6.0, -8.0, 5.0, 8.0, 6.0, -1.0, 0.0, 8.0, 2.0, -7.0, 1.0, -1.0, 1.0,
+        ]);
+        let sub_a = Matrix3([-6.0, 1.0, 6.0, -8.0, 8.0, 6.0, -7.0, -1.0, 1.0]);
+        assert_eq!(a.submatrix(2, 1).unwrap(), sub_a);
+    }
+
+    #[test]
+    fn minor_of_3x3_matrix() {
+        let a = Matrix3([3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
+        let b = a.submatrix(1, 0).unwrap();
+        assert!(eq_with_eps(b.determiant(), 25.0));
+        assert!(eq_with_eps(a.minor(1, 0).unwrap(), 25.0));
+    }
+
+    #[test]
+    fn cofactor_of_3x3_matrix() {
+        let a = Matrix3([3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
+        assert!(eq_with_eps(a.minor(0, 0).unwrap(), -12.0));
+        assert!(eq_with_eps(a.cofactor(0, 0).unwrap(), -12.0));
+        assert!(eq_with_eps(a.minor(1, 0).unwrap(), 25.0));
+        assert!(eq_with_eps(a.cofactor(1, 0).unwrap(), -25.0));
+    }
+
+    #[test]
+    fn determiant_of_3x3_matrix() {
+        let a = Matrix3([1.0, 2.0, 6.0, -5.0, 8.0, -4.0, 2.0, 6.0, 4.0]);
+        assert!(eq_with_eps(a.cofactor(0, 0).unwrap(), 56.0));
+        assert!(eq_with_eps(a.cofactor(0, 1).unwrap(), 12.0));
+        assert!(eq_with_eps(a.cofactor(0, 2).unwrap(), -46.0));
+        assert!(eq_with_eps(a.determiant().unwrap(), -196.0));
+    }
+
+    #[test]
+    fn determiant_of_4x4_matrix() {
+        let a = Matrix4([
+            -2.0, -8.0, 3.0, 5.0, -3.0, 1.0, 7.0, 3.0, 1.0, 2.0, -9.0, 6.0, -6.0, 7.0, 7.0, -9.0,
+        ]);
+        assert!(eq_with_eps(a.cofactor(0, 0).unwrap(), 690.0));
+        assert!(eq_with_eps(a.cofactor(0, 1).unwrap(), 447.0));
+        assert!(eq_with_eps(a.cofactor(0, 2).unwrap(), 210.0));
+        assert!(eq_with_eps(a.cofactor(0, 3).unwrap(), 51.0));
+        assert!(eq_with_eps(a.determiant().unwrap(), -4071.0));
+    }
+
+    #[test]
+    fn is_matrix_invertible() {
+        let a = Matrix4([
+            6.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 6.0, 4.0, -9.0, 3.0, -7.0, 9.0, 1.0, 7.0, -6.0,
+        ]);
+        assert!(eq_with_eps(a.determiant().unwrap(), -2120.0));
+        assert!(a.is_invertible().unwrap());
+
+        let a = Matrix4([
+            -4.0, 2.0, -2.0, -3.0, 9.0, 6.0, 2.0, 6.0, 0.0, -5.0, 1.0, -5.0, 0.0, 0.0, 0.0, 0.0,
+        ]);
+        assert!(eq_with_eps(a.determiant().unwrap(), 0.0));
+        assert!(!a.is_invertible().unwrap());
+    }
+
+    #[test]
+    fn inverse_matrix() {
+        let a = Matrix4([
+            -5.0, 2.0, 6.0, -8.0, 1.0, -5.0, 1.0, 8.0, 7.0, 7.0, -6.0, -7.0, 1.0, -3.0, 7.0, 4.0,
+        ]);
+        let b = a.inverse().unwrap();
+        assert!(eq_with_eps(a.determiant().unwrap(), 532.0));
+        assert!(eq_with_eps(a.cofactor(2, 3).unwrap(), -160.0));
+        assert!(eq_with_eps(b.get(3, 2).unwrap(), (-160.0) / 532.0));
+        assert!(eq_with_eps(a.cofactor(3, 2).unwrap(), 105.0));
+        assert!(eq_with_eps(b.get(2, 3).unwrap(), 105.0 / 532.0));
+        assert_eq!(
+            b,
+            Matrix4([
+                0.21805, 0.45113, 0.24060, -0.04511, -0.80827, -1.45677, -0.44361, 0.52068,
+                -0.07895, -0.22368, -0.05263, 0.19737, -0.52256, -0.81391, -0.30075, 0.30639
+            ])
+        );
+    }
+
+    #[test]
+    fn multiply_product_by_its_inverse() {
+        let a = Matrix4([
+            3.0, -9.0, 7.0, 3.0, 3.0, -8.0, 2.0, -9.0, -4.0, 4.0, 4.0, 1.0, -6.0, 5.0, -1.0, 1.0,
+        ]);
+        let b = Matrix4([
+            8.0, 2.0, 2.0, 2.0, 3.0, -1.0, 7.0, 0.0, 7.0, 0.0, 5.0, 4.0, 6.0, -2.0, 0.0, 5.0,
+        ]);
+        let c = a.clone() * b.clone();
+        assert_eq!(c * b.inverse().unwrap(), a);
     }
 }
