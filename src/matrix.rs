@@ -197,6 +197,19 @@ impl Matrix3 {
             Ok(self.submatrix(row, column)?.determiant())
         }
     }
+
+    pub fn cofactor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            let d = self.submatrix(row, column)?.determiant();
+            if (row + column) % 2 == 0 {
+                Ok(d)
+            } else {
+                Ok(d * -1.0)
+            }
+        }
+    }
 }
 
 impl PartialEq for Matrix3 {
@@ -407,5 +420,14 @@ mod tests {
         let b = a.submatrix(1, 0).unwrap();
         assert!(eq_with_eps(b.determiant(), 25.0));
         assert!(eq_with_eps(a.minor(1, 0).unwrap(), 25.0));
+    }
+
+    #[test]
+    fn cofactor_of_3x3_matrix() {
+        let a = Matrix3([3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
+        assert!(eq_with_eps(a.minor(0, 0).unwrap(), -12.0));
+        assert!(eq_with_eps(a.cofactor(0, 0).unwrap(), -12.0));
+        assert!(eq_with_eps(a.minor(1, 0).unwrap(), 25.0));
+        assert!(eq_with_eps(a.cofactor(1, 0).unwrap(), -25.0));
     }
 }
