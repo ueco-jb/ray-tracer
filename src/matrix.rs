@@ -97,6 +97,10 @@ impl Matrix4 {
         }
         Ok(d)
     }
+
+    pub fn is_invertible(&self) -> Result<bool, MatrixError> {
+        Ok(!eq_with_eps(self.determiant()?, 0.0))
+    }
 }
 
 impl PartialEq for Matrix4 {
@@ -239,6 +243,10 @@ impl Matrix3 {
         }
         Ok(d)
     }
+
+    pub fn is_invertible(&self) -> Result<bool, MatrixError> {
+        Ok(!eq_with_eps(self.determiant()?, 0.0))
+    }
 }
 
 impl PartialEq for Matrix3 {
@@ -272,6 +280,10 @@ impl Matrix2 {
 
     pub fn determiant(&self) -> f64 {
         self.0[0] * self.0[3] - self.0[1] * self.0[2]
+    }
+
+    pub fn is_invertible(&self) -> bool {
+        !eq_with_eps(self.determiant(), 0.0)
     }
 }
 
@@ -479,5 +491,20 @@ mod tests {
         assert!(eq_with_eps(a.cofactor(0, 2).unwrap(), 210.0));
         assert!(eq_with_eps(a.cofactor(0, 3).unwrap(), 51.0));
         assert!(eq_with_eps(a.determiant().unwrap(), -4071.0));
+    }
+
+    #[test]
+    fn is_matrix_invertible() {
+        let a = Matrix4([
+            6.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 6.0, 4.0, -9.0, 3.0, -7.0, 9.0, 1.0, 7.0, -6.0,
+        ]);
+        assert!(eq_with_eps(a.determiant().unwrap(), -2120.0));
+        assert!(a.is_invertible().unwrap());
+
+        let a = Matrix4([
+            -4.0, 2.0, -2.0, -3.0, 9.0, 6.0, 2.0, 6.0, 0.0, -5.0, 1.0, -5.0, 0.0, 0.0, 0.0, 0.0,
+        ]);
+        assert!(eq_with_eps(a.determiant().unwrap(), 0.0));
+        assert!(!a.is_invertible().unwrap());
     }
 }
