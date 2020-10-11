@@ -94,7 +94,7 @@ impl Matrix4 {
     pub fn determiant(&self) -> Result<f64, MatrixError> {
         let mut d = 0.0f64;
         for c in 0..Matrix4::SIZE {
-            d = d + self.get(0, c)? * self.cofactor(0, c)?;
+            d += self.get(0, c)? * self.cofactor(0, c)?;
         }
         Ok(d)
     }
@@ -104,7 +104,7 @@ impl Matrix4 {
     }
 
     pub fn inverse(&self) -> Result<Matrix4, MatrixError> {
-        if self.is_invertible()? == false {
+        if !self.is_invertible()? {
             Err(MatrixError::MatrixNotInvertible)
         } else {
             let d = self.determiant()?;
@@ -256,7 +256,7 @@ impl Matrix3 {
     pub fn determiant(&self) -> Result<f64, MatrixError> {
         let mut d = 0.0f64;
         for c in 0..Matrix3::SIZE {
-            d = d + self.get(0, c)? * self.cofactor(0, c)?;
+            d += self.get(0, c)? * self.cofactor(0, c)?;
         }
         Ok(d)
     }
