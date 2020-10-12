@@ -12,6 +12,9 @@ pub enum MatrixError {
 trait Matrix {
     const SIZE: usize;
 
+    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError>;
+    fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError>;
+
     fn boundry_check(&self, row: &usize, column: &usize) -> Result<(), MatrixError> {
         if row >= &Self::SIZE || column >= &Self::SIZE {
             Err(MatrixError::OutOfMatrixBorder)
@@ -43,18 +46,8 @@ pub struct Matrix4([f64; 16]);
 
 impl Matrix for Matrix4 {
     const SIZE: usize = 4;
-}
 
-impl Matrix4 {
-    const SIZE: usize = 4;
-
-    pub fn identity_matrix() -> Matrix4 {
-        Matrix4([
-            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-        ])
-    }
-
-    pub fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
+    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 self.0[row * Matrix4::SIZE + column] = value;
@@ -64,11 +57,21 @@ impl Matrix4 {
         }
     }
 
-    pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+    fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => Ok(self.0[row * Matrix4::SIZE + column]),
             Err(e) => Err(e),
         }
+    }
+}
+
+impl Matrix4 {
+    const SIZE: usize = 4;
+
+    pub fn identity_matrix() -> Matrix4 {
+        Matrix4([
+            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+        ])
     }
 
     pub fn transpose(&self) -> Result<Matrix4, MatrixError> {
@@ -207,12 +210,8 @@ pub struct Matrix3([f64; 9]);
 
 impl Matrix for Matrix3 {
     const SIZE: usize = 3;
-}
 
-impl Matrix3 {
-    const SIZE: usize = 3;
-
-    pub fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
+    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 self.0[row * Matrix3::SIZE + column] = value;
@@ -222,12 +221,16 @@ impl Matrix3 {
         }
     }
 
-    pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+    fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => Ok(self.0[row * Matrix3::SIZE + column]),
             Err(e) => Err(e),
         }
     }
+}
+
+impl Matrix3 {
+    const SIZE: usize = 3;
 
     pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix2, MatrixError> {
         match self.boundry_check(&row, &column) {
@@ -292,12 +295,8 @@ pub struct Matrix2([f64; 4]);
 
 impl Matrix for Matrix2 {
     const SIZE: usize = 2;
-}
 
-impl Matrix2 {
-    const SIZE: usize = 2;
-
-    pub fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
+    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 self.0[row * Matrix2::SIZE + column] = value;
@@ -307,12 +306,16 @@ impl Matrix2 {
         }
     }
 
-    pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+    fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => Ok(self.0[row * Matrix2::SIZE + column]),
             Err(e) => Err(e),
         }
     }
+}
+
+impl Matrix2 {
+    const SIZE: usize = 2;
 
     pub fn determiant(&self) -> f64 {
         self.0[0] * self.0[3] - self.0[1] * self.0[2]
