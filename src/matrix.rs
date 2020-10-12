@@ -42,6 +42,32 @@ trait Matrix {
     }
 
     fn submatrix(&self, row: usize, column: usize) -> Result<Self::Submatrix, MatrixError>;
+
+    fn cofactor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+        match self.boundry_check(&row, &column) {
+            Ok(_) => {
+                let d = self.submatrix(row, column)?.determiant()?;
+                if (row + column) % 2 == 0 {
+                    Ok(d)
+                } else {
+                    Ok(d * -1.0)
+                }
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    fn determiant(&self) -> Result<f64, MatrixError> {
+        let mut d = 0.0f64;
+        for c in 0..Self::SIZE {
+            d += self.get(0, c)? * self.cofactor(0, c)?;
+        }
+        Ok(d)
+    }
+
+    fn is_invertible(&self) -> Result<bool, MatrixError> {
+        Ok(!eq_with_eps(self.determiant()?, 0.0))
+    }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -104,32 +130,6 @@ impl Matrix4 {
             }
         }
         Ok(output)
-    }
-
-    pub fn cofactor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        match self.boundry_check(&row, &column) {
-            Ok(_) => {
-                let d = self.submatrix(row, column)?.determiant()?;
-                if (row + column) % 2 == 0 {
-                    Ok(d)
-                } else {
-                    Ok(d * -1.0)
-                }
-            }
-            Err(e) => Err(e),
-        }
-    }
-
-    fn is_invertible(&self) -> Result<bool, MatrixError> {
-        Ok(!eq_with_eps(self.determiant()?, 0.0))
-    }
-
-    pub fn determiant(&self) -> Result<f64, MatrixError> {
-        let mut d = 0.0f64;
-        for c in 0..Self::SIZE {
-            d += self.get(0, c)? * self.cofactor(0, c)?;
-        }
-        Ok(d)
     }
 
     pub fn inverse(&self) -> Result<Matrix4, MatrixError> {
@@ -258,35 +258,9 @@ impl Matrix3 {
 
     pub fn minor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         match self.boundry_check(&row, &column) {
-            Ok(_) => Ok(self.submatrix(row, column)?.determiant()),
+            Ok(_) => Ok(self.submatrix(row, column)?.determiant()?),
             Err(e) => Err(e),
         }
-    }
-
-    pub fn cofactor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        match self.boundry_check(&row, &column) {
-            Ok(_) => {
-                let d = self.submatrix(row, column)?.determiant();
-                if (row + column) % 2 == 0 {
-                    Ok(d)
-                } else {
-                    Ok(d * -1.0)
-                }
-            }
-            Err(e) => Err(e),
-        }
-    }
-
-    pub fn determiant(&self) -> Result<f64, MatrixError> {
-        let mut d = 0.0f64;
-        for c in 0..Self::SIZE {
-            d += self.get(0, c)? * self.cofactor(0, c)?;
-        }
-        Ok(d)
-    }
-
-    pub fn is_invertible(&self) -> Result<bool, MatrixError> {
-        Ok(!eq_with_eps(self.determiant()?, 0.0))
     }
 }
 
@@ -322,18 +296,6 @@ impl Matrix for Matrix2 {
 
     fn submatrix(&self, _row: usize, _column: usize) -> Result<Self::Submatrix, MatrixError> {
         Err(MatrixError::OutOfMatrixBorder)
-    }
-}
-
-impl Matrix2 {
-    const SIZE: usize = 2;
-
-    pub fn determiant(&self) -> f64 {
-        self.0[0] * self.0[3] - self.0[1] * self.0[2]
-    }
-
-    pub fn is_invertible(&self) -> bool {
-        !eq_with_eps(self.determiant(), 0.0)
     }
 }
 
@@ -486,7 +448,7 @@ mod tests {
     #[test]
     fn determiant_of_2x2_matrix() {
         let a = Matrix2([1.0, 5.0, -3.0, 2.0]);
-        assert!(eq_with_eps(a.determiant(), 17.0));
+        assert!(eq_with_eps(a.determiant().unwrap(), 17.0));
     }
 
     #[test]
@@ -509,7 +471,7 @@ mod tests {
     fn minor_of_3x3_matrix() {
         let a = Matrix3([3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
         let b = a.submatrix(1, 0).unwrap();
-        assert!(eq_with_eps(b.determiant(), 25.0));
+        assert!(eq_with_eps(b.determiant().unwrap(), 25.0));
         assert!(eq_with_eps(a.minor(1, 0).unwrap(), 25.0));
     }
 
