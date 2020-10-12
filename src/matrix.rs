@@ -50,7 +50,7 @@ impl Matrix for Matrix4 {
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
-                self.0[row * Matrix4::SIZE + column] = value;
+                self.0[row * Self::SIZE + column] = value;
                 Ok(())
             }
             Err(e) => Err(e),
@@ -59,7 +59,7 @@ impl Matrix for Matrix4 {
 
     fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         match self.boundry_check(&row, &column) {
-            Ok(_) => Ok(self.0[row * Matrix4::SIZE + column]),
+            Ok(_) => Ok(self.0[row * Self::SIZE + column]),
             Err(e) => Err(e),
         }
     }
@@ -75,9 +75,9 @@ impl Matrix4 {
     }
 
     pub fn transpose(&self) -> Result<Matrix4, MatrixError> {
-        let mut output: Matrix4 = Default::default();
-        for i in 0..Matrix4::SIZE {
-            for j in 0..Matrix4::SIZE {
+        let mut output: Self = Default::default();
+        for i in 0..Self::SIZE {
+            for j in 0..Self::SIZE {
                 output.set(j, i, self.get(i, j)?)?;
             }
         }
@@ -103,21 +103,22 @@ impl Matrix4 {
     }
 
     pub fn cofactor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        if row >= Matrix4::SIZE || column >= Matrix4::SIZE {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            let d = self.submatrix(row, column)?.determiant()?;
-            if (row + column) % 2 == 0 {
-                Ok(d)
-            } else {
-                Ok(d * -1.0)
+        match self.boundry_check(&row, &column) {
+            Ok(_) => {
+                let d = self.submatrix(row, column)?.determiant()?;
+                if (row + column) % 2 == 0 {
+                    Ok(d)
+                } else {
+                    Ok(d * -1.0)
+                }
             }
+            Err(e) => Err(e),
         }
     }
 
     pub fn determiant(&self) -> Result<f64, MatrixError> {
         let mut d = 0.0f64;
-        for c in 0..Matrix4::SIZE {
+        for c in 0..Self::SIZE {
             d += self.get(0, c)? * self.cofactor(0, c)?;
         }
         Ok(d)
@@ -132,9 +133,9 @@ impl Matrix4 {
             Err(MatrixError::MatrixNotInvertible)
         } else {
             let d = self.determiant()?;
-            let mut m: Matrix4 = Default::default();
-            for row in 0..Matrix4::SIZE {
-                for col in 0..Matrix4::SIZE {
+            let mut m: Self = Default::default();
+            for row in 0..Self::SIZE {
+                for col in 0..Self::SIZE {
                     let c = self.cofactor(row, col)?;
                     m.set(col, row, c / d)?
                 }
@@ -145,7 +146,7 @@ impl Matrix4 {
 }
 
 impl PartialEq for Matrix4 {
-    fn eq(&self, other: &Matrix4) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
     }
 }
@@ -155,11 +156,11 @@ impl Mul for Matrix4 {
 
     fn mul(self, rhs: Self) -> Self {
         let mut m = Self([0.0f64; 16]);
-        for i in 0..Matrix4::SIZE {
-            let pos_a = i * Matrix4::SIZE;
-            let pos_b = i * Matrix4::SIZE + 1;
-            let pos_c = i * Matrix4::SIZE + 2;
-            let pos_d = i * Matrix4::SIZE + 3;
+        for i in 0..Self::SIZE {
+            let pos_a = i * Self::SIZE;
+            let pos_b = i * Self::SIZE + 1;
+            let pos_c = i * Self::SIZE + 2;
+            let pos_d = i * Self::SIZE + 3;
             m.0[pos_a] = self.0[pos_a] * rhs.0[0]
                 + self.0[pos_b] * rhs.0[4]
                 + self.0[pos_c] * rhs.0[8]
@@ -214,7 +215,7 @@ impl Matrix for Matrix3 {
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
-                self.0[row * Matrix3::SIZE + column] = value;
+                self.0[row * Self::SIZE + column] = value;
                 Ok(())
             }
             Err(e) => Err(e),
@@ -223,7 +224,7 @@ impl Matrix for Matrix3 {
 
     fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         match self.boundry_check(&row, &column) {
-            Ok(_) => Ok(self.0[row * Matrix3::SIZE + column]),
+            Ok(_) => Ok(self.0[row * Self::SIZE + column]),
             Err(e) => Err(e),
         }
     }
@@ -273,7 +274,7 @@ impl Matrix3 {
 
     pub fn determiant(&self) -> Result<f64, MatrixError> {
         let mut d = 0.0f64;
-        for c in 0..Matrix3::SIZE {
+        for c in 0..Self::SIZE {
             d += self.get(0, c)? * self.cofactor(0, c)?;
         }
         Ok(d)
@@ -285,7 +286,7 @@ impl Matrix3 {
 }
 
 impl PartialEq for Matrix3 {
-    fn eq(&self, other: &Matrix3) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
     }
 }
@@ -299,7 +300,7 @@ impl Matrix for Matrix2 {
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
-                self.0[row * Matrix2::SIZE + column] = value;
+                self.0[row * Self::SIZE + column] = value;
                 Ok(())
             }
             Err(e) => Err(e),
@@ -308,7 +309,7 @@ impl Matrix for Matrix2 {
 
     fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         match self.boundry_check(&row, &column) {
-            Ok(_) => Ok(self.0[row * Matrix2::SIZE + column]),
+            Ok(_) => Ok(self.0[row * Self::SIZE + column]),
             Err(e) => Err(e),
         }
     }
@@ -327,7 +328,7 @@ impl Matrix2 {
 }
 
 impl PartialEq for Matrix2 {
-    fn eq(&self, other: &Matrix2) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
     }
 }
