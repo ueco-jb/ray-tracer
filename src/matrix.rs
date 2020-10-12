@@ -9,8 +9,33 @@ pub enum MatrixError {
     MatrixNotInvertible,
 }
 
+trait Matrix {
+    const SIZE: usize;
+
+    fn calculate_submatrix_remove_indexes(&self, row: usize, column: usize) -> HashSet<usize> {
+        let mut position_to_remove = HashSet::with_capacity(Self::SIZE + 1);
+        position_to_remove.insert(row * Self::SIZE);
+        position_to_remove.insert(row * Self::SIZE + 1);
+        position_to_remove.insert(row * Self::SIZE + 2);
+        if Self::SIZE == 4 {
+            position_to_remove.insert(row * Self::SIZE + 3);
+        }
+        position_to_remove.insert(column);
+        position_to_remove.insert(column + Self::SIZE);
+        position_to_remove.insert(column + Self::SIZE * 2);
+        if Self::SIZE == 4 {
+            position_to_remove.insert(column + Self::SIZE * 3);
+        }
+        position_to_remove
+    }
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct Matrix4([f64; 16]);
+
+impl Matrix for Matrix4 {
+    const SIZE: usize = 4;
+}
 
 impl Matrix4 {
     const SIZE: usize = 4;
@@ -48,24 +73,11 @@ impl Matrix4 {
         Ok(output)
     }
 
-    fn calculate_submatrix_remove_indexes(row: usize, column: usize) -> HashSet<usize> {
-        let mut position_to_remove = HashSet::with_capacity(Matrix4::SIZE + 1);
-        position_to_remove.insert(row * Matrix4::SIZE);
-        position_to_remove.insert(row * Matrix4::SIZE + 1);
-        position_to_remove.insert(row * Matrix4::SIZE + 2);
-        position_to_remove.insert(row * Matrix4::SIZE + 3);
-        position_to_remove.insert(column);
-        position_to_remove.insert(column + Matrix4::SIZE);
-        position_to_remove.insert(column + Matrix4::SIZE * 2);
-        position_to_remove.insert(column + Matrix4::SIZE * 3);
-        position_to_remove
-    }
-
     pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix3, MatrixError> {
         if row >= Matrix4::SIZE || column >= Matrix4::SIZE {
             Err(MatrixError::OutOfMatrixBorder)
         } else {
-            let to_remove = Matrix4::calculate_submatrix_remove_indexes(row, column);
+            let to_remove = self.calculate_submatrix_remove_indexes(row, column);
             let mut submatrix: Matrix3 = Default::default();
             let mut i = 0;
             for (index, elem) in self.0.iter().enumerate() {
@@ -184,6 +196,10 @@ impl Mul<Tuple> for Matrix4 {
 #[derive(Debug, Default)]
 pub struct Matrix3([f64; 9]);
 
+impl Matrix for Matrix3 {
+    const SIZE: usize = 3;
+}
+
 impl Matrix3 {
     const SIZE: usize = 3;
 
@@ -204,22 +220,11 @@ impl Matrix3 {
         }
     }
 
-    fn calculate_submatrix_remove_indexes(row: usize, column: usize) -> HashSet<usize> {
-        let mut position_to_remove = HashSet::with_capacity(Matrix3::SIZE + 1);
-        position_to_remove.insert(row * Matrix3::SIZE);
-        position_to_remove.insert(row * Matrix3::SIZE + 1);
-        position_to_remove.insert(row * Matrix3::SIZE + 2);
-        position_to_remove.insert(column);
-        position_to_remove.insert(column + Matrix3::SIZE);
-        position_to_remove.insert(column + Matrix3::SIZE * 2);
-        position_to_remove
-    }
-
     pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix2, MatrixError> {
         if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
             Err(MatrixError::OutOfMatrixBorder)
         } else {
-            let to_remove = Matrix3::calculate_submatrix_remove_indexes(row, column);
+            let to_remove = self.calculate_submatrix_remove_indexes(row, column);
             let mut submatrix: Matrix2 = Default::default();
             let mut i = 0;
             for (index, elem) in self.0.iter().enumerate() {
