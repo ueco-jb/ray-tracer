@@ -11,6 +11,7 @@ pub enum MatrixError {
 
 trait Matrix {
     const SIZE: usize;
+    type Submatrix;
 
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError>;
     fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError>;
@@ -39,6 +40,8 @@ trait Matrix {
         }
         position_to_remove
     }
+
+    fn submatrix(&self, row: usize, column: usize) -> Result<Self::Submatrix, MatrixError>;
 }
 
 #[derive(Clone, Debug, Default)]
@@ -46,6 +49,7 @@ pub struct Matrix4([f64; 16]);
 
 impl Matrix for Matrix4 {
     const SIZE: usize = 4;
+    type Submatrix = Matrix3;
 
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
         match self.boundry_check(&row, &column) {
@@ -60,6 +64,24 @@ impl Matrix for Matrix4 {
     fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => Ok(self.0[row * Self::SIZE + column]),
+            Err(e) => Err(e),
+        }
+    }
+
+    fn submatrix(&self, row: usize, column: usize) -> Result<Self::Submatrix, MatrixError> {
+        match self.boundry_check(&row, &column) {
+            Ok(_) => {
+                let to_remove = self.calculate_submatrix_remove_indexes(row, column);
+                let mut submatrix: Self::Submatrix = Default::default();
+                let mut i = 0;
+                for (index, elem) in self.0.iter().enumerate() {
+                    if !to_remove.contains(&index) {
+                        submatrix.0[i] = *elem;
+                        i += 1;
+                    }
+                }
+                Ok(submatrix)
+            }
             Err(e) => Err(e),
         }
     }
@@ -84,24 +106,6 @@ impl Matrix4 {
         Ok(output)
     }
 
-    pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix3, MatrixError> {
-        match self.boundry_check(&row, &column) {
-            Ok(_) => {
-                let to_remove = self.calculate_submatrix_remove_indexes(row, column);
-                let mut submatrix: Matrix3 = Default::default();
-                let mut i = 0;
-                for (index, elem) in self.0.iter().enumerate() {
-                    if !to_remove.contains(&index) {
-                        submatrix.0[i] = *elem;
-                        i += 1;
-                    }
-                }
-                Ok(submatrix)
-            }
-            Err(e) => Err(e),
-        }
-    }
-
     pub fn cofactor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
@@ -116,16 +120,16 @@ impl Matrix4 {
         }
     }
 
+    fn is_invertible(&self) -> Result<bool, MatrixError> {
+        Ok(!eq_with_eps(self.determiant()?, 0.0))
+    }
+
     pub fn determiant(&self) -> Result<f64, MatrixError> {
         let mut d = 0.0f64;
         for c in 0..Self::SIZE {
             d += self.get(0, c)? * self.cofactor(0, c)?;
         }
         Ok(d)
-    }
-
-    pub fn is_invertible(&self) -> Result<bool, MatrixError> {
-        Ok(!eq_with_eps(self.determiant()?, 0.0))
     }
 
     pub fn inverse(&self) -> Result<Matrix4, MatrixError> {
@@ -211,6 +215,7 @@ pub struct Matrix3([f64; 9]);
 
 impl Matrix for Matrix3 {
     const SIZE: usize = 3;
+    type Submatrix = Matrix2;
 
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
         match self.boundry_check(&row, &column) {
@@ -228,16 +233,12 @@ impl Matrix for Matrix3 {
             Err(e) => Err(e),
         }
     }
-}
 
-impl Matrix3 {
-    const SIZE: usize = 3;
-
-    pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix2, MatrixError> {
+    fn submatrix(&self, row: usize, column: usize) -> Result<Self::Submatrix, MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 let to_remove = self.calculate_submatrix_remove_indexes(row, column);
-                let mut submatrix: Matrix2 = Default::default();
+                let mut submatrix: Self::Submatrix = Default::default();
                 let mut i = 0;
                 for (index, elem) in self.0.iter().enumerate() {
                     if !to_remove.contains(&index) {
@@ -250,6 +251,10 @@ impl Matrix3 {
             Err(e) => Err(e),
         }
     }
+}
+
+impl Matrix3 {
+    const SIZE: usize = 3;
 
     pub fn minor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         match self.boundry_check(&row, &column) {
@@ -296,6 +301,7 @@ pub struct Matrix2([f64; 4]);
 
 impl Matrix for Matrix2 {
     const SIZE: usize = 2;
+    type Submatrix = Matrix2;
 
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
         match self.boundry_check(&row, &column) {
@@ -312,6 +318,10 @@ impl Matrix for Matrix2 {
             Ok(_) => Ok(self.0[row * Self::SIZE + column]),
             Err(e) => Err(e),
         }
+    }
+
+    fn submatrix(&self, _row: usize, _column: usize) -> Result<Self::Submatrix, MatrixError> {
+        Err(MatrixError::OutOfMatrixBorder)
     }
 }
 
