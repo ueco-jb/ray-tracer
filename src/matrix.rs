@@ -12,6 +12,14 @@ pub enum MatrixError {
 trait Matrix {
     const SIZE: usize;
 
+    fn boundry_check(&self, row: &usize, column: &usize) -> Result<(), MatrixError> {
+        if row >= &Self::SIZE || column >= &Self::SIZE {
+            Err(MatrixError::OutOfMatrixBorder)
+        } else {
+            Ok(())
+        }
+    }
+
     fn calculate_submatrix_remove_indexes(&self, row: usize, column: usize) -> HashSet<usize> {
         let mut position_to_remove = HashSet::with_capacity(Self::SIZE + 1);
         position_to_remove.insert(row * Self::SIZE);
@@ -47,19 +55,19 @@ impl Matrix4 {
     }
 
     pub fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
-        if row >= Matrix4::SIZE || column >= Matrix4::SIZE {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            self.0[row * Matrix4::SIZE + column] = value;
-            Ok(())
+        match self.boundry_check(&row, &column) {
+            Ok(_) => {
+                self.0[row * Matrix4::SIZE + column] = value;
+                Ok(())
+            }
+            Err(e) => Err(e),
         }
     }
 
     pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        if row >= Matrix4::SIZE || column >= Matrix4::SIZE {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            Ok(self.0[row * Matrix4::SIZE + column])
+        match self.boundry_check(&row, &column) {
+            Ok(_) => Ok(self.0[row * Matrix4::SIZE + column]),
+            Err(e) => Err(e),
         }
     }
 
@@ -74,19 +82,20 @@ impl Matrix4 {
     }
 
     pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix3, MatrixError> {
-        if row >= Matrix4::SIZE || column >= Matrix4::SIZE {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            let to_remove = self.calculate_submatrix_remove_indexes(row, column);
-            let mut submatrix: Matrix3 = Default::default();
-            let mut i = 0;
-            for (index, elem) in self.0.iter().enumerate() {
-                if !to_remove.contains(&index) {
-                    submatrix.0[i] = *elem;
-                    i += 1;
+        match self.boundry_check(&row, &column) {
+            Ok(_) => {
+                let to_remove = self.calculate_submatrix_remove_indexes(row, column);
+                let mut submatrix: Matrix3 = Default::default();
+                let mut i = 0;
+                for (index, elem) in self.0.iter().enumerate() {
+                    if !to_remove.contains(&index) {
+                        submatrix.0[i] = *elem;
+                        i += 1;
+                    }
                 }
+                Ok(submatrix)
             }
-            Ok(submatrix)
+            Err(e) => Err(e),
         }
     }
 
@@ -204,57 +213,58 @@ impl Matrix3 {
     const SIZE: usize = 3;
 
     pub fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
-        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            self.0[row * Matrix3::SIZE + column] = value;
-            Ok(())
+        match self.boundry_check(&row, &column) {
+            Ok(_) => {
+                self.0[row * Matrix3::SIZE + column] = value;
+                Ok(())
+            }
+            Err(e) => Err(e),
         }
     }
 
     pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            Ok(self.0[row * Matrix3::SIZE + column])
+        match self.boundry_check(&row, &column) {
+            Ok(_) => Ok(self.0[row * Matrix3::SIZE + column]),
+            Err(e) => Err(e),
         }
     }
 
     pub fn submatrix(&self, row: usize, column: usize) -> Result<Matrix2, MatrixError> {
-        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            let to_remove = self.calculate_submatrix_remove_indexes(row, column);
-            let mut submatrix: Matrix2 = Default::default();
-            let mut i = 0;
-            for (index, elem) in self.0.iter().enumerate() {
-                if !to_remove.contains(&index) {
-                    submatrix.0[i] = *elem;
-                    i += 1;
+        match self.boundry_check(&row, &column) {
+            Ok(_) => {
+                let to_remove = self.calculate_submatrix_remove_indexes(row, column);
+                let mut submatrix: Matrix2 = Default::default();
+                let mut i = 0;
+                for (index, elem) in self.0.iter().enumerate() {
+                    if !to_remove.contains(&index) {
+                        submatrix.0[i] = *elem;
+                        i += 1;
+                    }
                 }
+                Ok(submatrix)
             }
-            Ok(submatrix)
+            Err(e) => Err(e),
         }
     }
 
     pub fn minor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            Ok(self.submatrix(row, column)?.determiant())
+        match self.boundry_check(&row, &column) {
+            Ok(_) => Ok(self.submatrix(row, column)?.determiant()),
+            Err(e) => Err(e),
         }
     }
 
     pub fn cofactor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        if row >= Matrix3::SIZE || column >= Matrix3::SIZE {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            let d = self.submatrix(row, column)?.determiant();
-            if (row + column) % 2 == 0 {
-                Ok(d)
-            } else {
-                Ok(d * -1.0)
+        match self.boundry_check(&row, &column) {
+            Ok(_) => {
+                let d = self.submatrix(row, column)?.determiant();
+                if (row + column) % 2 == 0 {
+                    Ok(d)
+                } else {
+                    Ok(d * -1.0)
+                }
             }
+            Err(e) => Err(e),
         }
     }
 
@@ -280,23 +290,27 @@ impl PartialEq for Matrix3 {
 #[derive(Debug, Default)]
 pub struct Matrix2([f64; 4]);
 
+impl Matrix for Matrix2 {
+    const SIZE: usize = 2;
+}
+
 impl Matrix2 {
     const SIZE: usize = 2;
 
     pub fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
-        if row >= Matrix2::SIZE || column >= Matrix2::SIZE {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            self.0[row * Matrix2::SIZE + column] = value;
-            Ok(())
+        match self.boundry_check(&row, &column) {
+            Ok(_) => {
+                self.0[row * Matrix2::SIZE + column] = value;
+                Ok(())
+            }
+            Err(e) => Err(e),
         }
     }
 
     pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
-        if row >= Matrix2::SIZE || column >= Matrix2::SIZE {
-            Err(MatrixError::OutOfMatrixBorder)
-        } else {
-            Ok(self.0[row * Matrix2::SIZE + column])
+        match self.boundry_check(&row, &column) {
+            Ok(_) => Ok(self.0[row * Matrix2::SIZE + column]),
+            Err(e) => Err(e),
         }
     }
 
