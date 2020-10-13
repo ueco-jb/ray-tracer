@@ -11,7 +11,7 @@ pub enum MatrixError {
 
 trait Matrix {
     const SIZE: usize;
-    type Submatrix;
+    type Submatrix: Matrix;
 
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError>;
     fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError>;
@@ -296,6 +296,10 @@ impl Matrix for Matrix2 {
 
     fn submatrix(&self, _row: usize, _column: usize) -> Result<Self::Submatrix, MatrixError> {
         Err(MatrixError::OutOfMatrixBorder)
+    }
+
+    fn determiant(&self) -> Result<f64, MatrixError> {
+        Ok(self.0[0] * self.0[3] - self.0[1] * self.0[2])
     }
 }
 
