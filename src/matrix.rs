@@ -7,6 +7,7 @@ use std::ops::Mul;
 pub enum MatrixError {
     OutOfMatrixBorder,
     MatrixNotInvertible,
+    No2x2Submatrix,
 }
 
 trait Matrix {
@@ -29,13 +30,11 @@ trait Matrix {
         position_to_remove.insert(row * Self::SIZE);
         position_to_remove.insert(row * Self::SIZE + 1);
         position_to_remove.insert(row * Self::SIZE + 2);
-        if Self::SIZE == 4 {
-            position_to_remove.insert(row * Self::SIZE + 3);
-        }
         position_to_remove.insert(column);
         position_to_remove.insert(column + Self::SIZE);
         position_to_remove.insert(column + Self::SIZE * 2);
         if Self::SIZE == 4 {
+            position_to_remove.insert(row * Self::SIZE + 3);
             position_to_remove.insert(column + Self::SIZE * 3);
         }
         position_to_remove
@@ -254,8 +253,6 @@ impl Matrix for Matrix3 {
 }
 
 impl Matrix3 {
-    const SIZE: usize = 3;
-
     pub fn minor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         match self.boundry_check(&row, &column) {
             Ok(_) => Ok(self.submatrix(row, column)?.determiant()?),
@@ -295,7 +292,7 @@ impl Matrix for Matrix2 {
     }
 
     fn submatrix(&self, _row: usize, _column: usize) -> Result<Self::Submatrix, MatrixError> {
-        Err(MatrixError::OutOfMatrixBorder)
+        Err(MatrixError::No2x2Submatrix)
     }
 
     fn determiant(&self) -> Result<f64, MatrixError> {
