@@ -1,5 +1,7 @@
 use crate::matrix::*;
 
+const PI: f64 = std::f64::consts::PI;
+
 fn translation(x: f64, y: f64, z: f64) -> Result<Matrix4, MatrixError> {
     let mut m = Matrix4::identity_matrix();
     m.set(0, 3, x)?;
@@ -16,10 +18,20 @@ fn scaling(x: f64, y: f64, z: f64) -> Result<Matrix4, MatrixError> {
     Ok(m)
 }
 
+fn rotation_x(r: f64) -> Result<Matrix4, MatrixError> {
+    let mut m = Matrix4::identity_matrix();
+    m.set(1, 1, r.cos())?;
+    m.set(1, 2, -r.sin())?;
+    m.set(2, 1, r.sin())?;
+    m.set(2, 2, r.cos())?;
+    Ok(m)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::tuple::*;
+    use crate::utils::eq_with_eps;
 
     #[test]
     fn multiply_by_translation_matrix() {
@@ -70,5 +82,28 @@ mod tests {
         let transform = scaling(-1.0, 1.0, 1.0).unwrap();
         let p = point(2.0, 3.0, 4.0);
         assert_eq!(point(-2.0, 3.0, 4.0), transform * p);
+    }
+
+    #[test]
+    fn rotating_point_around_x_axis() {
+        let p = point(0.0, 1.0, 0.0);
+        let half_quarter = rotation_x(PI / 4.0).unwrap();
+        let full_quarter = rotation_x(PI / 2.0).unwrap();
+        assert_eq!(
+            point(0.0, 2f64.sqrt() / 2.0f64, 2f64.sqrt() / 2.0f64),
+            half_quarter * p
+        );
+        assert_eq!(point(0.0, 0.0, 1.0), full_quarter * p);
+    }
+
+    #[test]
+    fn inverse_of_x_rotation_rotates_in_opposite_direction() {
+        let p = point(0.0, 1.0, 0.0);
+        let half_quarter = rotation_x(PI / 4.0).unwrap();
+        let inv = half_quarter.inverse().unwrap();
+        assert_eq!(
+            point(0.0, 2f64.sqrt() / 2.0f64, -(2f64.sqrt() / 2.0f64)),
+            inv * p
+        );
     }
 }
