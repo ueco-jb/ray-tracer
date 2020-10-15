@@ -8,6 +8,14 @@ fn translation(x: f64, y: f64, z: f64) -> Result<Matrix4, MatrixError> {
     Ok(m)
 }
 
+fn scaling(x: f64, y: f64, z: f64) -> Result<Matrix4, MatrixError> {
+    let mut m = Matrix4::identity_matrix();
+    m.set(0, 0, x)?;
+    m.set(1, 1, y)?;
+    m.set(2, 2, z)?;
+    Ok(m)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -34,5 +42,27 @@ mod tests {
         let transform = translation(5.0, -3.0, 2.0).unwrap();
         let v = vector(-3.0, 4.0, 5.0);
         assert_eq!(v, transform * v);
+    }
+
+    #[test]
+    fn scaling_matrix_applied_to_point() {
+        let transform = scaling(2.0, 3.0, 4.0).unwrap();
+        let p = point(-4.0, 6.0, 8.0);
+        assert_eq!(point(-8, 18, 32), transform * p);
+    }
+
+    #[test]
+    fn scaling_matrix_applied_to_vector() {
+        let transform = scaling(2.0, 3.0, 4.0).unwrap();
+        let v = vector(-4.0, 6.0, 8.0);
+        assert_eq!(vector(-8, 18, 32), transform * v);
+    }
+
+    #[test]
+    fn multiplying_by_inverse_of_scaling_matrix() {
+        let transform = scaling(2.0, 3.0, 4.0).unwrap();
+        let inv = transform.inverse().unwrap();
+        let v = vector(-4.0, 6.0, 8.0);
+        assert_eq!(vector(-2.0, 2.0, 2.0), inv * v);
     }
 }
