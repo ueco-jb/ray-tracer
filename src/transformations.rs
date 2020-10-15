@@ -20,7 +20,6 @@ fn scaling(x: f64, y: f64, z: f64) -> Result<Matrix4, MatrixError> {
 mod tests {
     use super::*;
     use crate::tuple::*;
-    //use crate::utils::eq_with_eps;
 
     #[test]
     fn multiply_by_translation_matrix() {
@@ -64,5 +63,12 @@ mod tests {
         let inv = transform.inverse().unwrap();
         let v = vector(-4.0, 6.0, 8.0);
         assert_eq!(vector(-2.0, 2.0, 2.0), inv * v);
+    }
+
+    #[test]
+    fn reflection_is_scaling_by_negative_value() {
+        let transform = scaling(-1.0, 1.0, 1.0).unwrap();
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(point(-2.0, 3.0, 4.0), transform * p);
     }
 }
