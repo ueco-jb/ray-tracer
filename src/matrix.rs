@@ -10,7 +10,7 @@ pub enum MatrixError {
     No2x2Submatrix,
 }
 
-trait Matrix {
+pub trait Matrix {
     const SIZE: usize;
     type Submatrix: Matrix;
 
@@ -70,7 +70,7 @@ trait Matrix {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct Matrix4([f64; 16]);
+pub struct Matrix4(pub [f64; 16]);
 
 impl Matrix for Matrix4 {
     const SIZE: usize = 4;
