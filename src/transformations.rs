@@ -2,12 +2,10 @@ use crate::matrix::*;
 
 const PI: f64 = std::f64::consts::PI;
 
-fn translation(x: f64, y: f64, z: f64) -> Result<Matrix4, MatrixError> {
-    let mut m = Matrix4::identity_matrix();
-    m.set(0, 3, x)?;
-    m.set(1, 3, y)?;
-    m.set(2, 3, z)?;
-    Ok(m)
+fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
+    Matrix4([
+        1.0, 0.0, 0.0, x, 0.0, 1.0, 0.0, y, 0.0, 0.0, 1.0, z, 0.0, 0.0, 0.0, 1.0,
+    ])
 }
 
 fn scaling(x: f64, y: f64, z: f64) -> Result<Matrix4, MatrixError> {
@@ -45,6 +43,24 @@ fn rotation_z(r: f64) -> Result<Matrix4, MatrixError> {
     Ok(m)
 }
 
+fn shearing(
+    x_y: f64,
+    x_z: f64,
+    y_x: f64,
+    y_z: f64,
+    z_x: f64,
+    z_y: f64,
+) -> Result<Matrix4, MatrixError> {
+    let mut m = Matrix4::identity_matrix();
+    m.set(0, 1, x_y)?;
+    m.set(0, 2, x_z)?;
+    m.set(1, 0, y_x)?;
+    m.set(1, 2, y_z)?;
+    m.set(2, 0, z_x)?;
+    m.set(2, 1, z_y)?;
+    Ok(m)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -53,14 +69,14 @@ mod tests {
 
     #[test]
     fn multiply_by_translation_matrix() {
-        let transform: Matrix4 = translation(5.0, -3.0, 2.0).unwrap();
+        let transform: Matrix4 = translation(5.0, -3.0, 2.0);
         let p = point(-3.0, 4.0, 5.0);
         assert_eq!(point(2.0, 1.0, 7.0), transform * p);
     }
 
     #[test]
     fn multiply_by_inverse_of_translation_matrix() {
-        let transform = translation(5.0, -3.0, 2.0).unwrap();
+        let transform = translation(5.0, -3.0, 2.0);
         let inv = transform.inverse().unwrap();
         let p = point(-3.0, 4.0, 5.0);
         assert_eq!(point(-8.0, 7.0, 3.0), inv * p);
@@ -68,7 +84,7 @@ mod tests {
 
     #[test]
     fn translation_doesnt_affect_vector() {
-        let transform = translation(5.0, -3.0, 2.0).unwrap();
+        let transform = translation(5.0, -3.0, 2.0);
         let v = vector(-3.0, 4.0, 5.0);
         assert_eq!(v, transform * v);
     }
@@ -147,5 +163,32 @@ mod tests {
             half_quarter * p
         );
         assert_eq!(point(-1.0, 0.0, 0.0), full_quarter * p);
+    }
+
+    #[test]
+    fn shearing_transformation_moves_parameter_in_proportion_to_other() {
+        let transform = shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0).unwrap();
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(point(5.0, 3.0, 4.0), transform * p);
+
+        let transform = shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0).unwrap();
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(point(6.0, 3.0, 4.0), transform * p);
+
+        let transform = shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0).unwrap();
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(point(2.0, 5.0, 4.0), transform * p);
+
+        let transform = shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0).unwrap();
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(point(2.0, 7.0, 4.0), transform * p);
+
+        let transform = shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0).unwrap();
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(point(2.0, 3.0, 6.0), transform * p);
+
+        let transform = shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0).unwrap();
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(point(2.0, 3.0, 7.0), transform * p);
     }
 }
