@@ -27,6 +27,24 @@ fn rotation_x(r: f64) -> Result<Matrix4, MatrixError> {
     Ok(m)
 }
 
+fn rotation_y(r: f64) -> Result<Matrix4, MatrixError> {
+    let mut m = Matrix4::identity_matrix();
+    m.set(0, 0, r.cos())?;
+    m.set(0, 2, r.sin())?;
+    m.set(2, 0, -r.sin())?;
+    m.set(2, 2, r.cos())?;
+    Ok(m)
+}
+
+fn rotation_z(r: f64) -> Result<Matrix4, MatrixError> {
+    let mut m = Matrix4::identity_matrix();
+    m.set(0, 0, r.cos())?;
+    m.set(0, 1, -r.sin())?;
+    m.set(1, 0, r.sin())?;
+    m.set(1, 1, r.cos())?;
+    Ok(m)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -105,5 +123,29 @@ mod tests {
             point(0.0, 2f64.sqrt() / 2.0f64, -(2f64.sqrt() / 2.0f64)),
             inv * p
         );
+    }
+
+    #[test]
+    fn rotating_point_around_y_axis() {
+        let p = point(0.0, 0.0, 1.0);
+        let half_quarter = rotation_y(PI / 4.0).unwrap();
+        let full_quarter = rotation_y(PI / 2.0).unwrap();
+        assert_eq!(
+            point(2f64.sqrt() / 2.0f64, 0.0, 2f64.sqrt() / 2.0f64),
+            half_quarter * p
+        );
+        assert_eq!(point(1.0, 0.0, 0.0), full_quarter * p);
+    }
+
+    #[test]
+    fn rotating_point_around_z_axis() {
+        let p = point(0.0, 1.0, 0.0);
+        let half_quarter = rotation_z(PI / 4.0).unwrap();
+        let full_quarter = rotation_z(PI / 2.0).unwrap();
+        assert_eq!(
+            point(-2f64.sqrt() / 2.0f64, 2f64.sqrt() / 2.0f64, 0.0),
+            half_quarter * p
+        );
+        assert_eq!(point(-1.0, 0.0, 0.0), full_quarter * p);
     }
 }
