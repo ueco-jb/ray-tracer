@@ -1,3 +1,4 @@
+use crate::matrix::Matrix4;
 use crate::utils::eq_with_eps;
 use num_traits::cast::ToPrimitive;
 use std::ops::{Add, Div, Mul, Neg, Sub};
@@ -116,6 +117,30 @@ impl<T: ToPrimitive> Mul<T> for Tuple {
             z: self.z * rhs.to_f64().unwrap(),
             w: self.w * rhs.to_f64().unwrap(),
         }
+    }
+}
+
+impl Mul<Matrix4> for Tuple {
+    type Output = Tuple;
+
+    fn mul(self, rhs: Matrix4) -> Tuple {
+        let v1 = rhs.0[0] * self.get_x()
+            + rhs.0[1] * self.get_y()
+            + rhs.0[2] * self.get_z()
+            + rhs.0[3] * self.get_w();
+        let v2 = rhs.0[4] * self.get_x()
+            + rhs.0[5] * self.get_y()
+            + rhs.0[6] * self.get_z()
+            + rhs.0[7] * self.get_w();
+        let v3 = rhs.0[8] * self.get_x()
+            + rhs.0[9] * self.get_y()
+            + rhs.0[10] * self.get_z()
+            + rhs.0[11] * self.get_w();
+        let v4 = rhs.0[12] * self.get_x()
+            + rhs.0[13] * self.get_y()
+            + rhs.0[14] * self.get_z()
+            + rhs.0[15] * self.get_w();
+        Tuple::new(v1, v2, v3, v4)
     }
 }
 
