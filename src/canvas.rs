@@ -60,14 +60,6 @@ impl Canvas {
     }
 }
 
-pub fn pixel_at(canvas: &Canvas, w: usize, h: usize) -> Color {
-    canvas.pixel_at(h, w).unwrap()
-}
-
-pub fn write_pixel(canvas: &mut Canvas, w: usize, h: usize, c: Color) {
-    canvas.write_pixel(h, w, c).unwrap();
-}
-
 #[derive(Default)]
 pub struct PPM {
     header: String,
@@ -75,14 +67,6 @@ pub struct PPM {
 }
 
 impl PPM {
-    pub fn get_header(&self) -> String {
-        self.header.clone()
-    }
-
-    pub fn get_body(&self) -> String {
-        self.body.clone()
-    }
-
     pub fn get(&self) -> String {
         format!("{}\n{}", self.header, self.body)
     }
@@ -98,7 +82,7 @@ pub fn scale_color(color: f64, max: f64) -> u32 {
     }
 }
 
-pub fn color_to_scaled_integers(c: &Color, max: f64) -> Box<[u32]> {
+fn color_to_scaled_integers(c: &Color, max: f64) -> Box<[u32]> {
     let mut scaled = Box::new([0; 3]);
     scaled[0] = scale_color(c.get_red(), max);
     scaled[1] = scale_color(c.get_green(), max);
@@ -106,7 +90,7 @@ pub fn color_to_scaled_integers(c: &Color, max: f64) -> Box<[u32]> {
     scaled
 }
 
-pub fn colors_to_scaled_vector(can: &Canvas, max: f64) -> String {
+fn colors_to_scaled_vector(can: &Canvas, max: f64) -> String {
     let mut scaled_colors: String = "".to_string();
     for row in 0..can.get_height() {
         let mut temp_scaled_colors: String = "".to_string();

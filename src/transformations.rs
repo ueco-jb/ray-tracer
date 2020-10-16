@@ -219,4 +219,28 @@ mod tests {
         let p = point(2.0, 3.0, 4.0);
         assert_eq!(point(2.0, 3.0, 7.0), transform * p);
     }
+
+    #[test]
+    fn individual_transformations_are_applied_in_sequence() {
+        let p = point(1.0, 0.0, 1.0);
+        let a = rotation_x(PI / 2.0);
+        let b = scaling(5.0, 5.0, 5.0);
+        let c = translation(10.0, 5.0, 7.0);
+        let p2 = a * p;
+        assert_eq!(point(1.0, -1.0, 0.0), p2);
+        let p3 = b * p2;
+        assert_eq!(point(5.0, -5.0, 0.0), p3);
+        let p4 = c * p3;
+        assert_eq!(point(15.0, 0.0, 7.0), p4);
+    }
+
+    #[test]
+    fn chained_transformations_must_be_applied_in_reverse_order() {
+        let p = point(1.0, 0.0, 1.0);
+        let a = rotation_x(PI / 2.0);
+        let b = scaling(5.0, 5.0, 5.0);
+        let c = translation(10.0, 5.0, 7.0);
+        let trans = c * b * a;
+        assert_eq!(point(15.0, 0.0, 7.0), p * trans);
+    }
 }
