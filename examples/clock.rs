@@ -6,9 +6,9 @@ use tuple::point;
 
 fn main() {
     let mut c: canvas::Canvas =
-        canvas::Canvas::new_with_color(900, 550, color::Color::new(0, 0, 0));
+        canvas::Canvas::new_with_color(550, 550, color::Color::new(0, 0, 0));
 
-    let start = point(0, 100, 0);
+    let start = point(0, 200, 0);
     for n in 1..13 {
         let p = start * rotation_z((n as f64 * PI) / 6.0);
         let x = p.get_x() + c.get_width() as f64 / 2.0;
