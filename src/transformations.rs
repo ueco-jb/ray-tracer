@@ -1,7 +1,6 @@
 use crate::matrix::*;
 
-#[allow(dead_code)]
-const PI: f64 = std::f64::consts::PI;
+pub const PI: f64 = std::f64::consts::PI;
 
 #[allow(dead_code)]
 fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
@@ -17,8 +16,7 @@ fn scaling(x: f64, y: f64, z: f64) -> Matrix4 {
     ])
 }
 
-#[allow(dead_code)]
-fn rotation_x(r: f64) -> Matrix4 {
+pub fn rotation_x(r: f64) -> Matrix4 {
     Matrix4([
         1.0,
         0.0,
@@ -39,8 +37,7 @@ fn rotation_x(r: f64) -> Matrix4 {
     ])
 }
 
-#[allow(dead_code)]
-fn rotation_y(r: f64) -> Matrix4 {
+pub fn rotation_y(r: f64) -> Matrix4 {
     Matrix4([
         r.cos(),
         0.0,
@@ -61,8 +58,7 @@ fn rotation_y(r: f64) -> Matrix4 {
     ])
 }
 
-#[allow(dead_code)]
-fn rotation_z(r: f64) -> Matrix4 {
+pub fn rotation_z(r: f64) -> Matrix4 {
     Matrix4([
         r.cos(),
         -r.sin(),
