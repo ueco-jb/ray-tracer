@@ -1,6 +1,6 @@
 extern crate ray_tracer as rt;
 
-use rt::{tuple, utils};
+use rt::{tuple, tuple::TupleT, utils};
 
 #[derive(Debug)]
 struct Projectile {
@@ -22,12 +22,12 @@ fn tick(env: &Environment, proj: &Projectile) -> Projectile {
 
 fn main() {
     let mut p: Projectile = Projectile {
-        position: tuple::point(0, 1, 0),
-        velocity: tuple::normalize(&tuple::vector(1, 1, 0)),
+        position: tuple::point(0.0, 1.0, 0.0),
+        velocity: tuple::normalize(&tuple::vector(1.0, 1.0, 0.0)),
     };
     let e: Environment = Environment {
-        gravity: tuple::vector(0, -0.1, 0),
-        wind: tuple::vector(-0.01, 0, 0),
+        gravity: tuple::vector(0.0, -0.1, 0.0),
+        wind: tuple::vector(-0.01, 0.0, 0.0),
     };
 
     println!("Starting conditions: {:?}", p);

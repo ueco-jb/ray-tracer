@@ -1,4 +1,4 @@
-use crate::tuple::Tuple;
+use crate::tuple::{Tuple, TupleT};
 use crate::utils::eq_with_eps;
 use std::collections::HashSet;
 use std::ops::Mul;
@@ -407,8 +407,8 @@ mod tests {
         let a = Matrix4([
             1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 4.0, 2.0, 8.0, 6.0, 4.0, 1.0, 0.0, 0.0, 0.0, 1.0,
         ]);
-        let b = Tuple::new(1, 2, 3, 1);
-        assert_eq!(Tuple::new(18, 24, 33, 1), a * b);
+        let b = Tuple::new(1.0, 2.0, 3.0, 1.0);
+        assert_eq!(Tuple::new(18.0, 24.0, 33.0, 1.0), a * b);
     }
 
     #[test]
@@ -423,7 +423,7 @@ mod tests {
     #[test]
     fn multiply_identity_matrix_by_tuple() {
         let i = Matrix4::identity_matrix();
-        let a = Tuple::new(1, 2, 3, 4);
+        let a = Tuple::new(1.0, 2.0, 3.0, 4.0);
         assert_eq!(a, i * a);
     }
 
