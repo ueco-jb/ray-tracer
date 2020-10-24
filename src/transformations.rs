@@ -117,14 +117,14 @@ mod tests {
     fn scaling_matrix_applied_to_point() {
         let transform = scaling(2.0, 3.0, 4.0);
         let p = point(-4.0, 6.0, 8.0);
-        assert_eq!(point(-8, 18, 32), transform * p);
+        assert_eq!(point(-8.0, 18.0, 32.0), transform * p);
     }
 
     #[test]
     fn scaling_matrix_applied_to_vector() {
         let transform = scaling(2.0, 3.0, 4.0);
         let v = vector(-4.0, 6.0, 8.0);
-        assert_eq!(vector(-8, 18, 32), transform * v);
+        assert_eq!(vector(-8.0, 18.0, 32.0), transform * v);
     }
 
     #[test]
