@@ -2,8 +2,9 @@
 
 pub mod canvas;
 pub mod color;
+pub mod intersections;
 pub mod matrix;
-pub mod rays;
+pub mod ray;
 pub mod serialize;
 pub mod sphere;
 pub mod transformations;
