@@ -2,9 +2,17 @@ use crate::matrix::Matrix4;
 use crate::utils::eq_with_eps;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-// trait Point {}
-//
-// trait Vector {}
+pub trait TupleT {
+    fn new(x: f64, y: f64, z: f64, w: f64) -> Self;
+
+    fn get_x(&self) -> f64;
+
+    fn get_y(&self) -> f64;
+
+    fn get_z(&self) -> f64;
+
+    fn get_w(&self) -> f64;
+}
 
 #[derive(Copy, Clone, Debug)]
 pub struct Tuple {
@@ -14,11 +22,29 @@ pub struct Tuple {
     w: f64,
 }
 
-impl Tuple {
-    pub fn new(x: f64, y: f64, z: f64, w: f64) -> Tuple {
-        Tuple { x, y, z, w }
+impl TupleT for Tuple {
+    fn new(x: f64, y: f64, z: f64, w: f64) -> Self {
+        Self { x, y, z, w }
     }
 
+    fn get_x(&self) -> f64 {
+        self.x
+    }
+
+    fn get_y(&self) -> f64 {
+        self.y
+    }
+
+    fn get_z(&self) -> f64 {
+        self.z
+    }
+
+    fn get_w(&self) -> f64 {
+        self.w
+    }
+}
+
+impl Tuple {
     pub fn is_vector(&self) -> Result<bool, &'static str> {
         match self.w {
             w if eq_with_eps(w, 0.0) => Ok(true),
@@ -33,22 +59,6 @@ impl Tuple {
             w if eq_with_eps(w, 0.0) => Ok(false),
             _ => Err("invalid w value"),
         }
-    }
-
-    pub fn get_x(&self) -> f64 {
-        self.x
-    }
-
-    pub fn get_y(&self) -> f64 {
-        self.y
-    }
-
-    pub fn get_z(&self) -> f64 {
-        self.z
-    }
-
-    pub fn get_w(&self) -> f64 {
-        self.w
     }
 }
 

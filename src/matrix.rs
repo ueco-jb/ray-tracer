@@ -1,4 +1,4 @@
-use crate::tuple::Tuple;
+use crate::tuple::{Tuple, TupleT};
 use crate::utils::eq_with_eps;
 use std::collections::HashSet;
 use std::ops::Mul;

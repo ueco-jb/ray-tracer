@@ -1,6 +1,6 @@
 extern crate ray_tracer as rt;
 
-use rt::{tuple, utils};
+use rt::{tuple, tuple::TupleT, utils};
 
 #[derive(Debug)]
 struct Projectile {

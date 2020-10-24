@@ -1,5 +1,6 @@
 extern crate ray_tracer as rt;
 
+use crate::rt::tuple::TupleT;
 use rt::*;
 
 #[derive(Debug)]
