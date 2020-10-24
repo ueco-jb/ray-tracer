@@ -3,11 +3,13 @@ use crate::sphere::Sphere;
 use crate::tuple::{dot, point};
 use crate::utils::eq_with_eps;
 
-#[allow(dead_code)]
-pub struct Intersection<T> {
-    pub t: f64,
-    pub object: T,
+#[derive(Copy, Clone)]
+pub struct Intersection<T: Copy> {
+    t: f64,
+    object: T,
 }
+
+pub struct Intersections<T: Copy>(Vec<Intersection<T>>);
 
 pub fn intersect(_sphere: &Sphere, ray: &Ray) -> Vec<f64> {
     // Vector from the sphere's center to the ray origin
@@ -40,5 +42,16 @@ mod tests {
         let i = Intersection { t: 3.5, object: s };
         assert!(eq_with_eps(3.5, i.t));
         assert_eq!(s, i.object);
+    }
+
+    #[test]
+    fn aggregating_intersections() {
+        let s = Sphere { id: Uuid::new_v4() };
+        let i1 = Intersection { t: 1.0, object: s };
+        let i2 = Intersection { t: 2.0, object: s };
+        let xs = Intersections(vec![i1, i2]);
+        assert_eq!(2, xs.0.len());
+        assert!(eq_with_eps(1.0, xs.0[0].t));
+        assert!(eq_with_eps(2.0, xs.0[1].t));
     }
 }
