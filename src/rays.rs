@@ -72,8 +72,8 @@ mod tests {
         let s = Sphere { id: Uuid::new_v4() };
         let xs = intersect(&s, &r);
         assert_eq!(2, xs.len());
-        assert_eq!(4.0, xs[0]);
-        assert_eq!(6.0, xs[1]);
+        assert!(eq_with_eps(4.0, xs[0]));
+        assert!(eq_with_eps(6.0, xs[1]));
     }
 
     #[test]
@@ -85,8 +85,8 @@ mod tests {
         let s = Sphere { id: Uuid::new_v4() };
         let xs = intersect(&s, &r);
         assert_eq!(2, xs.len());
-        assert_eq!(5.0, xs[0]);
-        assert_eq!(5.0, xs[1]);
+        assert!(eq_with_eps(5.0, xs[0]));
+        assert!(eq_with_eps(5.0, xs[1]));
     }
 
     #[test]
@@ -109,8 +109,8 @@ mod tests {
         let s = Sphere { id: Uuid::new_v4() };
         let xs = intersect(&s, &r);
         assert_eq!(2, xs.len());
-        assert_eq!(-1.0, xs[0]);
-        assert_eq!(1.0, xs[1]);
+        assert!(eq_with_eps(-1.0, xs[0]));
+        assert!(eq_with_eps(1.0, xs[1]));
     }
 
     #[test]
@@ -122,7 +122,7 @@ mod tests {
         let s = Sphere { id: Uuid::new_v4() };
         let xs = intersect(&s, &r);
         assert_eq!(2, xs.len());
-        assert_eq!(-6.0, xs[0]);
-        assert_eq!(-4.0, xs[1]);
+        assert!(eq_with_eps(-6.0, xs[0]));
+        assert!(eq_with_eps(-4.0, xs[1]));
     }
 }
