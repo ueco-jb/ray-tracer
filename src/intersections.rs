@@ -1,17 +1,38 @@
 use crate::ray::Ray;
-use crate::sphere::Sphere;
 use crate::tuple::{dot, point};
 use crate::utils::eq_with_eps;
+use std::collections::HashSet;
+use std::hash::{Hash, Hasher};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Intersection<'a, T: Copy> {
     pub t: f64,
     pub object: &'a T,
 }
 
-pub struct Intersections<'a, T: Copy>(pub Vec<Intersection<'a, T>>);
+impl<T: Copy> Intersection<'_, T> {
+    fn key(&self) -> u64 {
+        unsafe { std::mem::transmute(self.t) }
+    }
+}
 
-pub fn intersect<'a>(sphere: &'a Sphere, ray: &Ray) -> Intersections<'a, Sphere> {
+impl<T: Copy> PartialEq for Intersection<'_, T> {
+    fn eq(&self, other: &Self) -> bool {
+        eq_with_eps(self.t, other.t)
+    }
+}
+
+impl<T: Copy> Hash for Intersection<'_, T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.key().hash(state);
+    }
+}
+
+impl<T: Copy> Eq for Intersection<'_, T> {}
+
+pub struct Intersections<'a, T: Copy>(pub HashSet<Intersection<'a, T>>);
+
+pub fn intersect<'a, T: Copy>(object: &'a T, ray: &Ray) -> Intersections<'a, T> {
     // Vector from the sphere's center to the ray origin
     let sphere_to_ray = ray.origin - point(0.0, 0.0, 0.0);
 
@@ -21,22 +42,26 @@ pub fn intersect<'a>(sphere: &'a Sphere, ray: &Ray) -> Intersections<'a, Sphere>
     let discriminant = (b * b) - (4.0 * a * c);
 
     if !eq_with_eps(discriminant, 0.0) && discriminant < 0.0 {
-        Intersections(vec![])
+        let set: HashSet<Intersection<T>> = HashSet::new();
+        Intersections(set)
     } else {
         let sqrt_discriminant = discriminant.sqrt();
         let t1 = (-b - sqrt_discriminant) / (2.0 * a);
         let t2 = (-b + sqrt_discriminant) / (2.0 * a);
-        Intersections(vec![
-            Intersection {
-                t: t1,
-                object: sphere,
-            },
-            Intersection {
-                t: t2,
-                object: sphere,
-            },
-        ])
+        let mut set: HashSet<Intersection<T>> = HashSet::with_capacity(2);
+        set.insert(Intersection { t: t1, object });
+        set.insert(Intersection { t: t2, object });
+        Intersections(set)
     }
+}
+
+pub fn hit<'a, T: Copy>(intersections: &'a Intersections<T>) -> Option<&'a Intersection<'a, T>> {
+    for intersection in &intersections.0 {
+        if intersection.t > 0.0 || eq_with_eps(intersection.t, 0.0) {
+            return Some(intersection);
+        }
+    }
+    None
 }
 
 #[cfg(test)]
@@ -58,9 +83,66 @@ mod tests {
         let s = Sphere { id: Uuid::new_v4() };
         let i1 = Intersection { t: 1.0, object: &s };
         let i2 = Intersection { t: 2.0, object: &s };
-        let xs = Intersections(vec![i1, i2]);
+        let mut set: HashSet<Intersection<Sphere>> = HashSet::with_capacity(2);
+        set.insert(i1);
+        set.insert(i2);
+        let xs = Intersections(set);
         assert_eq!(2, xs.0.len());
-        assert!(eq_with_eps(1.0, xs.0[0].t));
-        assert!(eq_with_eps(2.0, xs.0[1].t));
+        assert!(eq_with_eps(1.0, xs.0.get(&i1).unwrap().t));
+        assert!(eq_with_eps(2.0, xs.0.get(&i2).unwrap().t));
     }
+
+    // #[test]
+    // fn hit_when_all_intersections_have_positive_t() {
+    //     let s = Sphere { id: Uuid::new_v4() };
+    //     let i1 = Intersection { t: 1.0, object: &s };
+    //     let i2 = Intersection { t: 2.0, object: &s };
+    //     let xs = Intersections(vec![i2, i1]);
+    //     let i = hit(&xs);
+    //     assert_eq!(Some(i1), i);
+    // }
+
+    // #[test]
+    // fn hit_when_some_intersections_have_negative_t() {
+    //     let s = Sphere { id: Uuid::new_v4() };
+    //     let i1 = Intersection {
+    //         t: -1.0,
+    //         object: &s,
+    //     };
+    //     let i2 = Intersection { t: 2.0, object: &s };
+    //     let xs = Intersections(vec![i2, i1]);
+    //     let i = hit(&xs);
+    //     assert_eq!(Some(i2), i);
+    // }
+
+    // #[test]
+    // fn hit_when_all_intersections_have_negative_t() {
+    //     let s = Sphere { id: Uuid::new_v4() };
+    //     let i1 = Intersection {
+    //         t: -2.0,
+    //         object: &s,
+    //     };
+    //     let i2 = Intersection {
+    //         t: -1.0,
+    //         object: &s,
+    //     };
+    //     let xs = Intersections(vec![i2, i1]);
+    //     let i = hit(&xs);
+    //     assert_eq!(None, i);
+    // }
+
+    // #[test]
+    // fn hit_when_is_always_the_lowest_nonnegative_intersection() {
+    //     let s = Sphere { id: Uuid::new_v4() };
+    //     let i1 = Intersection { t: 5.0, object: &s };
+    //     let i2 = Intersection { t: 7.0, object: &s };
+    //     let i2 = Intersection {
+    //         t: -3.0,
+    //         object: &s,
+    //     };
+    //     let i2 = Intersection { t: 2.0, object: &s };
+    //     let xs = Intersections(vec![i1, i2, i3, i4]);
+    //     let i = hit(&xs);
+    //     assert_eq!(i4, i);
+    // }
 }
