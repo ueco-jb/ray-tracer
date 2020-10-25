@@ -25,6 +25,16 @@ pub struct Intersections<'a, T>(pub Vec<Intersection<'a, T>>)
 where
     T: Shape;
 
+impl<'a, T> Intersections<'a, T>
+where
+    T: Shape,
+{
+    pub fn sort(&mut self) {
+        self.0
+            .sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(std::cmp::Ordering::Less));
+    }
+}
+
 pub fn intersect<'a, T>(object: &'a T, ray: &Ray) -> Intersections<'a, T>
 where
     T: Shape,
@@ -50,13 +60,10 @@ where
     }
 }
 
-pub fn hit<'a, T>(intersections: &'a mut Intersections<T>) -> Option<&'a Intersection<'a, T>>
+pub fn hit<'a, T>(intersections: &'a Intersections<T>) -> Option<&'a Intersection<'a, T>>
 where
     T: Shape,
 {
-    intersections
-        .0
-        .sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(std::cmp::Ordering::Less));
     for intersection in &intersections.0 {
         if intersection.t > 0.0 || eq_with_eps(intersection.t, 0.0) {
             return Some(intersection);
@@ -96,7 +103,8 @@ mod tests {
         let i1 = Intersection { t: 1.0, object: &s };
         let i2 = Intersection { t: 2.0, object: &s };
         let mut xs = Intersections(vec![i2, i1]);
-        let i = hit(&mut xs);
+        xs.sort();
+        let i = hit(&xs);
         assert_eq!(&i1, i.unwrap());
     }
 
@@ -109,7 +117,8 @@ mod tests {
         };
         let i2 = Intersection { t: 2.0, object: &s };
         let mut xs = Intersections(vec![i2, i1]);
-        let i = hit(&mut xs);
+        xs.sort();
+        let i = hit(&xs);
         assert_eq!(&i2, i.unwrap());
     }
 
@@ -125,7 +134,8 @@ mod tests {
             object: &s,
         };
         let mut xs = Intersections(vec![i2, i1]);
-        let i = hit(&mut xs);
+        xs.sort();
+        let i = hit(&xs);
         assert_eq!(None, i);
     }
 
@@ -140,7 +150,8 @@ mod tests {
         };
         let i4 = Intersection { t: 2.0, object: &s };
         let mut xs = Intersections(vec![i1, i2, i3, i4]);
-        let i = hit(&mut xs);
+        xs.sort();
+        let i = hit(&xs);
         assert_eq!(&i4, i.unwrap());
     }
 }
