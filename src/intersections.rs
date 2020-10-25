@@ -29,9 +29,22 @@ impl<'a, T> Intersections<'a, T>
 where
     T: Shape,
 {
-    pub fn sort(&mut self) {
+    pub fn sort(&mut self) -> &Self {
         self.0
             .sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(std::cmp::Ordering::Less));
+        self
+    }
+
+    pub fn hit(&'a self) -> Option<&'a Intersection<'a, T>>
+    where
+        T: Shape,
+    {
+        for intersection in &self.0 {
+            if intersection.t > 0.0 || eq_with_eps(intersection.t, 0.0) {
+                return Some(intersection);
+            }
+        }
+        None
     }
 }
 
@@ -58,18 +71,6 @@ where
             Intersection { t: t2, object },
         ])
     }
-}
-
-pub fn hit<'a, T>(intersections: &'a Intersections<T>) -> Option<&'a Intersection<'a, T>>
-where
-    T: Shape,
-{
-    for intersection in &intersections.0 {
-        if intersection.t > 0.0 || eq_with_eps(intersection.t, 0.0) {
-            return Some(intersection);
-        }
-    }
-    None
 }
 
 #[cfg(test)]
@@ -103,8 +104,7 @@ mod tests {
         let i1 = Intersection { t: 1.0, object: &s };
         let i2 = Intersection { t: 2.0, object: &s };
         let mut xs = Intersections(vec![i2, i1]);
-        xs.sort();
-        let i = hit(&xs);
+        let i = xs.sort().hit();
         assert_eq!(&i1, i.unwrap());
     }
 
@@ -117,8 +117,7 @@ mod tests {
         };
         let i2 = Intersection { t: 2.0, object: &s };
         let mut xs = Intersections(vec![i2, i1]);
-        xs.sort();
-        let i = hit(&xs);
+        let i = xs.sort().hit();
         assert_eq!(&i2, i.unwrap());
     }
 
@@ -134,8 +133,7 @@ mod tests {
             object: &s,
         };
         let mut xs = Intersections(vec![i2, i1]);
-        xs.sort();
-        let i = hit(&xs);
+        let i = xs.sort().hit();
         assert_eq!(None, i);
     }
 
@@ -150,8 +148,7 @@ mod tests {
         };
         let i4 = Intersection { t: 2.0, object: &s };
         let mut xs = Intersections(vec![i1, i2, i3, i4]);
-        xs.sort();
-        let i = hit(&xs);
+        let i = xs.sort().hit();
         assert_eq!(&i4, i.unwrap());
     }
 }
