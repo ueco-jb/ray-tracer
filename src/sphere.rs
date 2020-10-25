@@ -1,3 +1,4 @@
+use crate::shape::Shape;
 use uuid::Uuid;
 
 // For simplicity, Sphere currently has radius 1 and center on (0, 0, 0)
@@ -5,6 +6,8 @@ use uuid::Uuid;
 pub struct Sphere {
     pub id: Uuid,
 }
+
+impl Shape for Sphere {}
 
 impl PartialEq for Sphere {
     fn eq(&self, other: &Self) -> bool {

@@ -1,38 +1,56 @@
 use crate::ray::Ray;
+use crate::shape::Shape;
 use crate::tuple::{dot, point};
 use crate::utils::eq_with_eps;
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 
 #[derive(Copy, Clone, Debug)]
-pub struct Intersection<'a, T: Copy> {
+pub struct Intersection<'a, T>
+where
+    T: Copy + Shape,
+{
     pub t: f64,
     pub object: &'a T,
 }
 
-impl<T: Copy> Intersection<'_, T> {
+impl<T> Intersection<'_, T>
+where
+    T: Copy + Shape,
+{
     fn key(&self) -> u64 {
         unsafe { std::mem::transmute(self.t) }
     }
 }
 
-impl<T: Copy> PartialEq for Intersection<'_, T> {
+impl<T> PartialEq for Intersection<'_, T>
+where
+    T: Copy + Shape,
+{
     fn eq(&self, other: &Self) -> bool {
         eq_with_eps(self.t, other.t)
     }
 }
 
-impl<T: Copy> Hash for Intersection<'_, T> {
+impl<T> Hash for Intersection<'_, T>
+where
+    T: Copy + Shape,
+{
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.key().hash(state);
     }
 }
 
-impl<T: Copy> Eq for Intersection<'_, T> {}
+impl<T> Eq for Intersection<'_, T> where T: Copy + Shape {}
 
-pub struct Intersections<'a, T: Copy>(pub HashSet<Intersection<'a, T>>);
+pub struct Intersections<'a, T>(pub HashSet<Intersection<'a, T>>)
+where
+    T: Copy + Shape;
 
-pub fn intersect<'a, T: Copy>(object: &'a T, ray: &Ray) -> Intersections<'a, T> {
+pub fn intersect<'a, T>(object: &'a T, ray: &Ray) -> Intersections<'a, T>
+where
+    T: Copy + Shape,
+{
     // Vector from the sphere's center to the ray origin
     let sphere_to_ray = ray.origin - point(0.0, 0.0, 0.0);
 
@@ -55,7 +73,10 @@ pub fn intersect<'a, T: Copy>(object: &'a T, ray: &Ray) -> Intersections<'a, T> 
     }
 }
 
-pub fn hit<'a, T: Copy>(intersections: &'a Intersections<T>) -> Option<&'a Intersection<'a, T>> {
+pub fn hit<'a, T>(intersections: &'a Intersections<T>) -> Option<&'a Intersection<'a, T>>
+where
+    T: Copy + Shape,
+{
     for intersection in &intersections.0 {
         if intersection.t > 0.0 || eq_with_eps(intersection.t, 0.0) {
             return Some(intersection);
