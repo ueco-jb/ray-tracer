@@ -56,7 +56,7 @@ where
 {
     intersections
         .0
-        .sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
+        .sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(std::cmp::Ordering::Less));
     for intersection in &intersections.0 {
         if intersection.t > 0.0 || eq_with_eps(intersection.t, 0.0) {
             return Some(intersection);
