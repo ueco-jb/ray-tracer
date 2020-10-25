@@ -2,8 +2,6 @@ use crate::ray::Ray;
 use crate::shape::Shape;
 use crate::tuple::{dot, point};
 use crate::utils::eq_with_eps;
-use std::collections::HashSet;
-use std::hash::{Hash, Hasher};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Intersection<'a, T>
@@ -14,36 +12,7 @@ where
     pub object: &'a T,
 }
 
-impl<T> Intersection<'_, T>
-where
-    T: Copy + Shape,
-{
-    fn key(&self) -> u64 {
-        unsafe { std::mem::transmute(self.t) }
-    }
-}
-
-impl<T> PartialEq for Intersection<'_, T>
-where
-    T: Copy + Shape,
-{
-    fn eq(&self, other: &Self) -> bool {
-        eq_with_eps(self.t, other.t)
-    }
-}
-
-impl<T> Hash for Intersection<'_, T>
-where
-    T: Copy + Shape,
-{
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.key().hash(state);
-    }
-}
-
-impl<T> Eq for Intersection<'_, T> where T: Copy + Shape {}
-
-pub struct Intersections<'a, T>(pub HashSet<Intersection<'a, T>>)
+pub struct Intersections<'a, T>(pub Vec<Intersection<'a, T>>)
 where
     T: Copy + Shape;
 
@@ -60,16 +29,15 @@ where
     let discriminant = (b * b) - (4.0 * a * c);
 
     if !eq_with_eps(discriminant, 0.0) && discriminant < 0.0 {
-        let set: HashSet<Intersection<T>> = HashSet::new();
-        Intersections(set)
+        Intersections(vec![])
     } else {
         let sqrt_discriminant = discriminant.sqrt();
         let t1 = (-b - sqrt_discriminant) / (2.0 * a);
         let t2 = (-b + sqrt_discriminant) / (2.0 * a);
-        let mut set: HashSet<Intersection<T>> = HashSet::with_capacity(2);
-        set.insert(Intersection { t: t1, object });
-        set.insert(Intersection { t: t2, object });
-        Intersections(set)
+        Intersections(vec![
+            Intersection { t: t1, object },
+            Intersection { t: t2, object },
+        ])
     }
 }
 
@@ -104,13 +72,10 @@ mod tests {
         let s = Sphere { id: Uuid::new_v4() };
         let i1 = Intersection { t: 1.0, object: &s };
         let i2 = Intersection { t: 2.0, object: &s };
-        let mut set: HashSet<Intersection<Sphere>> = HashSet::with_capacity(2);
-        set.insert(i1);
-        set.insert(i2);
-        let xs = Intersections(set);
+        let xs = Intersections(vec![i1, i2]);
         assert_eq!(2, xs.0.len());
-        assert!(eq_with_eps(1.0, xs.0.get(&i1).unwrap().t));
-        assert!(eq_with_eps(2.0, xs.0.get(&i2).unwrap().t));
+        assert!(eq_with_eps(1.0, xs.0[0].t));
+        assert!(eq_with_eps(2.0, xs.0[1].t));
     }
 
     // #[test]
