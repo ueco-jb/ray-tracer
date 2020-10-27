@@ -6,10 +6,18 @@ use uuid::Uuid;
 #[derive(Debug, Copy, Clone)]
 pub struct Sphere {
     id: Uuid,
-    pub transform: Matrix4,
+    transform: Matrix4,
 }
 
-impl Shape for Sphere {}
+impl Shape for Sphere {
+    fn set_transform(&mut self, transform: Matrix4) {
+        self.transform = transform;
+    }
+
+    fn get_transform(&self) -> Matrix4 {
+        self.transform
+    }
+}
 
 impl PartialEq for Sphere {
     fn eq(&self, other: &Self) -> bool {
@@ -17,16 +25,12 @@ impl PartialEq for Sphere {
     }
 }
 
-impl Sphere {
-    pub fn new() -> Sphere {
+impl Default for Sphere {
+    fn default() -> Self {
         Sphere {
             id: Uuid::new_v4(),
             transform: Matrix4::identity_matrix(),
         }
-    }
-
-    fn set_transform(&mut self, transform: Matrix4) {
-        self.transform = transform;
     }
 }
 
@@ -35,7 +39,7 @@ mod tests {
     use super::*;
     use crate::intersections::intersect;
     use crate::ray::Ray;
-    use crate::transformations::translation;
+    use crate::transformations::{scaling, translation};
     use crate::tuple::{point, vector};
     use crate::utils::eq_with_eps;
 
@@ -45,8 +49,8 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s = Sphere::new();
-        let xs = intersect(&s, &r);
+        let s: Sphere = Default::default();
+        let xs = intersect(&s, &r).unwrap();
         assert_eq!(2, xs.0.len());
         assert!(eq_with_eps(4.0, xs.0[0].t));
         assert!(eq_with_eps(6.0, xs.0[1].t));
@@ -58,8 +62,8 @@ mod tests {
             origin: point(0.0, 1.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s = Sphere::new();
-        let xs = intersect(&s, &r);
+        let s: Sphere = Default::default();
+        let xs = intersect(&s, &r).unwrap();
         assert_eq!(2, xs.0.len());
         assert!(eq_with_eps(5.0, xs.0[0].t));
         assert!(eq_with_eps(5.0, xs.0[1].t));
@@ -71,8 +75,8 @@ mod tests {
             origin: point(0.0, 2.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s = Sphere::new();
-        let xs = intersect(&s, &r);
+        let s: Sphere = Default::default();
+        let xs = intersect(&s, &r).unwrap();
         assert_eq!(0, xs.0.len());
     }
 
@@ -82,8 +86,8 @@ mod tests {
             origin: point(0.0, 0.0, 0.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s = Sphere::new();
-        let xs = intersect(&s, &r);
+        let s: Sphere = Default::default();
+        let xs = intersect(&s, &r).unwrap();
         assert_eq!(2, xs.0.len());
         assert!(eq_with_eps(-1.0, xs.0[0].t));
         assert!(eq_with_eps(1.0, xs.0[1].t));
@@ -95,8 +99,8 @@ mod tests {
             origin: point(0.0, 0.0, 5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s = Sphere::new();
-        let xs = intersect(&s, &r);
+        let s: Sphere = Default::default();
+        let xs = intersect(&s, &r).unwrap();
         assert_eq!(2, xs.0.len());
         assert!(eq_with_eps(-6.0, xs.0[0].t));
         assert!(eq_with_eps(-4.0, xs.0[1].t));
@@ -108,8 +112,8 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s = Sphere::new();
-        let xs = intersect(&s, &r);
+        let s: Sphere = Default::default();
+        let xs = intersect(&s, &r).unwrap();
         assert_eq!(2, xs.0.len());
         assert_eq!(&s, xs.0[0].object);
         assert_eq!(&s, xs.0[1].object);
@@ -117,15 +121,41 @@ mod tests {
 
     #[test]
     fn spheres_default_transformation() {
-        let s = Sphere::new();
+        let s: Sphere = Default::default();
         assert_eq!(Matrix4::identity_matrix(), s.transform);
     }
 
     #[test]
     fn changing_spheres_transformation() {
-        let mut s = Sphere::new();
+        let mut s: Sphere = Default::default();
         let t = translation(2.0, 3.0, 4.0);
         s.set_transform(t);
         assert_eq!(t, s.transform);
+    }
+
+    #[test]
+    fn intersecting_scaled_sphere_with_ray() {
+        let r = Ray {
+            origin: point(0.0, 0.0, -5.0),
+            direction: vector(0.0, 0.0, 1.0),
+        };
+        let mut s: Sphere = Default::default();
+        s.set_transform(scaling(2.0, 2.0, 2.0));
+        let xs = intersect(&s, &r).unwrap();
+        assert_eq!(2, xs.0.len());
+        assert!(eq_with_eps(3.0, xs.0[0].t));
+        assert!(eq_with_eps(7.0, xs.0[1].t));
+    }
+
+    #[test]
+    fn intersecting_translated_sphere_with_ray() {
+        let r = Ray {
+            origin: point(0.0, 0.0, -5.0),
+            direction: vector(0.0, 0.0, 1.0),
+        };
+        let mut s: Sphere = Default::default();
+        s.set_transform(translation(5.0, 0.0, 0.0));
+        let xs = intersect(&s, &r).unwrap();
+        assert_eq!(0, xs.0.len());
     }
 }

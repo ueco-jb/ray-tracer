@@ -1,6 +1,7 @@
 use crate::matrix::Matrix4;
 use crate::tuple::*;
 
+#[derive(Copy, Clone)]
 pub struct Ray {
     pub origin: Tuple,
     pub direction: Tuple,
@@ -12,7 +13,7 @@ impl Ray {
     }
 }
 
-fn transform(ray: Ray, matrix: Matrix4) -> Ray {
+pub fn transform(ray: Ray, matrix: Matrix4) -> Ray {
     Ray {
         origin: ray.origin * matrix,
         direction: ray.direction * matrix,
