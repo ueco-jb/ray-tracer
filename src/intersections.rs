@@ -1,4 +1,5 @@
-use crate::ray::Ray;
+use crate::matrix::MatrixError;
+use crate::ray::{transform, Ray};
 use crate::shape::Shape;
 use crate::tuple::{dot, point};
 use crate::utils::eq_with_eps;
@@ -49,28 +50,34 @@ where
     }
 }
 
-pub fn intersect<'a, T>(object: &'a T, ray: &Ray) -> Intersections<'a, T>
+/// Logic behind scaling is that instead of actually turning/rotating object, you move point
+/// (origin of ray) as inverse to operation
+/// In example instead of making sphere two times bigger, you shrink the distance between ray and
+/// the sphere
+/// In order to calculate proper intersection on scaled object, you need to apply inverse of
+/// sphere's transformation onto ray
+pub fn intersect<'a, T>(object: &'a T, ray: &Ray) -> Result<Intersections<'a, T>, MatrixError>
 where
     T: Shape,
 {
+    let ray2 = transform(*ray, object.get_transform().inverse()?);
     // Vector from the sphere's center to the ray origin
-    let sphere_to_ray = ray.origin - point(0.0, 0.0, 0.0);
-
-    let a = dot(&ray.direction, &ray.direction);
-    let b = 2.0 * dot(&ray.direction, &sphere_to_ray);
+    let sphere_to_ray = ray2.origin - point(0.0, 0.0, 0.0);
+    let a = dot(&ray2.direction, &ray2.direction);
+    let b = 2.0 * dot(&ray2.direction, &sphere_to_ray);
     let c = dot(&sphere_to_ray, &sphere_to_ray) - 1.0;
     let discriminant = (b * b) - (4.0 * a * c);
 
     if !eq_with_eps(discriminant, 0.0) && discriminant < 0.0 {
-        Intersections(vec![])
+        Ok(Intersections(vec![]))
     } else {
         let sqrt_discriminant = discriminant.sqrt();
         let t1 = (-b - sqrt_discriminant) / (2.0 * a);
         let t2 = (-b + sqrt_discriminant) / (2.0 * a);
-        Intersections(vec![
+        Ok(Intersections(vec![
             Intersection { t: t1, object },
             Intersection { t: t2, object },
-        ])
+        ]))
     }
 }
 
@@ -78,11 +85,10 @@ where
 mod tests {
     use super::*;
     use crate::sphere::Sphere;
-    use uuid::Uuid;
 
     #[test]
     fn intersection_encapsulates_t_and_object() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s: Sphere = Default::default();
         let i = Intersection { t: 3.5, object: &s };
         assert!(eq_with_eps(3.5, i.t));
         assert_eq!(&s, i.object);
@@ -90,7 +96,7 @@ mod tests {
 
     #[test]
     fn aggregating_intersections() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s: Sphere = Default::default();
         let i1 = Intersection { t: 1.0, object: &s };
         let i2 = Intersection { t: 2.0, object: &s };
         let xs = Intersections(vec![i1, i2]);
@@ -101,7 +107,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_positive_t() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s: Sphere = Default::default();
         let i1 = Intersection { t: 1.0, object: &s };
         let i2 = Intersection { t: 2.0, object: &s };
         let mut xs = Intersections(vec![i2, i1]);
@@ -111,7 +117,7 @@ mod tests {
 
     #[test]
     fn hit_when_some_intersections_have_negative_t() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s: Sphere = Default::default();
         let i1 = Intersection {
             t: -1.0,
             object: &s,
@@ -124,7 +130,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_negative_t() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s: Sphere = Default::default();
         let i1 = Intersection {
             t: -2.0,
             object: &s,
@@ -140,7 +146,7 @@ mod tests {
 
     #[test]
     fn hit_when_is_always_the_lowest_nonnegative_intersection() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s: Sphere = Default::default();
         let i1 = Intersection { t: 5.0, object: &s };
         let i2 = Intersection { t: 7.0, object: &s };
         let i3 = Intersection {

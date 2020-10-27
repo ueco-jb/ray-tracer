@@ -2,15 +2,13 @@ use crate::matrix::*;
 
 pub const PI: f64 = std::f64::consts::PI;
 
-#[allow(dead_code)]
-fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
+pub fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
     Matrix4([
         1.0, 0.0, 0.0, x, 0.0, 1.0, 0.0, y, 0.0, 0.0, 1.0, z, 0.0, 0.0, 0.0, 1.0,
     ])
 }
 
-#[allow(dead_code)]
-fn scaling(x: f64, y: f64, z: f64) -> Matrix4 {
+pub fn scaling(x: f64, y: f64, z: f64) -> Matrix4 {
     Matrix4([
         x, 0.0, 0.0, 0.0, 0.0, y, 0.0, 0.0, 0.0, 0.0, z, 0.0, 0.0, 0.0, 0.0, 1.0,
     ])
