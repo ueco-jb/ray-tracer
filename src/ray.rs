@@ -1,7 +1,6 @@
 use crate::matrix::Matrix4;
 use crate::tuple::*;
 
-#[allow(dead_code)]
 pub struct Ray {
     pub origin: Tuple,
     pub direction: Tuple,

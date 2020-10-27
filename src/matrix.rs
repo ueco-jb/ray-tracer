@@ -417,7 +417,7 @@ mod tests {
             0.0, 1.0, 2.0, 4.0, 1.0, 2.0, 4.0, 8.0, 2.0, 4.0, 8.0, 16.0, 4.0, 8.0, 16.0, 32.0,
         ]);
         let i = Matrix4::identity_matrix();
-        assert_eq!(a, a.clone() * i);
+        assert_eq!(a, a * i);
     }
 
     #[test]
@@ -549,7 +549,7 @@ mod tests {
         let b = Matrix4([
             8.0, 2.0, 2.0, 2.0, 3.0, -1.0, 7.0, 0.0, 7.0, 0.0, 5.0, 4.0, 6.0, -2.0, 0.0, 5.0,
         ]);
-        let c = a.clone() * b.clone();
+        let c = a * b;
         assert_eq!(c * b.inverse().unwrap(), a);
     }
 }

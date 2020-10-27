@@ -82,7 +82,7 @@ mod tests {
 
     #[test]
     fn intersection_encapsulates_t_and_object() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s = Sphere::new();
         let i = Intersection { t: 3.5, object: &s };
         assert!(eq_with_eps(3.5, i.t));
         assert_eq!(&s, i.object);
@@ -90,7 +90,7 @@ mod tests {
 
     #[test]
     fn aggregating_intersections() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s = Sphere::new();
         let i1 = Intersection { t: 1.0, object: &s };
         let i2 = Intersection { t: 2.0, object: &s };
         let xs = Intersections(vec![i1, i2]);
@@ -101,7 +101,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_positive_t() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s = Sphere::new();
         let i1 = Intersection { t: 1.0, object: &s };
         let i2 = Intersection { t: 2.0, object: &s };
         let mut xs = Intersections(vec![i2, i1]);
@@ -111,7 +111,7 @@ mod tests {
 
     #[test]
     fn hit_when_some_intersections_have_negative_t() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s = Sphere::new();
         let i1 = Intersection {
             t: -1.0,
             object: &s,
@@ -124,7 +124,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_negative_t() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s = Sphere::new();
         let i1 = Intersection {
             t: -2.0,
             object: &s,
@@ -140,7 +140,7 @@ mod tests {
 
     #[test]
     fn hit_when_is_always_the_lowest_nonnegative_intersection() {
-        let s = Sphere { id: Uuid::new_v4() };
+        let s = Sphere::new();
         let i1 = Intersection { t: 5.0, object: &s };
         let i2 = Intersection { t: 7.0, object: &s };
         let i3 = Intersection {
