@@ -69,7 +69,7 @@ pub trait Matrix {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct Matrix4(pub [f64; 16]);
 
 impl Matrix for Matrix4 {
