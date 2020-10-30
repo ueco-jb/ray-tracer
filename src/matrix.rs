@@ -2,22 +2,28 @@ use crate::tuple::{Tuple, TupleT};
 use crate::utils::eq_with_eps;
 use std::collections::HashSet;
 use std::ops::Mul;
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum MatrixError {
+    #[error("Read or write out of matrix border")]
     OutOfMatrixBorder,
+    #[error("Matrix is not invertible")]
     MatrixNotInvertible,
+    #[error("Matrix 2x2 cannot have a submatrix")]
     No2x2Submatrix,
 }
+
+type Result<T> = std::result::Result<T, MatrixError>;
 
 pub trait Matrix {
     const SIZE: usize;
     type Submatrix: Matrix;
 
-    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError>;
-    fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError>;
+    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<()>;
+    fn get(&self, row: usize, column: usize) -> Result<f64>;
 
-    fn boundry_check(&self, row: &usize, column: &usize) -> Result<(), MatrixError> {
+    fn boundry_check(&self, row: &usize, column: &usize) -> Result<()> {
         if row >= &Self::SIZE || column >= &Self::SIZE {
             Err(MatrixError::OutOfMatrixBorder)
         } else {
@@ -40,9 +46,9 @@ pub trait Matrix {
         position_to_remove
     }
 
-    fn submatrix(&self, row: usize, column: usize) -> Result<Self::Submatrix, MatrixError>;
+    fn submatrix(&self, row: usize, column: usize) -> Result<Self::Submatrix>;
 
-    fn cofactor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+    fn cofactor(&self, row: usize, column: usize) -> Result<f64> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 let d = self.submatrix(row, column)?.determiant()?;
@@ -56,7 +62,7 @@ pub trait Matrix {
         }
     }
 
-    fn determiant(&self) -> Result<f64, MatrixError> {
+    fn determiant(&self) -> Result<f64> {
         let mut d = 0.0f64;
         for c in 0..Self::SIZE {
             d += self.get(0, c)? * self.cofactor(0, c)?;
@@ -64,7 +70,7 @@ pub trait Matrix {
         Ok(d)
     }
 
-    fn is_invertible(&self) -> Result<bool, MatrixError> {
+    fn is_invertible(&self) -> Result<bool> {
         Ok(!eq_with_eps(self.determiant()?, 0.0))
     }
 }
@@ -76,7 +82,7 @@ impl Matrix for Matrix4 {
     const SIZE: usize = 4;
     type Submatrix = Matrix3;
 
-    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
+    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<()> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 self.0[row * Self::SIZE + column] = value;
@@ -86,14 +92,14 @@ impl Matrix for Matrix4 {
         }
     }
 
-    fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+    fn get(&self, row: usize, column: usize) -> Result<f64> {
         match self.boundry_check(&row, &column) {
             Ok(_) => Ok(self.0[row * Self::SIZE + column]),
             Err(e) => Err(e),
         }
     }
 
-    fn submatrix(&self, row: usize, column: usize) -> Result<Self::Submatrix, MatrixError> {
+    fn submatrix(&self, row: usize, column: usize) -> Result<Self::Submatrix> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 let to_remove = self.calculate_submatrix_remove_indexes(row, column);
@@ -121,7 +127,7 @@ impl Matrix4 {
         ])
     }
 
-    pub fn transpose(&self) -> Result<Matrix4, MatrixError> {
+    pub fn transpose(&self) -> Result<Matrix4> {
         let mut output: Self = Default::default();
         for i in 0..Self::SIZE {
             for j in 0..Self::SIZE {
@@ -131,7 +137,7 @@ impl Matrix4 {
         Ok(output)
     }
 
-    pub fn inverse(&self) -> Result<Matrix4, MatrixError> {
+    pub fn inverse(&self) -> Result<Matrix4> {
         if !self.is_invertible()? {
             Err(MatrixError::MatrixNotInvertible)
         } else {
@@ -216,7 +222,7 @@ impl Matrix for Matrix3 {
     const SIZE: usize = 3;
     type Submatrix = Matrix2;
 
-    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
+    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<()> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 self.0[row * Self::SIZE + column] = value;
@@ -226,14 +232,14 @@ impl Matrix for Matrix3 {
         }
     }
 
-    fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+    fn get(&self, row: usize, column: usize) -> Result<f64> {
         match self.boundry_check(&row, &column) {
             Ok(_) => Ok(self.0[row * Self::SIZE + column]),
             Err(e) => Err(e),
         }
     }
 
-    fn submatrix(&self, row: usize, column: usize) -> Result<Self::Submatrix, MatrixError> {
+    fn submatrix(&self, row: usize, column: usize) -> Result<Self::Submatrix> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 let to_remove = self.calculate_submatrix_remove_indexes(row, column);
@@ -253,7 +259,7 @@ impl Matrix for Matrix3 {
 }
 
 impl Matrix3 {
-    pub fn minor(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+    pub fn minor(&self, row: usize, column: usize) -> Result<f64> {
         match self.boundry_check(&row, &column) {
             Ok(_) => Ok(self.submatrix(row, column)?.determiant()?),
             Err(e) => Err(e),
@@ -274,7 +280,7 @@ impl Matrix for Matrix2 {
     const SIZE: usize = 2;
     type Submatrix = Matrix2;
 
-    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<(), MatrixError> {
+    fn set(&mut self, row: usize, column: usize, value: f64) -> Result<()> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 self.0[row * Self::SIZE + column] = value;
@@ -284,18 +290,18 @@ impl Matrix for Matrix2 {
         }
     }
 
-    fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
+    fn get(&self, row: usize, column: usize) -> Result<f64> {
         match self.boundry_check(&row, &column) {
             Ok(_) => Ok(self.0[row * Self::SIZE + column]),
             Err(e) => Err(e),
         }
     }
 
-    fn submatrix(&self, _row: usize, _column: usize) -> Result<Self::Submatrix, MatrixError> {
+    fn submatrix(&self, _row: usize, _column: usize) -> Result<Self::Submatrix> {
         Err(MatrixError::No2x2Submatrix)
     }
 
-    fn determiant(&self) -> Result<f64, MatrixError> {
+    fn determiant(&self) -> Result<f64> {
         Ok(self.0[0] * self.0[3] - self.0[1] * self.0[2])
     }
 }
