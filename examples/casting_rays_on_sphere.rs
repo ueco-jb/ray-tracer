@@ -8,7 +8,7 @@ use sphere::Sphere;
 use transformations::{scaling, shearing};
 use tuple::{normalize, point};
 
-const CANVAS_SIZE: usize = 100;
+const CANVAS_SIZE: usize = 1000;
 
 /// Sphere is at coordinates (0, 0, 0) by default with R=1.
 /// Origin of ray is at (0, 0, -5) - so 5 units in front of center of sphere
