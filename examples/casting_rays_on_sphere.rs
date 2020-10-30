@@ -2,34 +2,46 @@ extern crate ray_tracer as rt;
 
 use intersections::intersect;
 use ray::Ray;
-use rt::shape::Shape;
 use rt::*;
+use shape::Shape;
 use sphere::Sphere;
-use transformations::{scaling, translation};
-use tuple::{point, vector};
+use transformations::{scaling, shearing};
+use tuple::{normalize, point};
+
+const CANVAS_SIZE: usize = 100;
+
+/// Sphere is at coordinates (0, 0, 0) by default with R=1.
+/// Origin of ray is at (0, 0, -5) - so 5 units in front of center of sphere
+/// Further the wall, bigger the shadow. Extrapolating data given before, wall at distance 10 on z
+/// axis needs to be at least 6x6 to fill whole sphere's shadow. wall_size = 7 is a precautions.
+/// Thanks to that, whole image scales with CANVAS_SIZE value - though larger images take
+/// exponentially longer to render.
 
 fn main() {
-    let mut c: canvas::Canvas = canvas::Canvas::new(550, 550);
+    let mut c: canvas::Canvas = canvas::Canvas::new(CANVAS_SIZE, CANVAS_SIZE);
 
-    let trans = translation(250.0, 250.0, 0.0);
-    let scal = scaling(75.0, 75.0, 75.0);
     let mut s: Sphere = Default::default();
-    s.set_transform(trans * scal);
+    s.set_transform(shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0) * scaling(0.5, 1.0, 1.0));
+    let ray_origin = point(0.0, 0.0, -5.0);
+    let wall_z = 10.0;
+    let wall_size = 7.0;
+    let pixel_size = wall_size / CANVAS_SIZE as f64;
+    let half = wall_size / 2.0;
 
-    for r1 in 100..400 {
-        for r2 in 100..400 {
+    for y in 0..CANVAS_SIZE - 1 {
+        // world coordinates differs from regular, because originally 0,0 is at left bottom corner
+        let world_y = half - pixel_size * y as f64;
+        for x in 0..CANVAS_SIZE - 1 {
+            let world_x = -half + pixel_size * x as f64;
+            let position = point(world_x, world_y, wall_z);
             let r = Ray {
-                origin: point(r1 as f64, r2 as f64, -300.0),
-                direction: vector(0.0, 0.0, 1.0),
+                origin: ray_origin,
+                direction: normalize(&(position - ray_origin)),
             };
             let xs = intersect(&s, &r).unwrap();
             if !xs.0.is_empty() {
-                c.write_pixel(
-                    r1 as usize,
-                    r2 as usize,
-                    color::Color::new(0.85, 0.81, 0.72),
-                )
-                .expect("Out of canvas border");
+                c.write_pixel(x, y, color::Color::new(0.85, 0.54, 0.48))
+                    .expect("Out of canvas border");
             }
         }
     }

@@ -77,8 +77,7 @@ pub fn rotation_z(r: f64) -> Matrix4 {
     ])
 }
 
-#[allow(dead_code)]
-fn shearing(x_y: f64, x_z: f64, y_x: f64, y_z: f64, z_x: f64, z_y: f64) -> Matrix4 {
+pub fn shearing(x_y: f64, x_z: f64, y_x: f64, y_z: f64, z_x: f64, z_y: f64) -> Matrix4 {
     Matrix4([
         1.0, x_y, x_z, 0.0, y_x, 1.0, y_z, 0.0, z_x, z_y, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
     ])
