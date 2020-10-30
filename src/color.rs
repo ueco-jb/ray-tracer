@@ -1,5 +1,4 @@
 use crate::utils::eq_with_eps;
-use num_traits::cast::ToPrimitive;
 use std::ops::{Add, Mul, Sub};
 
 #[derive(Copy, Clone, Debug)]
@@ -10,12 +9,8 @@ pub struct Color {
 }
 
 impl Color {
-    pub fn new<T: ToPrimitive, U: ToPrimitive, V: ToPrimitive>(r: T, g: U, b: V) -> Color {
-        Color {
-            red: r.to_f64().unwrap(),
-            green: g.to_f64().unwrap(),
-            blue: b.to_f64().unwrap(),
-        }
+    pub fn new(red: f64, green: f64, blue: f64) -> Color {
+        Color { red, green, blue }
     }
 
     pub fn get_red(&self) -> f64 {
@@ -63,14 +58,14 @@ impl Sub for Color {
     }
 }
 
-impl<T: ToPrimitive> Mul<T> for Color {
+impl Mul<f64> for Color {
     type Output = Self;
 
-    fn mul(self, rhs: T) -> Self {
+    fn mul(self, rhs: f64) -> Self {
         Self {
-            red: self.red * rhs.to_f64().unwrap(),
-            green: self.green * rhs.to_f64().unwrap(),
-            blue: self.blue * rhs.to_f64().unwrap(),
+            red: self.red * rhs,
+            green: self.green * rhs,
+            blue: self.blue * rhs,
         }
     }
 }
@@ -116,13 +111,13 @@ mod tests {
     #[test]
     fn multiplying_color_by_scalar() {
         let c = Color::new(0.2, 0.3, 0.4);
-        assert_eq!(Color::new(0.4, 0.6, 0.8), c * 2);
+        assert_eq!(Color::new(0.4, 0.6, 0.8), c * 2.0);
     }
 
     #[test]
     fn multiplying_color_by_color() {
-        let c1 = Color::new(1, 0.2, 0.4);
-        let c2 = Color::new(0.9, 1, 0.1);
+        let c1 = Color::new(1.0, 0.2, 0.4);
+        let c2 = Color::new(0.9, 1.0, 0.1);
         assert_eq!(Color::new(0.9, 0.2, 0.04), c1 * c2);
     }
 }

@@ -31,8 +31,7 @@ fn main() {
         wind: tuple::vector(-0.01, 0.0, 0.0),
     };
 
-    let mut c: canvas::Canvas =
-        canvas::Canvas::new_with_color(900, 550, color::Color::new(0, 0, 0));
+    let mut c: canvas::Canvas = canvas::Canvas::new(900, 550);
 
     println!("Starting conditions: {:?}", p);
     loop {
@@ -46,7 +45,7 @@ fn main() {
             c.write_pixel(
                 xposition as usize,
                 c.get_height() - yposition as usize,
-                color::Color::new(1, 1, 1),
+                color::Color::new(1.0, 1.0, 1.0),
             )
             .unwrap();
         }

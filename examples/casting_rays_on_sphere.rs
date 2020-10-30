@@ -9,8 +9,7 @@ use transformations::{scaling, translation};
 use tuple::{point, vector};
 
 fn main() {
-    let mut c: canvas::Canvas =
-        canvas::Canvas::new_with_color(550, 550, color::Color::new(0, 0, 0));
+    let mut c: canvas::Canvas = canvas::Canvas::new(550, 550);
 
     let trans = translation(250.0, 250.0, 0.0);
     let scal = scaling(75.0, 75.0, 75.0);
