@@ -1,5 +1,6 @@
 use crate::matrix::Matrix4;
 use crate::shape::Shape;
+use crate::tuple::{normalize, point, Tuple};
 use uuid::Uuid;
 
 // For simplicity, Sphere currently has radius 1 and center on (0, 0, 0)
@@ -34,13 +35,21 @@ impl Default for Sphere {
     }
 }
 
+impl Sphere {
+    /// Normal at point on sphere is a vector perpendicular to the surface - it's the normal
+    #[allow(dead_code)]
+    fn normal_at(&self, p: Tuple) -> Tuple {
+        normalize(&(p - point(0.0, 0.0, 0.0)))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::intersections::intersect;
     use crate::ray::Ray;
     use crate::transformations::{scaling, translation};
-    use crate::tuple::{point, vector};
+    use crate::tuple::vector;
     use crate::utils::eq_with_eps;
 
     #[test]
@@ -157,5 +166,45 @@ mod tests {
         s.set_transform(translation(5.0, 0.0, 0.0));
         let xs = intersect(&s, &r).unwrap();
         assert_eq!(0, xs.0.len());
+    }
+
+    #[test]
+    fn normal_on_sphere_at_point_on_x_axis() {
+        let s: Sphere = Default::default();
+        let n = s.normal_at(point(1.0, 0.0, 0.0));
+        assert_eq!(vector(1.0, 0.0, 0.0), n);
+    }
+
+    #[test]
+    fn normal_on_sphere_at_point_on_y_axis() {
+        let s: Sphere = Default::default();
+        let n = s.normal_at(point(0.0, 1.0, 0.0));
+        assert_eq!(vector(0.0, 1.0, 0.0), n);
+    }
+
+    #[test]
+    fn normal_on_sphere_at_point_on_z_axis() {
+        let s: Sphere = Default::default();
+        let n = s.normal_at(point(0.0, 0.0, 1.0));
+        assert_eq!(vector(0.0, 0.0, 1.0), n);
+    }
+
+    #[test]
+    fn normal_on_sphere_at_point_at_nonaxial_point() {
+        let s: Sphere = Default::default();
+        let three_sqrt = 3.0f64.sqrt();
+        let n = s.normal_at(point(three_sqrt / 3.0, three_sqrt / 3.0, three_sqrt / 3.0));
+        assert_eq!(
+            vector(three_sqrt / 3.0, three_sqrt / 3.0, three_sqrt / 3.0),
+            n
+        );
+    }
+
+    #[test]
+    fn normal_is_normalized_vector() {
+        let s: Sphere = Default::default();
+        let three_sqrt = 3.0f64.sqrt();
+        let n = s.normal_at(point(three_sqrt / 3.0, three_sqrt / 3.0, three_sqrt / 3.0));
+        assert_eq!(normalize(&n), n);
     }
 }
