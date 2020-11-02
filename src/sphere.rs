@@ -1,5 +1,6 @@
-use crate::matrix::Matrix4;
+use crate::matrix::{Matrix4, MatrixError};
 use crate::shape::Shape;
+use crate::tuple::{normalize, point, Tuple};
 use uuid::Uuid;
 
 // For simplicity, Sphere currently has radius 1 and center on (0, 0, 0)
@@ -16,6 +17,19 @@ impl Shape for Sphere {
 
     fn get_transform(&self) -> Matrix4 {
         self.transform
+    }
+
+    /// Normal at point on sphere is a vector perpendicular to the surface - it's the normal
+    fn normal_at(&self, world_point: Tuple) -> Result<Tuple, MatrixError> {
+        // converting point from world space to object space by multiplying point by inverse of
+        // transformation matrix
+        let object_point = self.transform.inverse()? * world_point;
+        let object_normal = object_point - point(0.0, 0.0, 0.0);
+        let mut world_normal = self.transform.inverse()?.transpose()? * object_normal;
+        // hack - in order to avoid multiplication and inversing a submatrix of transformation,
+        // parameter w is set by hand to 0; otherwise some transformation might corrupt that value
+        world_normal.set_w(0.0);
+        Ok(normalize(&world_normal))
     }
 }
 
@@ -39,9 +53,9 @@ mod tests {
     use super::*;
     use crate::intersections::intersect;
     use crate::ray::Ray;
-    use crate::transformations::{scaling, translation};
-    use crate::tuple::{point, vector};
-    use crate::utils::eq_with_eps;
+    use crate::transformations::{rotation_z, scaling, translation};
+    use crate::tuple::vector;
+    use crate::utils::{eq_with_eps, PI};
 
     #[test]
     fn ray_intersects_sphere_at_two_points() {
@@ -157,5 +171,77 @@ mod tests {
         s.set_transform(translation(5.0, 0.0, 0.0));
         let xs = intersect(&s, &r).unwrap();
         assert_eq!(0, xs.0.len());
+    }
+
+    #[test]
+    fn normal_on_sphere_at_point_on_x_axis() {
+        let s: Sphere = Default::default();
+        let n = s.normal_at(point(1.0, 0.0, 0.0)).unwrap();
+        assert_eq!(vector(1.0, 0.0, 0.0), n);
+    }
+
+    #[test]
+    fn normal_on_sphere_at_point_on_y_axis() {
+        let s: Sphere = Default::default();
+        let n = s.normal_at(point(0.0, 1.0, 0.0)).unwrap();
+        assert_eq!(vector(0.0, 1.0, 0.0), n);
+    }
+
+    #[test]
+    fn normal_on_sphere_at_point_on_z_axis() {
+        let s: Sphere = Default::default();
+        let n = s.normal_at(point(0.0, 0.0, 1.0)).unwrap();
+        assert_eq!(vector(0.0, 0.0, 1.0), n);
+    }
+
+    #[test]
+    fn normal_on_sphere_at_point_at_nonaxial_point() {
+        let s: Sphere = Default::default();
+        let three_sqrt = 3.0f64.sqrt();
+        let n = s
+            .normal_at(point(three_sqrt / 3.0, three_sqrt / 3.0, three_sqrt / 3.0))
+            .unwrap();
+        assert_eq!(
+            vector(three_sqrt / 3.0, three_sqrt / 3.0, three_sqrt / 3.0),
+            n
+        );
+    }
+
+    #[test]
+    fn normal_is_normalized_vector() {
+        let s: Sphere = Default::default();
+        let three_sqrt = 3.0f64.sqrt();
+        let n = s
+            .normal_at(point(three_sqrt / 3.0, three_sqrt / 3.0, three_sqrt / 3.0))
+            .unwrap();
+        assert_eq!(normalize(&n), n);
+    }
+
+    #[test]
+    fn computing_normal_on_translated_sphere() {
+        let mut s: Sphere = Default::default();
+        s.set_transform(translation(0.0, 1.0, 0.0));
+        let n = s
+            .normal_at(point(0.0, 1.70711, -std::f64::consts::FRAC_1_SQRT_2))
+            .unwrap(); // 0.70711
+        assert_eq!(
+            vector(
+                0.0,
+                std::f64::consts::FRAC_1_SQRT_2,
+                -std::f64::consts::FRAC_1_SQRT_2
+            ),
+            n
+        );
+    }
+
+    #[test]
+    fn computing_normal_on_transformed_sphere() {
+        let mut s: Sphere = Default::default();
+        s.set_transform(scaling(1.0, 0.5, 1.0) * rotation_z(PI / 5.0));
+        let two_sqrt = 2.0f64.sqrt();
+        let n = s
+            .normal_at(point(0.0, two_sqrt / 2.0, -two_sqrt / 2.0))
+            .unwrap();
+        assert_eq!(vector(0.0, 0.97014, -0.24254), n);
     }
 }

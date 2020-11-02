@@ -1,7 +1,5 @@
 use crate::matrix::*;
 
-pub const PI: f64 = std::f64::consts::PI;
-
 pub fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
     Matrix4([
         1.0, 0.0, 0.0, x, 0.0, 1.0, 0.0, y, 0.0, 0.0, 1.0, z, 0.0, 0.0, 0.0, 1.0,
@@ -87,6 +85,7 @@ pub fn shearing(x_y: f64, x_z: f64, y_x: f64, y_z: f64, z_x: f64, z_y: f64) -> M
 mod tests {
     use super::*;
     use crate::tuple::*;
+    use crate::utils::PI;
 
     #[test]
     fn multiply_by_translation_matrix() {

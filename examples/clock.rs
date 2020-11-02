@@ -2,8 +2,9 @@ extern crate ray_tracer as rt;
 
 use rt::tuple::TupleT;
 use rt::*;
-use transformations::{rotation_z, PI};
+use transformations::rotation_z;
 use tuple::point;
+use utils::PI;
 
 fn main() {
     let mut c: canvas::Canvas = canvas::Canvas::new(550, 550);
