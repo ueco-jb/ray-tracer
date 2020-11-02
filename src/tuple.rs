@@ -45,6 +45,10 @@ impl TupleT for Tuple {
 }
 
 impl Tuple {
+    pub fn set_w(&mut self, w: f64) {
+        self.w = w
+    }
+
     pub fn is_vector(&self) -> Result<bool, &'static str> {
         match self.w {
             w if eq_with_eps(w, 0.0) => Ok(true),
