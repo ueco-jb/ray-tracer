@@ -1,3 +1,4 @@
+use crate::color::Color;
 use crate::material::Material;
 use crate::matrix::{Matrix4, MatrixError};
 use crate::shape::Shape;
@@ -36,6 +37,14 @@ impl Shape for Sphere {
 
     fn set_material(&mut self, m: Material) {
         self.material = m;
+    }
+
+    fn get_material(&mut self) -> &Material {
+        &self.material
+    }
+
+    fn set_color(&mut self, c: Color) {
+        self.material.color = c;
     }
 }
 

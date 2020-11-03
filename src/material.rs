@@ -34,48 +34,46 @@ impl PartialEq for Material {
     }
 }
 
-impl Material {
-    /// Calculating reflections using Phong reflection model
-    pub fn lighting(
-        &self,
-        light: PointLight,
-        position: Tuple,
-        eyev: Tuple,
-        normalv: Tuple,
-    ) -> Color {
-        let mut diffuse = BLACK;
-        let mut specular = BLACK;
+/// Calculating reflections using Phong reflection model
+pub fn lighting(
+    m: &Material,
+    light: PointLight,
+    position: Tuple,
+    eyev: Tuple,
+    normalv: Tuple,
+) -> Color {
+    let mut diffuse = BLACK;
+    let mut specular = BLACK;
 
-        // combine the surface color with the light's color/intensity
-        let effective_color = self.color * light.intensity;
+    // combine the surface color with the light's color/intensity
+    let effective_color = m.color * light.intensity;
 
-        // find the direction to the light source
-        let lightv = normalize(&(light.position - position));
+    // find the direction to the light source
+    let lightv = normalize(&(light.position - position));
 
-        // compute the ambient contribution
-        let ambient = effective_color * self.ambient;
+    // compute the ambient contribution
+    let ambient = effective_color * m.ambient;
 
-        // light_dot_normal represents the consine of the angle between the light vector and the
-        // normal vector. A negative number means the light is on the other side of the surface
-        let light_dot_normal = dot(&lightv, &normalv);
-        if light_dot_normal > 0.0 || eq_with_eps(0.0, light_dot_normal) {
-            // compute the diffuse contribution
-            diffuse = effective_color * self.diffuse * light_dot_normal;
+    // light_dot_normal represents the consine of the angle between the light vector and the
+    // normal vector. A negative number means the light is on the other side of the surface
+    let light_dot_normal = dot(&lightv, &normalv);
+    if light_dot_normal > 0.0 || eq_with_eps(0.0, light_dot_normal) {
+        // compute the diffuse contribution
+        diffuse = effective_color * m.diffuse * light_dot_normal;
 
-            // reflect_dot_eye representsd the cosine of the angle between the reflection vector
-            // and the eye vector. A negative number means the light reflects away from the eye
-            let reflectv = reflect(&-lightv, &normalv);
-            let reflect_dot_eye = dot(&reflectv, &eyev);
+        // reflect_dot_eye representsd the cosine of the angle between the reflection vector
+        // and the eye vector. A negative number means the light reflects away from the eye
+        let reflectv = reflect(&-lightv, &normalv);
+        let reflect_dot_eye = dot(&reflectv, &eyev);
 
-            if reflect_dot_eye > 0.0 {
-                // compute the specular contribution
-                let factor = reflect_dot_eye.powf(self.shininess);
-                specular = light.intensity * self.specular * factor;
-            }
+        if reflect_dot_eye > 0.0 {
+            // compute the specular contribution
+            let factor = reflect_dot_eye.powf(m.shininess);
+            specular = light.intensity * m.specular * factor;
         }
-
-        ambient + diffuse + specular
     }
+
+    ambient + diffuse + specular
 }
 
 #[cfg(test)]
@@ -108,7 +106,7 @@ mod tests {
             position: point(0.0, 0.0, -10.0),
             intensity: Color::new(1.0, 1.0, 1.0),
         };
-        let result = m.lighting(light, position, eyev, normalv);
+        let result = lighting(&m, light, position, eyev, normalv);
         assert_eq!(Color::new(1.9, 1.9, 1.9), result);
     }
 
@@ -122,7 +120,7 @@ mod tests {
             position: point(0.0, 0.0, -10.0),
             intensity: Color::new(1.0, 1.0, 1.0),
         };
-        let result = m.lighting(light, position, eyev, normalv);
+        let result = lighting(&m, light, position, eyev, normalv);
         assert_eq!(Color::new(1.0, 1.0, 1.0), result);
     }
 
@@ -135,7 +133,7 @@ mod tests {
             position: point(0.0, 10.0, -10.0),
             intensity: Color::new(1.0, 1.0, 1.0),
         };
-        let result = m.lighting(light, position, eyev, normalv);
+        let result = lighting(&m, light, position, eyev, normalv);
         assert_eq!(Color::new(0.7364, 0.7364, 0.7364), result);
     }
 
@@ -149,7 +147,7 @@ mod tests {
             position: point(0.0, 10.0, -10.0),
             intensity: Color::new(1.0, 1.0, 1.0),
         };
-        let result = m.lighting(light, position, eyev, normalv);
+        let result = lighting(&m, light, position, eyev, normalv);
         assert_eq!(Color::new(1.6364, 1.6364, 1.6364), result);
     }
 
@@ -162,7 +160,7 @@ mod tests {
             position: point(0.0, 0.0, 10.0),
             intensity: Color::new(1.0, 1.0, 1.0),
         };
-        let result = m.lighting(light, position, eyev, normalv);
+        let result = lighting(&m, light, position, eyev, normalv);
         assert_eq!(Color::new(0.1, 0.1, 0.1), result);
     }
 }
