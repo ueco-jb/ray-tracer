@@ -10,7 +10,7 @@ use shape::Shape;
 use sphere::Sphere;
 use tuple::{normalize, point};
 
-const CANVAS_SIZE: usize = 1000;
+const CANVAS_SIZE: usize = 100;
 
 fn main() {
     let mut c: canvas::Canvas = canvas::Canvas::new(CANVAS_SIZE, CANVAS_SIZE);
