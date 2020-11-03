@@ -1,3 +1,4 @@
+use crate::material::Material;
 use crate::matrix::{Matrix4, MatrixError};
 use crate::shape::Shape;
 use crate::tuple::{normalize, point, Tuple, TupleT};
@@ -8,6 +9,7 @@ use uuid::Uuid;
 pub struct Sphere {
     id: Uuid,
     transform: Matrix4,
+    material: Material,
 }
 
 impl Shape for Sphere {
@@ -31,6 +33,10 @@ impl Shape for Sphere {
         world_normal.set_w(0.0);
         Ok(normalize(&world_normal))
     }
+
+    fn set_material(&mut self, m: Material) {
+        self.material = m;
+    }
 }
 
 impl PartialEq for Sphere {
@@ -44,6 +50,7 @@ impl Default for Sphere {
         Sphere {
             id: Uuid::new_v4(),
             transform: Matrix4::identity_matrix(),
+            material: Default::default(),
         }
     }
 }
@@ -243,5 +250,23 @@ mod tests {
             .normal_at(point(0.0, two_sqrt / 2.0, -two_sqrt / 2.0))
             .unwrap();
         assert_eq!(vector(0.0, 0.97014, -0.24254), n);
+    }
+
+    #[test]
+    fn sphere_has_default_material() {
+        let s: Sphere = Default::default();
+        let default_m: Material = Default::default();
+        let m = s.material;
+        assert_eq!(default_m, m);
+    }
+
+    #[test]
+    fn sphere_may_have_assigned_material() {
+        let mut s: Sphere = Default::default();
+        let mut m: Material = Default::default();
+        m.ambient = 1.0;
+        let m = s.material;
+        s.set_material(m);
+        assert_eq!(m, s.material);
     }
 }
