@@ -1,6 +1,12 @@
 use crate::utils::eq_with_eps;
 use std::ops::{Add, Mul, Sub};
 
+pub const BLACK: Color = Color {
+    red: 0.0,
+    green: 0.0,
+    blue: 0.0,
+};
+
 #[derive(Copy, Clone, Debug)]
 pub struct Color {
     red: f64,
@@ -42,6 +48,18 @@ impl Add for Color {
             red: self.red + other.red,
             green: self.green + other.green,
             blue: self.blue + other.blue,
+        }
+    }
+}
+
+impl Add<f64> for Color {
+    type Output = Self;
+
+    fn add(self, other: f64) -> Self {
+        Self {
+            red: self.red + other,
+            green: self.green + other,
+            blue: self.blue + other,
         }
     }
 }

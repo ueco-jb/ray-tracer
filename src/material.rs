@@ -1,4 +1,6 @@
-use crate::color::Color;
+use crate::color::{Color, BLACK};
+use crate::light::PointLight;
+use crate::tuple::{dot, normalize, reflect, Tuple};
 use crate::utils::eq_with_eps;
 
 #[derive(Copy, Clone, Debug)]
@@ -32,9 +34,60 @@ impl PartialEq for Material {
     }
 }
 
+impl Material {
+    /// Calculating reflections using Phong reflection model
+    pub fn lighting(
+        &self,
+        light: PointLight,
+        position: Tuple,
+        eyev: Tuple,
+        normalv: Tuple,
+    ) -> Color {
+        let mut diffuse = BLACK;
+        let mut specular = BLACK;
+
+        // combine the surface color with the light's color/intensity
+        let effective_color = self.color * light.intensity;
+
+        // find the direction to the light source
+        let lightv = normalize(&(light.position - position));
+
+        // compute the ambient contribution
+        let ambient = effective_color * self.ambient;
+
+        // light_dot_normal represents the consine of the angle between the light vector and the
+        // normal vector. A negative number means the light is on the other side of the surface
+        let light_dot_normal = dot(&lightv, &normalv);
+        if light_dot_normal > 0.0 || eq_with_eps(0.0, light_dot_normal) {
+            // compute the diffuse contribution
+            diffuse = effective_color * self.diffuse * light_dot_normal;
+
+            // reflect_dot_eye representsd the cosine of the angle between the reflection vector
+            // and the eye vector. A negative number means the light reflects away from the eye
+            let reflectv = reflect(&-lightv, &normalv);
+            let reflect_dot_eye = dot(&reflectv, &eyev);
+
+            if reflect_dot_eye > 0.0 {
+                // compute the specular contribution
+                let factor = reflect_dot_eye.powf(self.shininess);
+                specular = light.intensity * self.specular * factor;
+            }
+        }
+
+        ambient + diffuse + specular
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::tuple::{point, vector};
+
+    fn setup() -> (Material, Tuple) {
+        let m: Material = Default::default();
+        let position = point(0.0, 0.0, 0.0);
+        (m, position)
+    }
 
     #[test]
     fn default_material() {
@@ -44,5 +97,72 @@ mod tests {
         assert!(eq_with_eps(0.9, m.diffuse));
         assert!(eq_with_eps(0.9, m.specular));
         assert!(eq_with_eps(200.0, m.shininess));
+    }
+
+    #[test]
+    fn lighting_with_eye_between_light_and_surface() {
+        let (m, position) = setup();
+        let eyev = vector(0.0, 0.0, -1.0);
+        let normalv = vector(0.0, 0.0, -1.0);
+        let light = PointLight {
+            position: point(0.0, 0.0, -10.0),
+            intensity: Color::new(1.0, 1.0, 1.0),
+        };
+        let result = m.lighting(light, position, eyev, normalv);
+        assert_eq!(Color::new(1.9, 1.9, 1.9), result);
+    }
+
+    #[test]
+    fn lighting_with_eye_between_light_and_surface_and_eye_offset_45() {
+        let (m, position) = setup();
+        let two_sqrt = 2.0f64.sqrt();
+        let eyev = vector(0.0, two_sqrt / 2.0, -two_sqrt / 2.0);
+        let normalv = vector(0.0, 0.0, -1.0);
+        let light = PointLight {
+            position: point(0.0, 0.0, -10.0),
+            intensity: Color::new(1.0, 1.0, 1.0),
+        };
+        let result = m.lighting(light, position, eyev, normalv);
+        assert_eq!(Color::new(1.0, 1.0, 1.0), result);
+    }
+
+    #[test]
+    fn lighting_with_eye_opposite_surface_and_light_offset_45() {
+        let (m, position) = setup();
+        let eyev = vector(0.0, 0.0, -1.0);
+        let normalv = vector(0.0, 0.0, -1.0);
+        let light = PointLight {
+            position: point(0.0, 10.0, -10.0),
+            intensity: Color::new(1.0, 1.0, 1.0),
+        };
+        let result = m.lighting(light, position, eyev, normalv);
+        assert_eq!(Color::new(0.7364, 0.7364, 0.7364), result);
+    }
+
+    #[test]
+    fn lighting_with_eye_in_path_of_reflection_vector() {
+        let (m, position) = setup();
+        let two_sqrt = 2.0f64.sqrt();
+        let eyev = vector(0.0, -two_sqrt / 2.0, -two_sqrt / 2.0);
+        let normalv = vector(0.0, 0.0, -1.0);
+        let light = PointLight {
+            position: point(0.0, 10.0, -10.0),
+            intensity: Color::new(1.0, 1.0, 1.0),
+        };
+        let result = m.lighting(light, position, eyev, normalv);
+        assert_eq!(Color::new(1.6364, 1.6364, 1.6364), result);
+    }
+
+    #[test]
+    fn lighting_with_light_behind_surface() {
+        let (m, position) = setup();
+        let eyev = vector(0.0, 0.0, -1.0);
+        let normalv = vector(0.0, 0.0, -1.0);
+        let light = PointLight {
+            position: point(0.0, 0.0, 10.0),
+            intensity: Color::new(1.0, 1.0, 1.0),
+        };
+        let result = m.lighting(light, position, eyev, normalv);
+        assert_eq!(Color::new(0.1, 0.1, 0.1), result);
     }
 }
