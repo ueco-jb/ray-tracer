@@ -12,6 +12,8 @@ pub trait TupleT {
     fn get_z(&self) -> f64;
 
     fn get_w(&self) -> f64;
+
+    fn set_w(&mut self, w: f64);
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -42,13 +44,13 @@ impl TupleT for Tuple {
     fn get_w(&self) -> f64 {
         self.w
     }
+
+    fn set_w(&mut self, w: f64) {
+        self.w = w
+    }
 }
 
 impl Tuple {
-    pub fn set_w(&mut self, w: f64) {
-        self.w = w
-    }
-
     pub fn is_vector(&self) -> Result<bool, &'static str> {
         match self.w {
             w if eq_with_eps(w, 0.0) => Ok(true),
@@ -195,6 +197,10 @@ pub fn cross(a: &Tuple, b: &Tuple) -> Tuple {
         a.z * b.x - a.x * b.z,
         a.x * b.y - a.y * b.x,
     )
+}
+
+pub fn reflect(incoming: &Tuple, normal: &Tuple) -> Tuple {
+    *incoming - *normal * 2.0 * dot(incoming, normal)
 }
 
 #[cfg(test)]
@@ -344,5 +350,22 @@ mod tests {
         let b = vector(2.0, 3.0, 4.0);
         assert_eq!(vector(-1.0, 2.0, -1.0), cross(&a, &b));
         assert_eq!(vector(1.0, -2.0, 1.0), cross(&b, &a));
+    }
+
+    #[test]
+    fn reflecting_vector_approaching_at_45() {
+        let v = vector(1.0, -1.0, 0.0);
+        let n = vector(0.0, 1.0, 0.0);
+        let r = reflect(&v, &n);
+        assert_eq!(vector(1.0, 1.0, 0.0), r);
+    }
+
+    #[test]
+    fn reflecting_vector_off_slanted_surface() {
+        let v = vector(0.0, -1.0, 0.0);
+        let two_sqrt = 2.0f64.sqrt();
+        let n = vector(two_sqrt / 2.0, two_sqrt / 2.0, 0.0);
+        let r = reflect(&v, &n);
+        assert_eq!(vector(1.0, 0.0, 0.0), r);
     }
 }

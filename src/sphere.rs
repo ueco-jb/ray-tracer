@@ -1,6 +1,6 @@
 use crate::matrix::{Matrix4, MatrixError};
 use crate::shape::Shape;
-use crate::tuple::{normalize, point, Tuple};
+use crate::tuple::{normalize, point, Tuple, TupleT};
 use uuid::Uuid;
 
 // For simplicity, Sphere currently has radius 1 and center on (0, 0, 0)
