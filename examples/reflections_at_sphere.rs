@@ -10,7 +10,7 @@ use shape::Shape;
 use sphere::Sphere;
 use tuple::{normalize, point};
 
-const CANVAS_SIZE: usize = 100;
+const CANVAS_SIZE: usize = 1000;
 
 fn main() {
     let mut c: canvas::Canvas = canvas::Canvas::new(CANVAS_SIZE, CANVAS_SIZE);
@@ -42,16 +42,12 @@ fn main() {
             };
             let mut xs = intersect(&s, &r).unwrap();
             let hit = xs.hit();
-            match hit {
-                Some(hit) => {
-                    let point = r.position(hit.t);
-                    let normal = hit.object.normal_at(point).unwrap();
-                    let eye = -r.direction;
-                    let col =
-                        lighting(hit.object.clone().get_material(), light, point, eye, normal);
-                    c.write_pixel(x, y, col).expect("Out of canvas border");
-                }
-                None => {}
+            if let Some(hit) = hit {
+                let point = r.position(hit.t);
+                let normal = hit.object.normal_at(point).unwrap();
+                let eye = -r.direction;
+                let col = lighting(hit.object.clone().get_material(), light, point, eye, normal);
+                c.write_pixel(x, y, col).expect("Out of canvas border");
             }
         }
     }
