@@ -41,7 +41,7 @@ impl Shape for Sphere {
         self.material = m;
     }
 
-    fn get_material(&mut self) -> &Material {
+    fn get_material(&self) -> &Material {
         &self.material
     }
 
