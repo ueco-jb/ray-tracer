@@ -1,6 +1,13 @@
 use crate::{
-    color::Color, light::PointLight, material::Material, shape::Shape, sphere::Sphere,
-    transformations::scaling, tuple::point,
+    color::Color,
+    intersections::{intersect, Intersections},
+    light::PointLight,
+    material::Material,
+    ray::Ray,
+    shape::Shape,
+    sphere::Sphere,
+    transformations::scaling,
+    tuple::point,
 };
 
 pub struct World {
@@ -39,9 +46,17 @@ impl World {
     }
 }
 
+fn intersect_world<'a>(world: &'a World, ray: &Ray) -> Intersections<'a, Sphere> {
+    let i = Intersections;
+    for o in world.objects.iter() {
+        i.append(intersect(o, &ray).unwrap().0);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::tuple::vector;
 
     #[test]
     fn creating_world() {
@@ -80,5 +95,20 @@ mod tests {
             .iter()
             .any(|&i| i.get_transform() == s2.get_transform()
                 && i.get_material() == s2.get_material()));
+    }
+
+    #[test]
+    fn intersecting_world_with_ray() {
+        let w: World = Default::default();
+        let r = Ray {
+            origin: point(0.0, 0.0, -5.0),
+            direction: vector(0.0, 0.0, 1.0),
+        };
+        let xs = w.intersect(r);
+        assert_eq!(4, xs.0.len());
+        assert_eq!(4.0, xs.0[0].t);
+        assert_eq!(4.5, xs.0[1].t);
+        assert_eq!(5.5, xs.0[2].t);
+        assert_eq!(6.0, xs.0[3].t);
     }
 }
