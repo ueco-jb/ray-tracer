@@ -47,13 +47,13 @@ impl World {
     }
 }
 
-fn intersect_world<'a>(
-    world: &'a World,
+fn intersect_world(
+    world: &World,
     ray: &Ray,
-    intersections: &mut Intersections<'a, Sphere>,
+    intersections: &mut Intersections<Sphere>,
 ) -> Result<(), MatrixError> {
     for o in world.objects.iter() {
-        let intersection = intersect(o, ray)?;
+        let mut intersection = intersect(*o, ray)?;
         intersections.append(&mut intersection);
     }
     Ok(())

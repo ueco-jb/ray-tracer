@@ -14,7 +14,7 @@ use std::{
 #[derive(Clone, Debug)]
 pub struct Intersection<T>
 where
-    T: Shape,
+    T: Shape + Copy,
 {
     pub t: f64,
     pub object: Rc<RefCell<T>>,
@@ -22,7 +22,7 @@ where
 
 impl<T> PartialEq for Intersection<T>
 where
-    T: Shape + PartialEq,
+    T: Shape + PartialEq + Copy,
 {
     fn eq(&self, other: &Self) -> bool {
         eq_with_eps(self.t, other.t) && self.object == other.object
@@ -57,7 +57,7 @@ impl<T: Shape> DerefMut for Intersections<T> {
 
 impl<T> Intersections<T>
 where
-    T: Shape,
+    T: Shape + Copy,
 {
     #[allow(dead_code)]
     fn new() -> Intersections<T> {
@@ -96,7 +96,7 @@ where
 /// sphere's transformation onto ray
 pub fn intersect<T>(object: T, ray: &Ray) -> Result<Intersections<T>, MatrixError>
 where
-    T: Shape,
+    T: Shape + Copy,
 {
     let ray2 = transform(*ray, object.get_transform().inverse()?);
     // Vector from the sphere's center to the ray origin
