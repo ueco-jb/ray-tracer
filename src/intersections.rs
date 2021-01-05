@@ -1,10 +1,14 @@
-use crate::matrix::MatrixError;
-use crate::ray::{transform, Ray};
-use crate::shape::Shape;
-use crate::tuple::{dot, point};
-use crate::utils::eq_with_eps;
+use crate::{
+    matrix::MatrixError,
+    ray::{transform, Ray},
+    shape::Shape,
+    tuple::{dot, point},
+    utils::eq_with_eps,
+};
+use std::ops::Deref;
+use std::ops::DerefMut;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct Intersection<'a, T>
 where
     T: Shape,
@@ -22,9 +26,23 @@ where
     }
 }
 
-pub struct Intersections<'a, T>(pub Vec<Intersection<'a, T>>)
-where
-    T: Shape;
+pub struct Intersections<'a, T: Shape>(pub Vec<Intersection<'a, T>>);
+
+impl<T> Deref for Intersections<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T> DerefMut for Intersections<T> {
+    type Target = T;
+
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 impl<'a, T> Intersections<'a, T>
 where
@@ -110,7 +128,7 @@ mod tests {
         let s: Sphere = Default::default();
         let i1 = Intersection { t: 1.0, object: &s };
         let i2 = Intersection { t: 2.0, object: &s };
-        let mut xs = Intersections(vec![i2, i1]);
+        let mut xs = Intersections(vec![i2, i1.clone()]);
         let i = xs.hit();
         assert_eq!(&i1, i.unwrap());
     }
@@ -123,7 +141,7 @@ mod tests {
             object: &s,
         };
         let i2 = Intersection { t: 2.0, object: &s };
-        let mut xs = Intersections(vec![i2, i1]);
+        let mut xs = Intersections(vec![i2.clone(), i1]);
         let i = xs.hit();
         assert_eq!(&i2, i.unwrap());
     }
@@ -154,7 +172,7 @@ mod tests {
             object: &s,
         };
         let i4 = Intersection { t: 2.0, object: &s };
-        let mut xs = Intersections(vec![i1, i2, i3, i4]);
+        let mut xs = Intersections(vec![i1, i2, i3, i4.clone()]);
         let i = xs.hit();
         assert_eq!(&i4, i.unwrap());
     }
