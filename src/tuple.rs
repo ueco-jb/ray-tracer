@@ -133,22 +133,22 @@ impl Mul<Matrix4> for Tuple {
     type Output = Tuple;
 
     fn mul(self, rhs: Matrix4) -> Tuple {
-        let v1 = rhs.0[0] * self.get_x()
-            + rhs.0[1] * self.get_y()
-            + rhs.0[2] * self.get_z()
-            + rhs.0[3] * self.get_w();
-        let v2 = rhs.0[4] * self.get_x()
-            + rhs.0[5] * self.get_y()
-            + rhs.0[6] * self.get_z()
-            + rhs.0[7] * self.get_w();
-        let v3 = rhs.0[8] * self.get_x()
-            + rhs.0[9] * self.get_y()
-            + rhs.0[10] * self.get_z()
-            + rhs.0[11] * self.get_w();
-        let v4 = rhs.0[12] * self.get_x()
-            + rhs.0[13] * self.get_y()
-            + rhs.0[14] * self.get_z()
-            + rhs.0[15] * self.get_w();
+        let v1 = (*rhs)[0] * self.get_x()
+            + (*rhs)[1] * self.get_y()
+            + (*rhs)[2] * self.get_z()
+            + (*rhs)[3] * self.get_w();
+        let v2 = (*rhs)[4] * self.get_x()
+            + (*rhs)[5] * self.get_y()
+            + (*rhs)[6] * self.get_z()
+            + (*rhs)[7] * self.get_w();
+        let v3 = (*rhs)[8] * self.get_x()
+            + (*rhs)[9] * self.get_y()
+            + (*rhs)[10] * self.get_z()
+            + (*rhs)[11] * self.get_w();
+        let v4 = (*rhs)[12] * self.get_x()
+            + (*rhs)[13] * self.get_y()
+            + (*rhs)[14] * self.get_z()
+            + (*rhs)[15] * self.get_w();
         Tuple::new(v1, v2, v3, v4)
     }
 }

@@ -279,7 +279,7 @@ impl Matrix for Matrix3 {
                 let mut i = 0;
                 for (index, elem) in (*self).iter().enumerate() {
                     if !to_remove.contains(&index) {
-                        submatrix.0[i] = *elem;
+                        (*submatrix)[i] = *elem;
                         i += 1;
                     }
                 }
