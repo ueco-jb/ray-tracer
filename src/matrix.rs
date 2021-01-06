@@ -125,7 +125,7 @@ impl Matrix for Matrix4 {
                 let mut i = 0;
                 for (index, elem) in (*self).iter().enumerate() {
                     if !to_remove.contains(&index) {
-                        submatrix.0[i] = *elem;
+                        (*submatrix)[i] = *elem;
                         i += 1;
                     }
                 }
@@ -174,7 +174,7 @@ impl Matrix4 {
 
 impl PartialEq for Matrix4 {
     fn eq(&self, other: &Self) -> bool {
-        (*self).iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
+        (*self).iter().eq_by(&**other, |&x, &y| eq_with_eps(x, y))
     }
 }
 
@@ -188,22 +188,22 @@ impl Mul for Matrix4 {
             let pos_b = i * Self::SIZE + 1;
             let pos_c = i * Self::SIZE + 2;
             let pos_d = i * Self::SIZE + 3;
-            m.0[pos_a] = (*self)[pos_a] * rhs.0[0]
-                + (*self)[pos_b] * rhs.0[4]
-                + (*self)[pos_c] * rhs.0[8]
-                + (*self)[pos_d] * rhs.0[12];
-            m.0[pos_b] = (*self)[pos_a] * rhs.0[1]
-                + (*self)[pos_b] * rhs.0[5]
-                + (*self)[pos_c] * rhs.0[9]
-                + (*self)[pos_d] * rhs.0[13];
-            m.0[pos_c] = (*self)[pos_a] * rhs.0[2]
-                + (*self)[pos_b] * rhs.0[6]
-                + (*self)[pos_c] * rhs.0[10]
-                + (*self)[pos_d] * rhs.0[14];
-            m.0[pos_d] = (*self)[pos_a] * rhs.0[3]
-                + (*self)[pos_b] * rhs.0[7]
-                + (*self)[pos_c] * rhs.0[11]
-                + (*self)[pos_d] * rhs.0[15];
+            (*m)[pos_a] = (*self)[pos_a] * (*rhs)[0]
+                + (*self)[pos_b] * (*rhs)[4]
+                + (*self)[pos_c] * (*rhs)[8]
+                + (*self)[pos_d] * (*rhs)[12];
+            (*m)[pos_b] = (*self)[pos_a] * (*rhs)[1]
+                + (*self)[pos_b] * (*rhs)[5]
+                + (*self)[pos_c] * (*rhs)[9]
+                + (*self)[pos_d] * (*rhs)[13];
+            (*m)[pos_c] = (*self)[pos_a] * (*rhs)[2]
+                + (*self)[pos_b] * (*rhs)[6]
+                + (*self)[pos_c] * (*rhs)[10]
+                + (*self)[pos_d] * (*rhs)[14];
+            (*m)[pos_d] = (*self)[pos_a] * (*rhs)[3]
+                + (*self)[pos_b] * (*rhs)[7]
+                + (*self)[pos_c] * (*rhs)[11]
+                + (*self)[pos_d] * (*rhs)[15];
         }
         m
     }
