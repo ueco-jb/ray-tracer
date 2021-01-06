@@ -54,10 +54,12 @@ impl<'a, T> Intersections<'a, T>
 where
     T: Shape,
 {
+    #[allow(dead_code)]
     fn new() -> Intersections<'a, T> {
         Intersections(Vec::new())
     }
 
+    #[allow(dead_code)]
     fn add(&mut self, elem: Intersection<'a, T>) {
         (*self).push(elem);
     }
