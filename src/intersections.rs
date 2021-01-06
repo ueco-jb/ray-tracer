@@ -5,8 +5,7 @@ use crate::{
     tuple::{dot, point},
     utils::eq_with_eps,
 };
-use std::ops::Deref;
-use std::ops::DerefMut;
+use std::ops::{Deref, DerefMut};
 
 #[derive(Clone, Debug)]
 pub struct Intersection<'a, T>
@@ -26,7 +25,6 @@ where
     }
 }
 
-#[derive(Clone, Debug)]
 pub struct Intersections<'a, T: Shape>(Vec<Intersection<'a, T>>);
 
 impl<'a, T: Shape> Deref for Intersections<'a, T> {
@@ -43,10 +41,27 @@ impl<'a, T: Shape> DerefMut for Intersections<'a, T> {
     }
 }
 
+impl<'a, T: Shape> IntoIterator for Intersections<'a, T> {
+    type Item = Intersection<'a, T>;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 impl<'a, T> Intersections<'a, T>
 where
     T: Shape,
 {
+    fn new() -> Intersections<'a, T> {
+        Intersections(Vec::new())
+    }
+
+    fn add(&mut self, elem: Intersection<'a, T>) {
+        self.0.push(elem);
+    }
+
     fn sort(&mut self) -> &Self {
         (*self).sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(std::cmp::Ordering::Less));
         self
