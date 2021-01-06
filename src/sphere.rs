@@ -81,9 +81,9 @@ mod tests {
         };
         let s: Sphere = Default::default();
         let xs = intersect(&s, &r).unwrap();
-        assert_eq!(2, xs.0.len());
-        assert!(eq_with_eps(4.0, xs.0[0].t));
-        assert!(eq_with_eps(6.0, xs.0[1].t));
+        assert_eq!(2, (*xs).len());
+        assert!(eq_with_eps(4.0, (*xs)[0].t));
+        assert!(eq_with_eps(6.0, (*xs)[1].t));
     }
 
     #[test]
@@ -94,9 +94,9 @@ mod tests {
         };
         let s: Sphere = Default::default();
         let xs = intersect(&s, &r).unwrap();
-        assert_eq!(2, xs.0.len());
-        assert!(eq_with_eps(5.0, xs.0[0].t));
-        assert!(eq_with_eps(5.0, xs.0[1].t));
+        assert_eq!(2, (*xs).len());
+        assert!(eq_with_eps(5.0, (*xs)[0].t));
+        assert!(eq_with_eps(5.0, (*xs)[1].t));
     }
 
     #[test]
@@ -107,7 +107,7 @@ mod tests {
         };
         let s: Sphere = Default::default();
         let xs = intersect(&s, &r).unwrap();
-        assert_eq!(0, xs.0.len());
+        assert_eq!(0, (*xs).len());
     }
 
     #[test]
@@ -118,9 +118,9 @@ mod tests {
         };
         let s: Sphere = Default::default();
         let xs = intersect(&s, &r).unwrap();
-        assert_eq!(2, xs.0.len());
-        assert!(eq_with_eps(-1.0, xs.0[0].t));
-        assert!(eq_with_eps(1.0, xs.0[1].t));
+        assert_eq!(2, (*xs).len());
+        assert!(eq_with_eps(-1.0, (*xs)[0].t));
+        assert!(eq_with_eps(1.0, (*xs)[1].t));
     }
 
     #[test]
@@ -131,9 +131,9 @@ mod tests {
         };
         let s: Sphere = Default::default();
         let xs = intersect(&s, &r).unwrap();
-        assert_eq!(2, xs.0.len());
-        assert!(eq_with_eps(-6.0, xs.0[0].t));
-        assert!(eq_with_eps(-4.0, xs.0[1].t));
+        assert_eq!(2, (*xs).len());
+        assert!(eq_with_eps(-6.0, (*xs)[0].t));
+        assert!(eq_with_eps(-4.0, (*xs)[1].t));
     }
 
     #[test]
@@ -144,9 +144,9 @@ mod tests {
         };
         let s: Sphere = Default::default();
         let xs = intersect(&s, &r).unwrap();
-        assert_eq!(2, xs.0.len());
-        assert_eq!(&s, xs.0[0].object);
-        assert_eq!(&s, xs.0[1].object);
+        assert_eq!(2, (*xs).len());
+        assert_eq!(&s, (*xs)[0].object);
+        assert_eq!(&s, (*xs)[1].object);
     }
 
     #[test]
@@ -172,9 +172,9 @@ mod tests {
         let mut s: Sphere = Default::default();
         s.set_transform(scaling(2.0, 2.0, 2.0));
         let xs = intersect(&s, &r).unwrap();
-        assert_eq!(2, xs.0.len());
-        assert!(eq_with_eps(3.0, xs.0[0].t));
-        assert!(eq_with_eps(7.0, xs.0[1].t));
+        assert_eq!(2, (*xs).len());
+        assert!(eq_with_eps(3.0, (*xs)[0].t));
+        assert!(eq_with_eps(7.0, (*xs)[1].t));
     }
 
     #[test]
@@ -186,7 +186,7 @@ mod tests {
         let mut s: Sphere = Default::default();
         s.set_transform(translation(5.0, 0.0, 0.0));
         let xs = intersect(&s, &r).unwrap();
-        assert_eq!(0, xs.0.len());
+        assert_eq!(0, (*xs).len());
     }
 
     #[test]

@@ -1,7 +1,11 @@
-use crate::tuple::{Tuple, TupleT};
-use crate::utils::eq_with_eps;
-use std::collections::HashSet;
-use std::ops::Mul;
+use crate::{
+    tuple::{Tuple, TupleT},
+    utils::eq_with_eps,
+};
+use std::{
+    collections::HashSet,
+    ops::{Deref, DerefMut, Mul},
+};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -78,6 +82,20 @@ pub trait Matrix {
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Matrix4(pub [f64; 16]);
 
+impl Deref for Matrix4 {
+    type Target = [f64; 16];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Matrix4 {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 impl Matrix for Matrix4 {
     const SIZE: usize = 4;
     type Submatrix = Matrix3;
@@ -85,7 +103,7 @@ impl Matrix for Matrix4 {
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<()> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
-                self.0[row * Self::SIZE + column] = value;
+                (*self)[row * Self::SIZE + column] = value;
                 Ok(())
             }
             Err(e) => Err(e),
@@ -94,7 +112,7 @@ impl Matrix for Matrix4 {
 
     fn get(&self, row: usize, column: usize) -> Result<f64> {
         match self.boundry_check(&row, &column) {
-            Ok(_) => Ok(self.0[row * Self::SIZE + column]),
+            Ok(_) => Ok((*self)[row * Self::SIZE + column]),
             Err(e) => Err(e),
         }
     }
@@ -105,9 +123,9 @@ impl Matrix for Matrix4 {
                 let to_remove = self.calculate_submatrix_remove_indexes(row, column);
                 let mut submatrix: Self::Submatrix = Default::default();
                 let mut i = 0;
-                for (index, elem) in self.0.iter().enumerate() {
+                for (index, elem) in (*self).iter().enumerate() {
                     if !to_remove.contains(&index) {
-                        submatrix.0[i] = *elem;
+                        (*submatrix)[i] = *elem;
                         i += 1;
                     }
                 }
@@ -156,7 +174,7 @@ impl Matrix4 {
 
 impl PartialEq for Matrix4 {
     fn eq(&self, other: &Self) -> bool {
-        self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
+        (*self).iter().eq_by(&**other, |&x, &y| eq_with_eps(x, y))
     }
 }
 
@@ -170,22 +188,22 @@ impl Mul for Matrix4 {
             let pos_b = i * Self::SIZE + 1;
             let pos_c = i * Self::SIZE + 2;
             let pos_d = i * Self::SIZE + 3;
-            m.0[pos_a] = self.0[pos_a] * rhs.0[0]
-                + self.0[pos_b] * rhs.0[4]
-                + self.0[pos_c] * rhs.0[8]
-                + self.0[pos_d] * rhs.0[12];
-            m.0[pos_b] = self.0[pos_a] * rhs.0[1]
-                + self.0[pos_b] * rhs.0[5]
-                + self.0[pos_c] * rhs.0[9]
-                + self.0[pos_d] * rhs.0[13];
-            m.0[pos_c] = self.0[pos_a] * rhs.0[2]
-                + self.0[pos_b] * rhs.0[6]
-                + self.0[pos_c] * rhs.0[10]
-                + self.0[pos_d] * rhs.0[14];
-            m.0[pos_d] = self.0[pos_a] * rhs.0[3]
-                + self.0[pos_b] * rhs.0[7]
-                + self.0[pos_c] * rhs.0[11]
-                + self.0[pos_d] * rhs.0[15];
+            (*m)[pos_a] = (*self)[pos_a] * (*rhs)[0]
+                + (*self)[pos_b] * (*rhs)[4]
+                + (*self)[pos_c] * (*rhs)[8]
+                + (*self)[pos_d] * (*rhs)[12];
+            (*m)[pos_b] = (*self)[pos_a] * (*rhs)[1]
+                + (*self)[pos_b] * (*rhs)[5]
+                + (*self)[pos_c] * (*rhs)[9]
+                + (*self)[pos_d] * (*rhs)[13];
+            (*m)[pos_c] = (*self)[pos_a] * (*rhs)[2]
+                + (*self)[pos_b] * (*rhs)[6]
+                + (*self)[pos_c] * (*rhs)[10]
+                + (*self)[pos_d] * (*rhs)[14];
+            (*m)[pos_d] = (*self)[pos_a] * (*rhs)[3]
+                + (*self)[pos_b] * (*rhs)[7]
+                + (*self)[pos_c] * (*rhs)[11]
+                + (*self)[pos_d] * (*rhs)[15];
         }
         m
     }
@@ -195,28 +213,42 @@ impl Mul<Tuple> for Matrix4 {
     type Output = Tuple;
 
     fn mul(self, rhs: Tuple) -> Tuple {
-        let v1 = self.0[0] * rhs.get_x()
-            + self.0[1] * rhs.get_y()
-            + self.0[2] * rhs.get_z()
-            + self.0[3] * rhs.get_w();
-        let v2 = self.0[4] * rhs.get_x()
-            + self.0[5] * rhs.get_y()
-            + self.0[6] * rhs.get_z()
-            + self.0[7] * rhs.get_w();
-        let v3 = self.0[8] * rhs.get_x()
-            + self.0[9] * rhs.get_y()
-            + self.0[10] * rhs.get_z()
-            + self.0[11] * rhs.get_w();
-        let v4 = self.0[12] * rhs.get_x()
-            + self.0[13] * rhs.get_y()
-            + self.0[14] * rhs.get_z()
-            + self.0[15] * rhs.get_w();
+        let v1 = (*self)[0] * rhs.get_x()
+            + (*self)[1] * rhs.get_y()
+            + (*self)[2] * rhs.get_z()
+            + (*self)[3] * rhs.get_w();
+        let v2 = (*self)[4] * rhs.get_x()
+            + (*self)[5] * rhs.get_y()
+            + (*self)[6] * rhs.get_z()
+            + (*self)[7] * rhs.get_w();
+        let v3 = (*self)[8] * rhs.get_x()
+            + (*self)[9] * rhs.get_y()
+            + (*self)[10] * rhs.get_z()
+            + (*self)[11] * rhs.get_w();
+        let v4 = (*self)[12] * rhs.get_x()
+            + (*self)[13] * rhs.get_y()
+            + (*self)[14] * rhs.get_z()
+            + (*self)[15] * rhs.get_w();
         Tuple::new(v1, v2, v3, v4)
     }
 }
 
 #[derive(Debug, Default)]
 pub struct Matrix3([f64; 9]);
+
+impl Deref for Matrix3 {
+    type Target = [f64; 9];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Matrix3 {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 impl Matrix for Matrix3 {
     const SIZE: usize = 3;
@@ -225,7 +257,7 @@ impl Matrix for Matrix3 {
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<()> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
-                self.0[row * Self::SIZE + column] = value;
+                (*self)[row * Self::SIZE + column] = value;
                 Ok(())
             }
             Err(e) => Err(e),
@@ -234,7 +266,7 @@ impl Matrix for Matrix3 {
 
     fn get(&self, row: usize, column: usize) -> Result<f64> {
         match self.boundry_check(&row, &column) {
-            Ok(_) => Ok(self.0[row * Self::SIZE + column]),
+            Ok(_) => Ok((*self)[row * Self::SIZE + column]),
             Err(e) => Err(e),
         }
     }
@@ -245,9 +277,9 @@ impl Matrix for Matrix3 {
                 let to_remove = self.calculate_submatrix_remove_indexes(row, column);
                 let mut submatrix: Self::Submatrix = Default::default();
                 let mut i = 0;
-                for (index, elem) in self.0.iter().enumerate() {
+                for (index, elem) in (*self).iter().enumerate() {
                     if !to_remove.contains(&index) {
-                        submatrix.0[i] = *elem;
+                        (*submatrix)[i] = *elem;
                         i += 1;
                     }
                 }
@@ -269,12 +301,26 @@ impl Matrix3 {
 
 impl PartialEq for Matrix3 {
     fn eq(&self, other: &Self) -> bool {
-        self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
+        (*self).iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
     }
 }
 
 #[derive(Debug, Default)]
 pub struct Matrix2([f64; 4]);
+
+impl Deref for Matrix2 {
+    type Target = [f64; 4];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Matrix2 {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 impl Matrix for Matrix2 {
     const SIZE: usize = 2;
@@ -283,7 +329,7 @@ impl Matrix for Matrix2 {
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<()> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
-                self.0[row * Self::SIZE + column] = value;
+                (*self)[row * Self::SIZE + column] = value;
                 Ok(())
             }
             Err(e) => Err(e),
@@ -292,7 +338,7 @@ impl Matrix for Matrix2 {
 
     fn get(&self, row: usize, column: usize) -> Result<f64> {
         match self.boundry_check(&row, &column) {
-            Ok(_) => Ok(self.0[row * Self::SIZE + column]),
+            Ok(_) => Ok((*self)[row * Self::SIZE + column]),
             Err(e) => Err(e),
         }
     }
@@ -302,13 +348,13 @@ impl Matrix for Matrix2 {
     }
 
     fn determiant(&self) -> Result<f64> {
-        Ok(self.0[0] * self.0[3] - self.0[1] * self.0[2])
+        Ok((*self)[0] * (*self)[3] - (*self)[1] * (*self)[2])
     }
 }
 
 impl PartialEq for Matrix2 {
     fn eq(&self, other: &Self) -> bool {
-        self.0.iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
+        (*self).iter().eq_by(&other.0, |&x, &y| eq_with_eps(x, y))
     }
 }
 
