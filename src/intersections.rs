@@ -26,19 +26,18 @@ where
     }
 }
 
-pub struct Intersections<'a, T: Shape>(pub Vec<Intersection<'a, T>>);
+#[derive(Clone, Debug)]
+pub struct Intersections<'a, T: Shape>(Vec<Intersection<'a, T>>);
 
-impl<T> Deref for Intersections<T> {
-    type Target = T;
+impl<'a, T: Shape> Deref for Intersections<'a, T> {
+    type Target = Vec<Intersection<'a, T>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<T> DerefMut for Intersections<T> {
-    type Target = T;
-
+impl<'a, T: Shape> DerefMut for Intersections<'a, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
@@ -49,8 +48,7 @@ where
     T: Shape,
 {
     fn sort(&mut self) -> &Self {
-        self.0
-            .sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(std::cmp::Ordering::Less));
+        (*self).sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(std::cmp::Ordering::Less));
         self
     }
 
