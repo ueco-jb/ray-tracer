@@ -1,7 +1,11 @@
-use crate::tuple::{Tuple, TupleT};
-use crate::utils::eq_with_eps;
-use std::collections::HashSet;
-use std::ops::Mul;
+use crate::{
+    tuple::{Tuple, TupleT},
+    utils::eq_with_eps,
+};
+use std::{
+    collections::HashSet,
+    ops::{Deref, DerefMut, Mul},
+};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -78,6 +82,20 @@ pub trait Matrix {
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Matrix4(pub [f64; 16]);
 
+impl Deref for Matrix4 {
+    type Target = [f64; 16];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Matrix4 {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 impl Matrix for Matrix4 {
     const SIZE: usize = 4;
     type Submatrix = Matrix3;
@@ -85,7 +103,7 @@ impl Matrix for Matrix4 {
     fn set(&mut self, row: usize, column: usize, value: f64) -> Result<()> {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
-                self.0[row * Self::SIZE + column] = value;
+                (*self)[row * Self::SIZE + column] = value;
                 Ok(())
             }
             Err(e) => Err(e),
@@ -218,6 +236,20 @@ impl Mul<Tuple> for Matrix4 {
 #[derive(Debug, Default)]
 pub struct Matrix3([f64; 9]);
 
+impl Deref for Matrix3 {
+    type Target = [f64; 9];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Matrix3 {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 impl Matrix for Matrix3 {
     const SIZE: usize = 3;
     type Submatrix = Matrix2;
@@ -275,6 +307,20 @@ impl PartialEq for Matrix3 {
 
 #[derive(Debug, Default)]
 pub struct Matrix2([f64; 4]);
+
+impl Deref for Matrix2 {
+    type Target = [f64; 4];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Matrix2 {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 impl Matrix for Matrix2 {
     const SIZE: usize = 2;
