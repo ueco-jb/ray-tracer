@@ -41,14 +41,14 @@ impl<'a, T: Shape> DerefMut for Intersections<'a, T> {
     }
 }
 
-impl<'a, T: Shape> IntoIterator for Intersections<'a, T> {
-    type Item = Intersection<'a, T>;
-    type IntoIter = std::vec::IntoIter<Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter()
-    }
-}
+// impl<'a, T: Shape> IntoIterator for &Intersections<'a, T> {
+//     type Item = Intersection<'a, T>;
+//     type IntoIter = std::vec::IntoIter<Self::Item>;
+//
+//     fn into_iter(self) -> Self::IntoIter {
+//         self.0.into_iter()
+//     }
+// }
 
 impl<'a, T> Intersections<'a, T>
 where
@@ -59,7 +59,7 @@ where
     }
 
     fn add(&mut self, elem: Intersection<'a, T>) {
-        self.0.push(elem);
+        (*self).push(elem);
     }
 
     fn sort(&mut self) -> &Self {
