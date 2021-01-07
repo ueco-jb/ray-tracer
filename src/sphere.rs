@@ -5,7 +5,6 @@ use crate::{
     shape::Shape,
     tuple::{normalize, point, Tuple, TupleT},
 };
-use std::rc::Rc;
 use uuid::Uuid;
 
 // For simplicity, Sphere currently has radius 1 and center on (0, 0, 0)
@@ -70,11 +69,14 @@ impl Default for Sphere {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::intersections::intersect;
-    use crate::ray::Ray;
-    use crate::transformations::{rotation_z, scaling, translation};
-    use crate::tuple::vector;
-    use crate::utils::{eq_with_eps, PI};
+    use crate::{
+        intersections::intersect,
+        ray::Ray,
+        transformations::{rotation_z, scaling, translation},
+        tuple::vector,
+        utils::{eq_with_eps, PI},
+    };
+    use std::rc::Rc;
 
     #[test]
     fn ray_intersects_sphere_at_two_points() {
@@ -150,8 +152,6 @@ mod tests {
         assert_eq!(2, (*xs).len());
         assert_eq!(s, Rc::try_unwrap((*xs)[0].object).unwrap());
         assert_eq!(s, Rc::try_unwrap((*xs)[1].object).unwrap());
-        // assert_eq!(&s, (*xs)[0].object);
-        // assert_eq!(&s, (*xs)[1].object);
     }
 
     #[test]

@@ -10,7 +10,7 @@ use std::{
     rc::Rc,
 };
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Intersection<T>
 where
     T: Shape,
@@ -168,7 +168,7 @@ mod tests {
             t: 2.0,
             object: Rc::new(s),
         };
-        let mut xs = Intersections(vec![i2, i1]);
+        let mut xs = Intersections(vec![i2, i1.clone()]);
         let i = xs.hit();
         assert_eq!(&i1, i.unwrap());
     }
@@ -184,7 +184,7 @@ mod tests {
             t: 2.0,
             object: Rc::new(s),
         };
-        let mut xs = Intersections(vec![i2, i1]);
+        let mut xs = Intersections(vec![i2.clone(), i1]);
         let i = xs.hit();
         assert_eq!(&i2, i.unwrap());
     }
@@ -224,7 +224,7 @@ mod tests {
             t: 2.0,
             object: Rc::new(s),
         };
-        let mut xs = Intersections(vec![i1, i2, i3, i4]);
+        let mut xs = Intersections(vec![i1, i2, i3, i4.clone()]);
         let i = xs.hit();
         assert_eq!(&i4, i.unwrap());
     }
