@@ -5,18 +5,21 @@ use crate::{
     tuple::{dot, point},
     utils::eq_with_eps,
 };
-use std::ops::{Deref, DerefMut};
+use std::{
+    ops::{Deref, DerefMut},
+    rc::Rc,
+};
 
-#[derive(Clone, Debug)]
-pub struct Intersection<'a, T>
+#[derive(Debug)]
+pub struct Intersection<T>
 where
     T: Shape,
 {
     pub t: f64,
-    pub object: &'a T,
+    pub object: Rc<T>,
 }
 
-impl<'a, T> PartialEq for Intersection<'_, T>
+impl<T> PartialEq for Intersection<T>
 where
     T: Shape + PartialEq,
 {
@@ -25,17 +28,17 @@ where
     }
 }
 
-pub struct Intersections<'a, T: Shape>(Vec<Intersection<'a, T>>);
+pub struct Intersections<T: Shape>(Vec<Intersection<T>>);
 
-impl<'a, T: Shape> Deref for Intersections<'a, T> {
-    type Target = Vec<Intersection<'a, T>>;
+impl<T: Shape> Deref for Intersections<T> {
+    type Target = Vec<Intersection<T>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<'a, T: Shape> DerefMut for Intersections<'a, T> {
+impl<T: Shape> DerefMut for Intersections<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
@@ -50,17 +53,17 @@ impl<'a, T: Shape> DerefMut for Intersections<'a, T> {
 //     }
 // }
 
-impl<'a, T> Intersections<'a, T>
+impl<T> Intersections<T>
 where
     T: Shape,
 {
     #[allow(dead_code)]
-    fn new() -> Intersections<'a, T> {
+    fn new() -> Intersections<T> {
         Intersections(Vec::new())
     }
 
     #[allow(dead_code)]
-    fn add(&mut self, elem: Intersection<'a, T>) {
+    fn add(&mut self, elem: Intersection<T>) {
         (*self).push(elem);
     }
 
@@ -69,7 +72,7 @@ where
         self
     }
 
-    pub fn hit(&'a mut self) -> Option<&'a Intersection<'a, T>>
+    pub fn hit(&mut self) -> Option<&Intersection<T>>
     where
         T: Shape,
     {
@@ -89,7 +92,7 @@ where
 /// the sphere
 /// In order to calculate proper intersection on scaled object, you need to apply inverse of
 /// sphere's transformation onto ray
-pub fn intersect<'a, T>(object: &'a T, ray: &Ray) -> Result<Intersections<'a, T>, MatrixError>
+pub fn intersect<T>(object: T, ray: &Ray) -> Result<Intersections<T>, MatrixError>
 where
     T: Shape,
 {
@@ -107,9 +110,16 @@ where
         let sqrt_discriminant = discriminant.sqrt();
         let t1 = (-b - sqrt_discriminant) / (2.0 * a);
         let t2 = (-b + sqrt_discriminant) / (2.0 * a);
+        let rc_object = Rc::new(object);
         Ok(Intersections(vec![
-            Intersection { t: t1, object },
-            Intersection { t: t2, object },
+            Intersection {
+                t: t1,
+                object: Rc::clone(&rc_object),
+            },
+            Intersection {
+                t: t2,
+                object: Rc::clone(&rc_object),
+            },
         ]))
     }
 }
