@@ -132,16 +132,25 @@ mod tests {
     #[test]
     fn intersection_encapsulates_t_and_object() {
         let s: Sphere = Default::default();
-        let i = Intersection { t: 3.5, object: &s };
+        let i = Intersection {
+            t: 3.5,
+            object: Rc::new(s),
+        };
         assert!(eq_with_eps(3.5, i.t));
-        assert_eq!(&s, i.object);
+        assert_eq!(s, Rc::try_unwrap(i.object).unwrap());
     }
 
     #[test]
     fn aggregating_intersections() {
         let s: Sphere = Default::default();
-        let i1 = Intersection { t: 1.0, object: &s };
-        let i2 = Intersection { t: 2.0, object: &s };
+        let i1 = Intersection {
+            t: 1.0,
+            object: Rc::new(s),
+        };
+        let i2 = Intersection {
+            t: 2.0,
+            object: Rc::new(s),
+        };
         let xs = Intersections(vec![i1, i2]);
         assert_eq!(2, xs.0.len());
         assert!(eq_with_eps(1.0, xs.0[0].t));
@@ -151,9 +160,15 @@ mod tests {
     #[test]
     fn hit_when_all_intersections_have_positive_t() {
         let s: Sphere = Default::default();
-        let i1 = Intersection { t: 1.0, object: &s };
-        let i2 = Intersection { t: 2.0, object: &s };
-        let mut xs = Intersections(vec![i2, i1.clone()]);
+        let i1 = Intersection {
+            t: 1.0,
+            object: Rc::new(s),
+        };
+        let i2 = Intersection {
+            t: 2.0,
+            object: Rc::new(s),
+        };
+        let mut xs = Intersections(vec![i2, i1]);
         let i = xs.hit();
         assert_eq!(&i1, i.unwrap());
     }
@@ -163,10 +178,13 @@ mod tests {
         let s: Sphere = Default::default();
         let i1 = Intersection {
             t: -1.0,
-            object: &s,
+            object: Rc::new(s),
         };
-        let i2 = Intersection { t: 2.0, object: &s };
-        let mut xs = Intersections(vec![i2.clone(), i1]);
+        let i2 = Intersection {
+            t: 2.0,
+            object: Rc::new(s),
+        };
+        let mut xs = Intersections(vec![i2, i1]);
         let i = xs.hit();
         assert_eq!(&i2, i.unwrap());
     }
@@ -176,11 +194,11 @@ mod tests {
         let s: Sphere = Default::default();
         let i1 = Intersection {
             t: -2.0,
-            object: &s,
+            object: Rc::new(s),
         };
         let i2 = Intersection {
             t: -1.0,
-            object: &s,
+            object: Rc::new(s),
         };
         let mut xs = Intersections(vec![i2, i1]);
         let i = xs.hit();
@@ -190,14 +208,23 @@ mod tests {
     #[test]
     fn hit_when_is_always_the_lowest_nonnegative_intersection() {
         let s: Sphere = Default::default();
-        let i1 = Intersection { t: 5.0, object: &s };
-        let i2 = Intersection { t: 7.0, object: &s };
+        let i1 = Intersection {
+            t: 5.0,
+            object: Rc::new(s),
+        };
+        let i2 = Intersection {
+            t: 7.0,
+            object: Rc::new(s),
+        };
         let i3 = Intersection {
             t: -3.0,
-            object: &s,
+            object: Rc::new(s),
         };
-        let i4 = Intersection { t: 2.0, object: &s };
-        let mut xs = Intersections(vec![i1, i2, i3, i4.clone()]);
+        let i4 = Intersection {
+            t: 2.0,
+            object: Rc::new(s),
+        };
+        let mut xs = Intersections(vec![i1, i2, i3, i4]);
         let i = xs.hit();
         assert_eq!(&i4, i.unwrap());
     }

@@ -1,8 +1,11 @@
-use crate::color::Color;
-use crate::material::Material;
-use crate::matrix::{Matrix4, MatrixError};
-use crate::shape::Shape;
-use crate::tuple::{normalize, point, Tuple, TupleT};
+use crate::{
+    color::Color,
+    material::Material,
+    matrix::{Matrix4, MatrixError},
+    shape::Shape,
+    tuple::{normalize, point, Tuple, TupleT},
+};
+use std::rc::Rc;
 use uuid::Uuid;
 
 // For simplicity, Sphere currently has radius 1 and center on (0, 0, 0)
@@ -80,7 +83,7 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s: Sphere = Default::default();
-        let xs = intersect(&s, &r).unwrap();
+        let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
         assert!(eq_with_eps(4.0, (*xs)[0].t));
         assert!(eq_with_eps(6.0, (*xs)[1].t));
@@ -93,7 +96,7 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s: Sphere = Default::default();
-        let xs = intersect(&s, &r).unwrap();
+        let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
         assert!(eq_with_eps(5.0, (*xs)[0].t));
         assert!(eq_with_eps(5.0, (*xs)[1].t));
@@ -106,7 +109,7 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s: Sphere = Default::default();
-        let xs = intersect(&s, &r).unwrap();
+        let xs = intersect(s, &r).unwrap();
         assert_eq!(0, (*xs).len());
     }
 
@@ -117,7 +120,7 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s: Sphere = Default::default();
-        let xs = intersect(&s, &r).unwrap();
+        let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
         assert!(eq_with_eps(-1.0, (*xs)[0].t));
         assert!(eq_with_eps(1.0, (*xs)[1].t));
@@ -130,7 +133,7 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s: Sphere = Default::default();
-        let xs = intersect(&s, &r).unwrap();
+        let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
         assert!(eq_with_eps(-6.0, (*xs)[0].t));
         assert!(eq_with_eps(-4.0, (*xs)[1].t));
@@ -143,10 +146,12 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s: Sphere = Default::default();
-        let xs = intersect(&s, &r).unwrap();
+        let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
-        assert_eq!(&s, (*xs)[0].object);
-        assert_eq!(&s, (*xs)[1].object);
+        assert_eq!(s, Rc::try_unwrap((*xs)[0].object).unwrap());
+        assert_eq!(s, Rc::try_unwrap((*xs)[1].object).unwrap());
+        // assert_eq!(&s, (*xs)[0].object);
+        // assert_eq!(&s, (*xs)[1].object);
     }
 
     #[test]
@@ -171,7 +176,7 @@ mod tests {
         };
         let mut s: Sphere = Default::default();
         s.set_transform(scaling(2.0, 2.0, 2.0));
-        let xs = intersect(&s, &r).unwrap();
+        let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
         assert!(eq_with_eps(3.0, (*xs)[0].t));
         assert!(eq_with_eps(7.0, (*xs)[1].t));
@@ -185,7 +190,7 @@ mod tests {
         };
         let mut s: Sphere = Default::default();
         s.set_transform(translation(5.0, 0.0, 0.0));
-        let xs = intersect(&s, &r).unwrap();
+        let xs = intersect(s, &r).unwrap();
         assert_eq!(0, (*xs).len());
     }
 

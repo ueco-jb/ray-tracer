@@ -40,7 +40,7 @@ fn main() {
                 origin: ray_origin,
                 direction: normalize(&(position - ray_origin)),
             };
-            let mut xs = intersect(&s, &r).unwrap();
+            let mut xs = intersect(s, &r).unwrap();
             let hit = xs.hit();
             if let Some(hit) = hit {
                 let point = r.position(hit.t);

@@ -38,7 +38,7 @@ fn main() {
                 origin: ray_origin,
                 direction: normalize(&(position - ray_origin)),
             };
-            let xs = intersect(&s, &r).unwrap();
+            let xs = intersect(s, &r).unwrap();
             if !(*xs).is_empty() {
                 c.write_pixel(x, y, color::Color::new(0.85, 0.54, 0.48))
                     .expect("Out of canvas border");
