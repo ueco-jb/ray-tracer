@@ -39,6 +39,7 @@ impl Default for World {
 }
 
 impl World {
+    #[allow(dead_code)]
     fn new() -> Self {
         World {
             light: None,
@@ -47,6 +48,7 @@ impl World {
     }
 }
 
+#[allow(dead_code)]
 fn intersect_world(
     world: &World,
     ray: &Ray,
@@ -56,14 +58,14 @@ fn intersect_world(
         let mut intersection = intersect(*o, ray)?;
         intersections.append(&mut intersection);
     }
-    intersections.sorts();
+    intersections.sort();
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tuple::vector;
+    use crate::{tuple::vector, utils::eq_with_eps};
 
     #[test]
     fn creating_world() {
@@ -114,9 +116,9 @@ mod tests {
         let mut i: Intersections<Sphere> = Intersections::new();
         intersect_world(&w, &r, &mut i).unwrap();
         assert_eq!(4, (*i).len());
-        assert_eq!(4.0, (*i)[0].t);
-        assert_eq!(4.5, (*i)[1].t);
-        assert_eq!(5.5, (*i)[2].t);
-        assert_eq!(6.0, (*i)[3].t);
+        assert!(eq_with_eps(4.0, (*i)[0].t));
+        assert!(eq_with_eps(4.5, (*i)[1].t));
+        assert!(eq_with_eps(5.5, (*i)[2].t));
+        assert!(eq_with_eps(6.0, (*i)[3].t));
     }
 }

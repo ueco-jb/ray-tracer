@@ -59,17 +59,15 @@ impl<T> Intersections<T>
 where
     T: Shape,
 {
-    #[allow(dead_code)]
     pub fn new() -> Intersections<T> {
         Intersections(Vec::new())
     }
 
-    #[allow(dead_code)]
     pub fn add(&mut self, elem: Intersection<T>) {
         (*self).push(elem);
     }
 
-    pub fn sorts(&mut self) -> &Self {
+    pub fn sort(&mut self) -> &Self {
         (*self).sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(std::cmp::Ordering::Less));
         self
     }
@@ -78,13 +76,19 @@ where
     where
         T: Shape,
     {
-        self.sorts();
+        self.sort();
         for intersection in &self.0 {
             if intersection.t > 0.0 || eq_with_eps(intersection.t, 0.0) {
                 return Some(intersection);
             }
         }
         None
+    }
+}
+
+impl<T: Shape> Default for Intersections<T> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
