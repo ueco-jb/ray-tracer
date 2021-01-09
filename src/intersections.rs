@@ -20,7 +20,7 @@ where
     pub object: Rc<RefCell<T>>,
 }
 
-impl<'a, T> PartialEq for Intersection<'_, T>
+impl<T> PartialEq for Intersection<T>
 where
     T: Shape + PartialEq,
 {
@@ -55,30 +55,30 @@ impl<T: Shape> DerefMut for Intersections<T> {
 //     }
 // }
 
-impl<'a, T> Intersections<'a, T>
+impl<T> Intersections<T>
 where
     T: Shape,
 {
     #[allow(dead_code)]
-    fn new() -> Intersections<T> {
+    pub fn new() -> Intersections<T> {
         Intersections(Vec::new())
     }
 
     #[allow(dead_code)]
-    fn add(&mut self, elem: Intersection<T>) {
+    pub fn add(&mut self, elem: Intersection<T>) {
         (*self).push(elem);
     }
 
-    fn sort(&mut self) -> &Self {
+    pub fn sorts(&mut self) -> &Self {
         (*self).sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(std::cmp::Ordering::Less));
         self
     }
 
-    pub fn hit(&'a mut self) -> Option<&'a Intersection<'a, T>>
+    pub fn hit(&mut self) -> Option<&Intersection<T>>
     where
         T: Shape,
     {
-        self.sort();
+        self.sorts();
         for intersection in &self.0 {
             if intersection.t > 0.0 || eq_with_eps(intersection.t, 0.0) {
                 return Some(intersection);
@@ -94,7 +94,7 @@ where
 /// the sphere
 /// In order to calculate proper intersection on scaled object, you need to apply inverse of
 /// sphere's transformation onto ray
-pub fn intersect<'a, T>(object: &'a T, ray: &Ray) -> Result<Intersections<'a, T>, MatrixError>
+pub fn intersect<T>(object: T, ray: &Ray) -> Result<Intersections<T>, MatrixError>
 where
     T: Shape,
 {

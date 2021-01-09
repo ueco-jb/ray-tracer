@@ -47,15 +47,16 @@ impl World {
     }
 }
 
-fn intersect_world<'a>(
-    world: &'a World,
+fn intersect_world(
+    world: &World,
     ray: &Ray,
-    intersections: &mut Intersections<'a, Sphere>,
+    intersections: &mut Intersections<Sphere>,
 ) -> Result<(), MatrixError> {
     for o in world.objects.iter() {
-        let intersection = intersect(o, ray)?;
+        let mut intersection = intersect(*o, ray)?;
         intersections.append(&mut intersection);
     }
+    intersections.sorts();
     Ok(())
 }
 
@@ -111,11 +112,11 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let mut i: Intersections<Sphere> = Intersections::new();
-        let xs = intersect_world(w, r, i).unwrap();
-        assert_eq!(4, xs.0.len());
-        assert_eq!(4.0, xs.0[0].t);
-        assert_eq!(4.5, xs.0[1].t);
-        assert_eq!(5.5, xs.0[2].t);
-        assert_eq!(6.0, xs.0[3].t);
+        intersect_world(&w, &r, &mut i).unwrap();
+        assert_eq!(4, (*i).len());
+        assert_eq!(4.0, (*i)[0].t);
+        assert_eq!(4.5, (*i)[1].t);
+        assert_eq!(5.5, (*i)[2].t);
+        assert_eq!(6.0, (*i)[3].t);
     }
 }
