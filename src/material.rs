@@ -1,7 +1,9 @@
-use crate::color::{Color, BLACK};
-use crate::light::PointLight;
-use crate::tuple::{dot, normalize, reflect, Tuple};
-use crate::utils::eq_with_eps;
+use crate::{
+    color::{Color, BLACK},
+    light::PointLight,
+    tuple::{dot, normalize, reflect, Tuple},
+    utils::eq_with_eps,
+};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Material {

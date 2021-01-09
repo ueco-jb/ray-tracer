@@ -5,18 +5,22 @@ use crate::{
     tuple::{dot, point},
     utils::eq_with_eps,
 };
-use std::ops::{Deref, DerefMut};
+use std::{
+    cell::RefCell,
+    ops::{Deref, DerefMut},
+    rc::Rc,
+};
 
 #[derive(Clone, Debug)]
-pub struct Intersection<'a, T>
+pub struct Intersection<T>
 where
     T: Shape,
 {
     pub t: f64,
-    pub object: &'a T,
+    pub object: Rc<RefCell<T>>,
 }
 
-impl<'a, T> PartialEq for Intersection<'_, T>
+impl<T> PartialEq for Intersection<T>
 where
     T: Shape + PartialEq,
 {
@@ -25,17 +29,18 @@ where
     }
 }
 
-pub struct Intersections<'a, T: Shape>(Vec<Intersection<'a, T>>);
+#[repr(transparent)]
+pub struct Intersections<T: Shape>(Vec<Intersection<T>>);
 
-impl<'a, T: Shape> Deref for Intersections<'a, T> {
-    type Target = Vec<Intersection<'a, T>>;
+impl<T: Shape> Deref for Intersections<T> {
+    type Target = Vec<Intersection<T>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<'a, T: Shape> DerefMut for Intersections<'a, T> {
+impl<T: Shape> DerefMut for Intersections<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
@@ -50,17 +55,17 @@ impl<'a, T: Shape> DerefMut for Intersections<'a, T> {
 //     }
 // }
 
-impl<'a, T> Intersections<'a, T>
+impl<T> Intersections<T>
 where
     T: Shape,
 {
     #[allow(dead_code)]
-    fn new() -> Intersections<'a, T> {
+    fn new() -> Intersections<T> {
         Intersections(Vec::new())
     }
 
     #[allow(dead_code)]
-    fn add(&mut self, elem: Intersection<'a, T>) {
+    fn add(&mut self, elem: Intersection<T>) {
         (*self).push(elem);
     }
 
@@ -69,7 +74,7 @@ where
         self
     }
 
-    pub fn hit(&'a mut self) -> Option<&'a Intersection<'a, T>>
+    pub fn hit(&mut self) -> Option<&Intersection<T>>
     where
         T: Shape,
     {
@@ -89,7 +94,7 @@ where
 /// the sphere
 /// In order to calculate proper intersection on scaled object, you need to apply inverse of
 /// sphere's transformation onto ray
-pub fn intersect<'a, T>(object: &'a T, ray: &Ray) -> Result<Intersections<'a, T>, MatrixError>
+pub fn intersect<T>(object: T, ray: &Ray) -> Result<Intersections<T>, MatrixError>
 where
     T: Shape,
 {
@@ -107,9 +112,16 @@ where
         let sqrt_discriminant = discriminant.sqrt();
         let t1 = (-b - sqrt_discriminant) / (2.0 * a);
         let t2 = (-b + sqrt_discriminant) / (2.0 * a);
+        let rc_object = Rc::new(RefCell::new(object));
         Ok(Intersections(vec![
-            Intersection { t: t1, object },
-            Intersection { t: t2, object },
+            Intersection {
+                t: t1,
+                object: Rc::clone(&rc_object),
+            },
+            Intersection {
+                t: t2,
+                object: Rc::clone(&rc_object),
+            },
         ]))
     }
 }
@@ -122,16 +134,25 @@ mod tests {
     #[test]
     fn intersection_encapsulates_t_and_object() {
         let s: Sphere = Default::default();
-        let i = Intersection { t: 3.5, object: &s };
+        let i = Intersection {
+            t: 3.5,
+            object: Rc::new(RefCell::new(s)),
+        };
         assert!(eq_with_eps(3.5, i.t));
-        assert_eq!(&s, i.object);
+        assert_eq!(s, (*(*i.object).borrow()));
     }
 
     #[test]
     fn aggregating_intersections() {
         let s: Sphere = Default::default();
-        let i1 = Intersection { t: 1.0, object: &s };
-        let i2 = Intersection { t: 2.0, object: &s };
+        let i1 = Intersection {
+            t: 1.0,
+            object: Rc::new(RefCell::new(s)),
+        };
+        let i2 = Intersection {
+            t: 2.0,
+            object: Rc::new(RefCell::new(s)),
+        };
         let xs = Intersections(vec![i1, i2]);
         assert_eq!(2, xs.0.len());
         assert!(eq_with_eps(1.0, xs.0[0].t));
@@ -141,8 +162,14 @@ mod tests {
     #[test]
     fn hit_when_all_intersections_have_positive_t() {
         let s: Sphere = Default::default();
-        let i1 = Intersection { t: 1.0, object: &s };
-        let i2 = Intersection { t: 2.0, object: &s };
+        let i1 = Intersection {
+            t: 1.0,
+            object: Rc::new(RefCell::new(s)),
+        };
+        let i2 = Intersection {
+            t: 2.0,
+            object: Rc::new(RefCell::new(s)),
+        };
         let mut xs = Intersections(vec![i2, i1.clone()]);
         let i = xs.hit();
         assert_eq!(&i1, i.unwrap());
@@ -153,9 +180,12 @@ mod tests {
         let s: Sphere = Default::default();
         let i1 = Intersection {
             t: -1.0,
-            object: &s,
+            object: Rc::new(RefCell::new(s)),
         };
-        let i2 = Intersection { t: 2.0, object: &s };
+        let i2 = Intersection {
+            t: 2.0,
+            object: Rc::new(RefCell::new(s)),
+        };
         let mut xs = Intersections(vec![i2.clone(), i1]);
         let i = xs.hit();
         assert_eq!(&i2, i.unwrap());
@@ -166,11 +196,11 @@ mod tests {
         let s: Sphere = Default::default();
         let i1 = Intersection {
             t: -2.0,
-            object: &s,
+            object: Rc::new(RefCell::new(s)),
         };
         let i2 = Intersection {
             t: -1.0,
-            object: &s,
+            object: Rc::new(RefCell::new(s)),
         };
         let mut xs = Intersections(vec![i2, i1]);
         let i = xs.hit();
@@ -180,13 +210,22 @@ mod tests {
     #[test]
     fn hit_when_is_always_the_lowest_nonnegative_intersection() {
         let s: Sphere = Default::default();
-        let i1 = Intersection { t: 5.0, object: &s };
-        let i2 = Intersection { t: 7.0, object: &s };
+        let i1 = Intersection {
+            t: 5.0,
+            object: Rc::new(RefCell::new(s)),
+        };
+        let i2 = Intersection {
+            t: 7.0,
+            object: Rc::new(RefCell::new(s)),
+        };
         let i3 = Intersection {
             t: -3.0,
-            object: &s,
+            object: Rc::new(RefCell::new(s)),
         };
-        let i4 = Intersection { t: 2.0, object: &s };
+        let i4 = Intersection {
+            t: 2.0,
+            object: Rc::new(RefCell::new(s)),
+        };
         let mut xs = Intersections(vec![i1, i2, i3, i4.clone()]);
         let i = xs.hit();
         assert_eq!(&i4, i.unwrap());

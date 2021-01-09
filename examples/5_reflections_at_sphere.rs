@@ -40,13 +40,19 @@ fn main() {
                 origin: ray_origin,
                 direction: normalize(&(position - ray_origin)),
             };
-            let mut xs = intersect(&s, &r).unwrap();
+            let mut xs = intersect(s, &r).unwrap();
             let hit = xs.hit();
             if let Some(hit) = hit {
                 let point = r.position(hit.t);
-                let normal = hit.object.normal_at(point).unwrap();
+                let normal = (*hit.object).borrow().normal_at(point).unwrap();
                 let eye = -r.direction;
-                let col = lighting(hit.object.clone().get_material(), light, point, eye, normal);
+                let col = lighting(
+                    (*hit.object).borrow_mut().get_material(),
+                    light,
+                    point,
+                    eye,
+                    normal,
+                );
                 c.write_pixel(x, y, col).expect("Out of canvas border");
             }
         }
