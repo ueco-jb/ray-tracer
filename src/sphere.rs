@@ -76,7 +76,6 @@ mod tests {
         tuple::vector,
         utils::{eq_with_eps, PI},
     };
-    use std::rc::Rc;
 
     #[test]
     fn ray_intersects_sphere_at_two_points() {
@@ -150,8 +149,8 @@ mod tests {
         let s: Sphere = Default::default();
         let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
-        assert_eq!(s, Rc::try_unwrap((*xs)[0].object).unwrap());
-        assert_eq!(s, Rc::try_unwrap((*xs)[1].object).unwrap());
+        assert_eq!(s, (*((*xs)[0].object).borrow()));
+        assert_eq!(s, (*((*xs)[1].object).borrow()));
     }
 
     #[test]

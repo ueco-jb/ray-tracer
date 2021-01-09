@@ -6,6 +6,7 @@ use crate::{
     utils::eq_with_eps,
 };
 use std::{
+    cell::RefCell,
     ops::{Deref, DerefMut},
     rc::Rc,
 };
@@ -16,7 +17,7 @@ where
     T: Shape,
 {
     pub t: f64,
-    pub object: Rc<T>,
+    pub object: Rc<RefCell<T>>,
 }
 
 impl<T> PartialEq for Intersection<T>
@@ -28,6 +29,7 @@ where
     }
 }
 
+#[repr(transparent)]
 pub struct Intersections<T: Shape>(Vec<Intersection<T>>);
 
 impl<T: Shape> Deref for Intersections<T> {
@@ -110,7 +112,7 @@ where
         let sqrt_discriminant = discriminant.sqrt();
         let t1 = (-b - sqrt_discriminant) / (2.0 * a);
         let t2 = (-b + sqrt_discriminant) / (2.0 * a);
-        let rc_object = Rc::new(object);
+        let rc_object = Rc::new(RefCell::new(object));
         Ok(Intersections(vec![
             Intersection {
                 t: t1,
@@ -134,10 +136,10 @@ mod tests {
         let s: Sphere = Default::default();
         let i = Intersection {
             t: 3.5,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         assert!(eq_with_eps(3.5, i.t));
-        assert_eq!(s, Rc::try_unwrap(i.object).unwrap());
+        assert_eq!(s, (*(*i.object).borrow()));
     }
 
     #[test]
@@ -145,11 +147,11 @@ mod tests {
         let s: Sphere = Default::default();
         let i1 = Intersection {
             t: 1.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let i2 = Intersection {
             t: 2.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let xs = Intersections(vec![i1, i2]);
         assert_eq!(2, xs.0.len());
@@ -162,11 +164,11 @@ mod tests {
         let s: Sphere = Default::default();
         let i1 = Intersection {
             t: 1.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let i2 = Intersection {
             t: 2.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let mut xs = Intersections(vec![i2, i1.clone()]);
         let i = xs.hit();
@@ -178,11 +180,11 @@ mod tests {
         let s: Sphere = Default::default();
         let i1 = Intersection {
             t: -1.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let i2 = Intersection {
             t: 2.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let mut xs = Intersections(vec![i2.clone(), i1]);
         let i = xs.hit();
@@ -194,11 +196,11 @@ mod tests {
         let s: Sphere = Default::default();
         let i1 = Intersection {
             t: -2.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let i2 = Intersection {
             t: -1.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let mut xs = Intersections(vec![i2, i1]);
         let i = xs.hit();
@@ -210,19 +212,19 @@ mod tests {
         let s: Sphere = Default::default();
         let i1 = Intersection {
             t: 5.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let i2 = Intersection {
             t: 7.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let i3 = Intersection {
             t: -3.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let i4 = Intersection {
             t: 2.0,
-            object: Rc::new(s),
+            object: Rc::new(RefCell::new(s)),
         };
         let mut xs = Intersections(vec![i1, i2, i3, i4.clone()]);
         let i = xs.hit();
