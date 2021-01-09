@@ -14,15 +14,15 @@ use std::{
 #[derive(Clone, Debug)]
 pub struct Intersection<T>
 where
-    T: Shape + Copy,
+    T: Shape,
 {
     pub t: f64,
     pub object: Rc<RefCell<T>>,
 }
 
-impl<T> PartialEq for Intersection<T>
+impl<'a, T> PartialEq for Intersection<'_, T>
 where
-    T: Shape + PartialEq + Copy,
+    T: Shape + PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         eq_with_eps(self.t, other.t) && self.object == other.object
@@ -55,9 +55,9 @@ impl<T: Shape> DerefMut for Intersections<T> {
 //     }
 // }
 
-impl<T> Intersections<T>
+impl<'a, T> Intersections<'a, T>
 where
-    T: Shape + Copy,
+    T: Shape,
 {
     #[allow(dead_code)]
     fn new() -> Intersections<T> {
@@ -74,7 +74,7 @@ where
         self
     }
 
-    pub fn hit(&mut self) -> Option<&Intersection<T>>
+    pub fn hit(&'a mut self) -> Option<&'a Intersection<'a, T>>
     where
         T: Shape,
     {
@@ -94,9 +94,9 @@ where
 /// the sphere
 /// In order to calculate proper intersection on scaled object, you need to apply inverse of
 /// sphere's transformation onto ray
-pub fn intersect<T>(object: T, ray: &Ray) -> Result<Intersections<T>, MatrixError>
+pub fn intersect<'a, T>(object: &'a T, ray: &Ray) -> Result<Intersections<'a, T>, MatrixError>
 where
-    T: Shape + Copy,
+    T: Shape,
 {
     let ray2 = transform(*ray, object.get_transform().inverse()?);
     // Vector from the sphere's center to the ray origin
