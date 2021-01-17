@@ -1,8 +1,8 @@
 use crate::{
     color::Color,
-    intersections::{intersect, Intersections},
+    intersections::{intersect, Computations, Intersections},
     light::PointLight,
-    material::Material,
+    material::{lighting, Material},
     matrix::MatrixError,
     ray::Ray,
     shape::Shape,
@@ -46,6 +46,20 @@ impl World {
             objects: vec![],
         }
     }
+
+    pub fn shade_hit(&self, comps: Computations<Sphere>) -> Option<Color> {
+        if let Some(light) = self.light {
+            Some(lighting(
+                (*comps.object).borrow().get_material(),
+                light,
+                comps.point,
+                comps.eyev,
+                comps.normalv,
+            ))
+        } else {
+            None
+        }
+    }
 }
 
 #[allow(dead_code)]
@@ -65,7 +79,8 @@ fn intersect_world(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{tuple::vector, utils::eq_with_eps};
+    use crate::{intersections::Intersection, tuple::vector, utils::eq_with_eps};
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn creating_world() {
@@ -120,5 +135,43 @@ mod tests {
         assert!(eq_with_eps(4.5, (*i)[1].t));
         assert!(eq_with_eps(5.5, (*i)[2].t));
         assert!(eq_with_eps(6.0, (*i)[3].t));
+    }
+
+    #[test]
+    fn shading_intersection() {
+        let w: World = Default::default();
+        let r = Ray {
+            origin: point(0.0, 0.0, -5.0),
+            direction: vector(0.0, 0.0, 1.0),
+        };
+        let shape: Sphere = w.objects[0];
+        let i = Intersection {
+            t: 4.0,
+            object: Rc::new(RefCell::new(shape)),
+        };
+        let comps = Computations::prepare_computation(i.clone(), r).unwrap();
+        let c = w.shade_hit(comps).unwrap();
+        assert_eq!(Color::new(0.38066, 0.47583, 0.2855), c);
+    }
+
+    #[test]
+    fn shading_intersection_from_inside() {
+        let mut w: World = Default::default();
+        w.light = Some(PointLight {
+            position: point(0.0, 0.25, 0.0),
+            intensity: Color::new(1.0, 1.0, 1.0),
+        });
+        let r = Ray {
+            origin: point(0.0, 0.0, 0.0),
+            direction: vector(0.0, 0.0, 1.0),
+        };
+        let shape: Sphere = w.objects[1];
+        let i = Intersection {
+            t: 0.5,
+            object: Rc::new(RefCell::new(shape)),
+        };
+        let comps = Computations::prepare_computation(i.clone(), r).unwrap();
+        let c = w.shade_hit(comps).unwrap();
+        assert_eq!(Color::new(00.90498, 0.90498, 0.90498), c);
     }
 }
