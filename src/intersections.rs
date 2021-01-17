@@ -144,11 +144,7 @@ where
 
 impl<T: Shape> Computations<T> {
     fn is_inside(normalv: &Tuple, eyev: &Tuple) -> bool {
-        if dot(normalv, eyev) < 0.0 {
-            true
-        } else {
-            false
-        }
+        dot(normalv, eyev) < 0.0
     }
 
     pub fn prepare_computation(
@@ -294,7 +290,7 @@ mod tests {
             object: Rc::new(RefCell::new(shape)),
         };
         let comps = Computations::prepare_computation(i.clone(), r).unwrap();
-        assert_eq!(i.t, comps.t);
+        assert!(eq_with_eps(i.t, comps.t));
         assert_eq!(i.object, comps.object);
         assert_eq!(point(0.0, 0.0, -1.0), comps.point);
         assert_eq!(vector(0.0, 0.0, -1.0), comps.eyev);
@@ -327,7 +323,7 @@ mod tests {
             t: 1.0,
             object: Rc::new(RefCell::new(shape)),
         };
-        let comps = Computations::prepare_computation(i.clone(), r).unwrap();
+        let comps = Computations::prepare_computation(i, r).unwrap();
         assert_eq!(point(0.0, 0.0, 1.0), comps.point);
         assert_eq!(vector(0.0, 0.0, -1.0), comps.eyev);
         assert_eq!(vector(0.0, 0.0, -1.0), comps.normalv);

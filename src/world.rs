@@ -149,7 +149,7 @@ mod tests {
             t: 4.0,
             object: Rc::new(RefCell::new(shape)),
         };
-        let comps = Computations::prepare_computation(i.clone(), r).unwrap();
+        let comps = Computations::prepare_computation(i, r).unwrap();
         let c = w.shade_hit(comps).unwrap();
         assert_eq!(Color::new(0.38066, 0.47583, 0.2855), c);
     }
@@ -170,7 +170,7 @@ mod tests {
             t: 0.5,
             object: Rc::new(RefCell::new(shape)),
         };
-        let comps = Computations::prepare_computation(i.clone(), r).unwrap();
+        let comps = Computations::prepare_computation(i, r).unwrap();
         let c = w.shade_hit(comps).unwrap();
         assert_eq!(Color::new(00.90498, 0.90498, 0.90498), c);
     }
