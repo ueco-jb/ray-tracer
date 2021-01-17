@@ -2,7 +2,7 @@ use crate::{
     matrix::MatrixError,
     ray::{transform, Ray},
     shape::Shape,
-    tuple::{dot, point},
+    tuple::{dot, point, Tuple},
     utils::eq_with_eps,
 };
 use std::{
@@ -130,10 +130,41 @@ where
     }
 }
 
+pub struct Computations<T>
+where
+    T: Shape,
+{
+    pub t: f64,
+    pub object: Rc<RefCell<T>>,
+    pub point: Tuple,
+    pub eyev: Tuple,
+    pub normalv: Tuple,
+}
+
+impl<T: Shape> Computations<T> {
+    pub fn prepare_computation(
+        intersection: Intersection<T>,
+        ray: Ray,
+    ) -> Result<Computations<T>, MatrixError> {
+        let t = intersection.t;
+        let ray_position = ray.position(t);
+        Ok(Computations {
+            t,
+            object: Rc::clone(&intersection.object),
+            point: ray_position,
+            eyev: -ray.direction,
+            normalv: (*intersection.object).borrow().normal_at(ray_position)?,
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::sphere::Sphere;
+    use crate::{
+        sphere::Sphere,
+        tuple::{point, vector},
+    };
 
     #[test]
     fn intersection_encapsulates_t_and_object() {
@@ -233,5 +264,24 @@ mod tests {
         let mut xs = Intersections(vec![i1, i2, i3, i4.clone()]);
         let i = xs.hit();
         assert_eq!(&i4, i.unwrap());
+    }
+
+    #[test]
+    fn precomputing_state_of_intersection() {
+        let r = Ray {
+            origin: point(0.0, 0.0, -5.0),
+            direction: vector(0.0, 0.0, 1.0),
+        };
+        let shape: Sphere = Default::default();
+        let i = Intersection {
+            t: 4.0,
+            object: Rc::new(RefCell::new(shape)),
+        };
+        let comps = Computations::prepare_computation(i.clone(), r).unwrap();
+        assert_eq!(i.t, comps.t);
+        assert_eq!(i.object, comps.object);
+        assert_eq!(point(0.0, 0.0, -1.0), comps.point);
+        assert_eq!(vector(0.0, 0.0, -1.0), comps.eyev);
+        assert_eq!(vector(0.0, 0.0, -1.0), comps.normalv);
     }
 }
