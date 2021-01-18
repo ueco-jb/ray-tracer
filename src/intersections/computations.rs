@@ -62,7 +62,7 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let shape: Sphere = Default::default();
+        let shape = Sphere::default();
         let i = Intersection {
             t: 4.0,
             object: Rc::new(RefCell::new(shape)),
@@ -81,7 +81,7 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let shape: Sphere = Default::default();
+        let shape = Sphere::default();
         let i = Intersection {
             t: 4.0,
             object: Rc::new(RefCell::new(shape)),
@@ -96,7 +96,7 @@ mod tests {
             origin: point(0.0, 0.0, 0.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let shape: Sphere = Default::default();
+        let shape = Sphere::default();
         let i = Intersection {
             t: 1.0,
             object: Rc::new(RefCell::new(shape)),

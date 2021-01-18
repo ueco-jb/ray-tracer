@@ -15,7 +15,7 @@ const CANVAS_SIZE: usize = 100;
 fn main() {
     let mut c = Canvas::new(CANVAS_SIZE, CANVAS_SIZE);
 
-    let mut s: Sphere = Default::default();
+    let mut s = Sphere::default();
     s.set_transform(shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0) * scaling(0.5, 1.0, 1.0));
     let ray_origin = point(0.0, 0.0, -5.0);
     let wall_z = 10.0;

@@ -14,7 +14,7 @@ fn main() {
         intensity: Color::new(1.0, 1.0, 1.0),
     };
 
-    let mut s: Sphere = Default::default();
+    let mut s = Sphere::default();
     s.set_color(Color::new(1.0, 0.2, 1.0));
 
     let ray_origin = point(0.0, 0.0, -5.0);

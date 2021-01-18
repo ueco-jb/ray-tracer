@@ -137,7 +137,7 @@ mod tests {
 
     #[test]
     fn intersection_encapsulates_t_and_object() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let i = Intersection {
             t: 3.5,
             object: Rc::new(RefCell::new(s)),
@@ -148,7 +148,7 @@ mod tests {
 
     #[test]
     fn aggregating_intersections() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let i1 = Intersection {
             t: 1.0,
             object: Rc::new(RefCell::new(s)),
@@ -165,7 +165,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_positive_t() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let i1 = Intersection {
             t: 1.0,
             object: Rc::new(RefCell::new(s)),
@@ -181,7 +181,7 @@ mod tests {
 
     #[test]
     fn hit_when_some_intersections_have_negative_t() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let i1 = Intersection {
             t: -1.0,
             object: Rc::new(RefCell::new(s)),
@@ -197,7 +197,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_negative_t() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let i1 = Intersection {
             t: -2.0,
             object: Rc::new(RefCell::new(s)),
@@ -213,7 +213,7 @@ mod tests {
 
     #[test]
     fn hit_when_is_always_the_lowest_nonnegative_intersection() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let i1 = Intersection {
             t: 5.0,
             object: Rc::new(RefCell::new(s)),
