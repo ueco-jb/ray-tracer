@@ -1,19 +1,12 @@
-extern crate ray_tracer as rt;
-
-use color::Color;
-use intersections::intersect;
-use light::PointLight;
-use material::lighting;
-use ray::Ray;
-use rt::*;
-use shape::Shape;
-use sphere::Sphere;
-use tuple::{normalize, point};
+use ray_tracer::{
+    canvas_to_ppm, intersect, lighting, normalize, point, save, Canvas, Color, PointLight, Ray,
+    Shape, Sphere,
+};
 
 const CANVAS_SIZE: usize = 100;
 
 fn main() {
-    let mut c: canvas::Canvas = canvas::Canvas::new(CANVAS_SIZE, CANVAS_SIZE);
+    let mut c = Canvas::new(CANVAS_SIZE, CANVAS_SIZE);
 
     // light configuration - white light behind, above and to the left of the eye
     let light = PointLight {
@@ -21,7 +14,7 @@ fn main() {
         intensity: Color::new(1.0, 1.0, 1.0),
     };
 
-    let mut s: Sphere = Default::default();
+    let mut s = Sphere::default();
     s.set_color(Color::new(1.0, 0.2, 1.0));
 
     let ray_origin = point(0.0, 0.0, -5.0);
@@ -58,6 +51,6 @@ fn main() {
         }
     }
 
-    let data: canvas::PPM = canvas::canvas_to_ppm(&c);
-    serialize::save(&data.get(), "saved.ppm").unwrap();
+    let data = canvas_to_ppm(&c);
+    save(&data.get(), "saved.ppm").unwrap();
 }

@@ -1,4 +1,4 @@
-use crate::matrix::*;
+use crate::matrix::Matrix4;
 
 pub fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
     Matrix4([

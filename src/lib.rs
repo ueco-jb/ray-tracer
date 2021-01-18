@@ -1,16 +1,21 @@
 #![feature(iter_order_by)]
 
-pub mod canvas;
-pub mod color;
-pub mod intersections;
-pub mod light;
-pub mod material;
-pub mod matrix;
-pub mod ray;
-pub mod serialize;
-pub mod shape;
-pub mod sphere;
-pub mod transformations;
-pub mod tuple;
-pub mod utils;
-pub mod world;
+pub use self::{
+    canvas::*, color::*, intersections::*, light::*, material::*, matrix::*, ray::*, serialize::*,
+    shape::*, sphere::*, transformations::*, tuple::*, utils::*, world::*,
+};
+
+mod canvas;
+mod color;
+mod intersections;
+mod light;
+mod material;
+mod matrix;
+mod ray;
+mod serialize;
+mod shape;
+mod sphere;
+mod transformations;
+mod tuple;
+mod utils;
+mod world;

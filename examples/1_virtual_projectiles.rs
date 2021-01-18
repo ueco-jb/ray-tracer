@@ -1,17 +1,16 @@
-extern crate ray_tracer as rt;
-
-use rt::{tuple, tuple::TupleT, utils};
+use ray_tracer::TupleT;
+use ray_tracer::{eq_with_eps, normalize, point, vector, Tuple};
 
 #[derive(Debug)]
 struct Projectile {
-    position: tuple::Tuple, // point
-    velocity: tuple::Tuple, // vector
+    position: Tuple, // point
+    velocity: Tuple, // vector
 }
 
 #[derive(Debug)]
 struct Environment {
-    gravity: tuple::Tuple, // vector
-    wind: tuple::Tuple,    // vector
+    gravity: Tuple, // vector
+    wind: Tuple,    // vector
 }
 
 fn tick(env: &Environment, proj: &Projectile) -> Projectile {
@@ -22,12 +21,12 @@ fn tick(env: &Environment, proj: &Projectile) -> Projectile {
 
 fn main() {
     let mut p: Projectile = Projectile {
-        position: tuple::point(0.0, 1.0, 0.0),
-        velocity: tuple::normalize(&tuple::vector(1.0, 1.0, 0.0)),
+        position: point(0.0, 1.0, 0.0),
+        velocity: normalize(&vector(1.0, 1.0, 0.0)),
     };
     let e: Environment = Environment {
-        gravity: tuple::vector(0.0, -0.1, 0.0),
-        wind: tuple::vector(-0.01, 0.0, 0.0),
+        gravity: vector(0.0, -0.1, 0.0),
+        wind: vector(-0.01, 0.0, 0.0),
     };
 
     println!("Starting conditions: {:?}", p);
@@ -36,7 +35,7 @@ fn main() {
         p = tick(&e, &p);
         println!("New tick #{}", i);
         i += 1;
-        if utils::eq_with_eps(0.0_f64, p.position.get_y()) || p.position.get_y() < 0.0_f64 {
+        if eq_with_eps(0.0_f64, p.position.get_y()) || p.position.get_y() < 0.0_f64 {
             println!("Final position {:?}", p);
             break;
         }

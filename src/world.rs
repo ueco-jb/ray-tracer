@@ -18,7 +18,7 @@ pub struct World {
 
 impl Default for World {
     fn default() -> Self {
-        let mut s1: Sphere = Default::default();
+        let mut s1 = Sphere::default();
         s1.set_material(Material {
             color: Color::new(0.8, 1.0, 0.6),
             ambient: 0.1,
@@ -26,7 +26,7 @@ impl Default for World {
             specular: 0.2,
             shininess: 200.0,
         });
-        let mut s2: Sphere = Default::default();
+        let mut s2 = Sphere::default();
         s2.set_transform(scaling(0.5, 0.5, 0.5));
         World {
             light: Some(PointLight {
@@ -112,12 +112,12 @@ mod tests {
 
     #[test]
     fn default_world() {
-        let w: World = Default::default();
+        let w = World::default();
         let light = PointLight {
             position: point(-10.0, -10.0, -10.0),
             intensity: Color::new(1.0, 1.0, 1.0),
         };
-        let mut s1: Sphere = Default::default();
+        let mut s1 = Sphere::default();
         s1.set_material(Material {
             color: Color::new(0.8, 1.0, 0.6),
             ambient: 0.1,
@@ -125,7 +125,7 @@ mod tests {
             specular: 0.2,
             shininess: 200.0,
         });
-        let mut s2: Sphere = Default::default();
+        let mut s2 = Sphere::default();
         s2.set_transform(scaling(0.5, 0.5, 0.5));
 
         assert_eq!(Some(light), w.light);
@@ -143,7 +143,7 @@ mod tests {
 
     #[test]
     fn intersecting_world_with_ray() {
-        let w: World = Default::default();
+        let w = World::default();
         let r = Ray {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
@@ -159,7 +159,7 @@ mod tests {
 
     #[test]
     fn shading_intersection() {
-        let w: World = Default::default();
+        let w = World::default();
         let r = Ray {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
@@ -176,7 +176,7 @@ mod tests {
 
     #[test]
     fn shading_intersection_from_inside() {
-        let mut w: World = Default::default();
+        let mut w = World::default();
         w.light = Some(PointLight {
             position: point(0.0, 0.25, 0.0),
             intensity: Color::new(1.0, 1.0, 1.0),
@@ -197,7 +197,7 @@ mod tests {
 
     #[test]
     fn color_when_ray_misses() {
-        let w: World = Default::default();
+        let w = World::default();
         let r = Ray {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 1.0, 0.0),
@@ -208,7 +208,7 @@ mod tests {
 
     #[test]
     fn color_when_ray_hits() {
-        let w: World = Default::default();
+        let w = World::default();
         let r = Ray {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
@@ -219,7 +219,7 @@ mod tests {
 
     #[test]
     fn color_with_intersection_behind_ray() {
-        let mut w: World = Default::default();
+        let mut w = World::default();
         let outer = w.get_mut_object(0).unwrap();
         outer.set_ambient(1.0);
         let inner = w.get_mut_object(1).unwrap();

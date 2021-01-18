@@ -69,7 +69,7 @@ impl Default for Sphere {
         Sphere {
             id: Uuid::new_v4(),
             transform: Matrix4::identity_matrix(),
-            material: Default::default(),
+            material: Material::default(),
         }
     }
 }
@@ -91,7 +91,7 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
         assert!(eq_with_eps(4.0, (*xs)[0].t));
@@ -104,7 +104,7 @@ mod tests {
             origin: point(0.0, 1.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
         assert!(eq_with_eps(5.0, (*xs)[0].t));
@@ -117,7 +117,7 @@ mod tests {
             origin: point(0.0, 2.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let xs = intersect(s, &r).unwrap();
         assert_eq!(0, (*xs).len());
     }
@@ -128,7 +128,7 @@ mod tests {
             origin: point(0.0, 0.0, 0.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
         assert!(eq_with_eps(-1.0, (*xs)[0].t));
@@ -141,7 +141,7 @@ mod tests {
             origin: point(0.0, 0.0, 5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
         assert!(eq_with_eps(-6.0, (*xs)[0].t));
@@ -154,7 +154,7 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
         assert_eq!(s, (*((*xs)[0].object).borrow()));
@@ -163,13 +163,13 @@ mod tests {
 
     #[test]
     fn spheres_default_transformation() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         assert_eq!(Matrix4::identity_matrix(), s.transform);
     }
 
     #[test]
     fn changing_spheres_transformation() {
-        let mut s: Sphere = Default::default();
+        let mut s = Sphere::default();
         let t = translation(2.0, 3.0, 4.0);
         s.set_transform(t);
         assert_eq!(t, s.transform);
@@ -181,7 +181,7 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let mut s: Sphere = Default::default();
+        let mut s = Sphere::default();
         s.set_transform(scaling(2.0, 2.0, 2.0));
         let xs = intersect(s, &r).unwrap();
         assert_eq!(2, (*xs).len());
@@ -195,7 +195,7 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let mut s: Sphere = Default::default();
+        let mut s = Sphere::default();
         s.set_transform(translation(5.0, 0.0, 0.0));
         let xs = intersect(s, &r).unwrap();
         assert_eq!(0, (*xs).len());
@@ -203,28 +203,28 @@ mod tests {
 
     #[test]
     fn normal_on_sphere_at_point_on_x_axis() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let n = s.normal_at(point(1.0, 0.0, 0.0)).unwrap();
         assert_eq!(vector(1.0, 0.0, 0.0), n);
     }
 
     #[test]
     fn normal_on_sphere_at_point_on_y_axis() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let n = s.normal_at(point(0.0, 1.0, 0.0)).unwrap();
         assert_eq!(vector(0.0, 1.0, 0.0), n);
     }
 
     #[test]
     fn normal_on_sphere_at_point_on_z_axis() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let n = s.normal_at(point(0.0, 0.0, 1.0)).unwrap();
         assert_eq!(vector(0.0, 0.0, 1.0), n);
     }
 
     #[test]
     fn normal_on_sphere_at_point_at_nonaxial_point() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let three_sqrt = 3.0f64.sqrt();
         let n = s
             .normal_at(point(three_sqrt / 3.0, three_sqrt / 3.0, three_sqrt / 3.0))
@@ -237,7 +237,7 @@ mod tests {
 
     #[test]
     fn normal_is_normalized_vector() {
-        let s: Sphere = Default::default();
+        let s = Sphere::default();
         let three_sqrt = 3.0f64.sqrt();
         let n = s
             .normal_at(point(three_sqrt / 3.0, three_sqrt / 3.0, three_sqrt / 3.0))
@@ -247,7 +247,7 @@ mod tests {
 
     #[test]
     fn computing_normal_on_translated_sphere() {
-        let mut s: Sphere = Default::default();
+        let mut s = Sphere::default();
         s.set_transform(translation(0.0, 1.0, 0.0));
         let n = s
             .normal_at(point(0.0, 1.70711, -std::f64::consts::FRAC_1_SQRT_2))
@@ -264,7 +264,7 @@ mod tests {
 
     #[test]
     fn computing_normal_on_transformed_sphere() {
-        let mut s: Sphere = Default::default();
+        let mut s = Sphere::default();
         s.set_transform(scaling(1.0, 0.5, 1.0) * rotation_z(PI / 5.0));
         let two_sqrt = 2.0f64.sqrt();
         let n = s
@@ -275,16 +275,16 @@ mod tests {
 
     #[test]
     fn sphere_has_default_material() {
-        let s: Sphere = Default::default();
-        let default_m: Material = Default::default();
+        let s = Sphere::default();
+        let default_m = Material::default();
         let m = s.material;
         assert_eq!(default_m, m);
     }
 
     #[test]
     fn sphere_may_have_assigned_material() {
-        let mut s: Sphere = Default::default();
-        let mut m: Material = Default::default();
+        let mut s = Sphere::default();
+        let mut m = Material::default();
         m.ambient = 1.0;
         let m = s.material;
         s.set_material(m);

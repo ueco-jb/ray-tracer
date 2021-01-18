@@ -121,7 +121,7 @@ impl Matrix for Matrix4 {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 let to_remove = self.calculate_submatrix_remove_indexes(row, column);
-                let mut submatrix: Self::Submatrix = Default::default();
+                let mut submatrix = Self::Submatrix::default();
                 let mut i = 0;
                 for (index, elem) in (*self).iter().enumerate() {
                     if !to_remove.contains(&index) {
@@ -146,7 +146,7 @@ impl Matrix4 {
     }
 
     pub fn transpose(&self) -> Result<Matrix4> {
-        let mut output: Self = Default::default();
+        let mut output = Self::default();
         for i in 0..Self::SIZE {
             for j in 0..Self::SIZE {
                 output.set(j, i, self.get(i, j)?)?;
@@ -160,7 +160,7 @@ impl Matrix4 {
             Err(MatrixError::MatrixNotInvertible)
         } else {
             let d = self.determiant()?;
-            let mut m: Self = Default::default();
+            let mut m = Self::default();
             for row in 0..Self::SIZE {
                 for col in 0..Self::SIZE {
                     let c = self.cofactor(row, col)?;
@@ -275,7 +275,7 @@ impl Matrix for Matrix3 {
         match self.boundry_check(&row, &column) {
             Ok(_) => {
                 let to_remove = self.calculate_submatrix_remove_indexes(row, column);
-                let mut submatrix: Self::Submatrix = Default::default();
+                let mut submatrix = Self::Submatrix::default();
                 let mut i = 0;
                 for (index, elem) in (*self).iter().enumerate() {
                     if !to_remove.contains(&index) {
@@ -365,7 +365,7 @@ mod tests {
 
     #[test]
     fn constructing_4_matrix() {
-        let m: Matrix4 = Default::default();
+        let m = Matrix4::default();
         assert!(eq_with_eps(0.0, m.get(0, 0).unwrap()));
         assert!(eq_with_eps(0.0, m.get(0, 3).unwrap()));
         assert!(eq_with_eps(0.0, m.get(1, 0).unwrap()));
@@ -394,7 +394,7 @@ mod tests {
 
     #[test]
     fn constructing_3_matrix() {
-        let m: Matrix3 = Default::default();
+        let m = Matrix3::default();
         assert!(eq_with_eps(0.0, m.get(0, 0).unwrap()));
         assert!(eq_with_eps(0.0, m.get(0, 2).unwrap()));
         assert!(eq_with_eps(0.0, m.get(1, 0).unwrap()));
@@ -417,7 +417,7 @@ mod tests {
 
     #[test]
     fn constructing_2_matrix() {
-        let m: Matrix2 = Default::default();
+        let m = Matrix2::default();
         assert!(eq_with_eps(0.0, m.get(0, 0).unwrap()));
         assert!(eq_with_eps(0.0, m.get(0, 1).unwrap()));
         assert!(eq_with_eps(0.0, m.get(1, 0).unwrap()));

@@ -1,5 +1,4 @@
-use crate::matrix::Matrix4;
-use crate::utils::eq_with_eps;
+use crate::{matrix::Matrix4, utils::eq_with_eps};
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 pub trait TupleT {

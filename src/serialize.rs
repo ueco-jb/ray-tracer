@@ -1,5 +1,4 @@
-use std::fs::File;
-use std::io::Write;
+use std::{fs::File, io::Write};
 
 pub fn save(data: &str, path: &str) -> std::io::Result<()> {
     let mut file = File::create(path)?;

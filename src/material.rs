@@ -84,14 +84,14 @@ mod tests {
     use crate::tuple::{point, vector};
 
     fn setup() -> (Material, Tuple) {
-        let m: Material = Default::default();
+        let m = Material::default();
         let position = point(0.0, 0.0, 0.0);
         (m, position)
     }
 
     #[test]
     fn default_material() {
-        let m: Material = Default::default();
+        let m = Material::default();
         assert_eq!(Color::new(1.0, 1.0, 1.0), m.color);
         assert!(eq_with_eps(0.1, m.ambient));
         assert!(eq_with_eps(0.9, m.diffuse));

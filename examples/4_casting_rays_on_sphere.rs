@@ -1,12 +1,7 @@
-extern crate ray_tracer as rt;
-
-use intersections::intersect;
-use ray::Ray;
-use rt::*;
-use shape::Shape;
-use sphere::Sphere;
-use transformations::{scaling, shearing};
-use tuple::{normalize, point};
+use ray_tracer::{
+    canvas_to_ppm, intersect, normalize, point, save, scaling, shearing, Canvas, Color, Ray, Shape,
+    Sphere,
+};
 
 const CANVAS_SIZE: usize = 100;
 
@@ -18,9 +13,9 @@ const CANVAS_SIZE: usize = 100;
 /// exponentially longer to render.
 
 fn main() {
-    let mut c: canvas::Canvas = canvas::Canvas::new(CANVAS_SIZE, CANVAS_SIZE);
+    let mut c = Canvas::new(CANVAS_SIZE, CANVAS_SIZE);
 
-    let mut s: Sphere = Default::default();
+    let mut s = Sphere::default();
     s.set_transform(shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0) * scaling(0.5, 1.0, 1.0));
     let ray_origin = point(0.0, 0.0, -5.0);
     let wall_z = 10.0;
@@ -40,12 +35,12 @@ fn main() {
             };
             let xs = intersect(s, &r).unwrap();
             if !(*xs).is_empty() {
-                c.write_pixel(x, y, color::Color::new(0.85, 0.54, 0.48))
+                c.write_pixel(x, y, Color::new(0.85, 0.54, 0.48))
                     .expect("Out of canvas border");
             }
         }
     }
 
-    let data: canvas::PPM = canvas::canvas_to_ppm(&c);
-    serialize::save(&data.get(), "saved.ppm").unwrap();
+    let data = canvas_to_ppm(&c);
+    save(&data.get(), "saved.ppm").unwrap();
 }
