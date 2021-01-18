@@ -1,7 +1,9 @@
-use crate::color::Color;
-use crate::material::Material;
-use crate::matrix::{Matrix4, MatrixError};
-use crate::tuple::Tuple;
+use crate::{
+    color::Color,
+    material::Material,
+    matrix::{Matrix4, MatrixError},
+    tuple::Tuple,
+};
 
 pub trait Shape {
     fn get_transform(&self) -> Matrix4;

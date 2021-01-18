@@ -1,5 +1,4 @@
-use crate::matrix::Matrix4;
-use crate::tuple::*;
+use crate::{matrix::Matrix4, tuple::Tuple};
 
 #[derive(Copy, Clone)]
 pub struct Ray {
@@ -23,7 +22,10 @@ pub fn transform(ray: Ray, matrix: Matrix4) -> Ray {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::transformations::{scaling, translation};
+    use crate::{
+        transformations::{scaling, translation},
+        tuple::{point, vector},
+    };
 
     #[test]
     fn creating_and_querrying_ray() {
