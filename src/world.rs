@@ -70,6 +70,7 @@ impl World {
     }
 }
 
+#[allow(dead_code)]
 fn intersect_world(
     world: &World,
     ray: &Ray,
@@ -83,6 +84,7 @@ fn intersect_world(
     Ok(())
 }
 
+#[allow(dead_code)]
 fn color_at(world: &World, ray: &Ray) -> Result<Color, MatrixError> {
     let mut intersections: Intersections<Sphere> = Intersections::new();
     intersect_world(world, ray, &mut intersections)?;
@@ -222,7 +224,7 @@ mod tests {
         outer.set_ambient(1.0);
         let inner = w.get_mut_object(1).unwrap();
         inner.set_ambient(1.0);
-        let output_color = inner.get_color().clone();
+        let output_color = *inner.get_color();
         let r = Ray {
             origin: point(0.0, 0.0, 0.75),
             direction: vector(0.0, 0.0, -1.0),
