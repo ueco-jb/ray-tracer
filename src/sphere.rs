@@ -48,6 +48,14 @@ impl Shape for Sphere {
     fn set_color(&mut self, c: Color) {
         self.material.color = c;
     }
+
+    fn get_color(&self) -> &Color {
+        &self.material.color
+    }
+
+    fn set_ambient(&mut self, a: f64) {
+        self.material.ambient = a;
+    }
 }
 
 impl PartialEq for Sphere {

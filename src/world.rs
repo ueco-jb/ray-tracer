@@ -47,6 +47,14 @@ impl World {
         }
     }
 
+    pub fn get_object(&self, index: usize) -> Option<&Sphere> {
+        self.objects.get(index)
+    }
+
+    pub fn get_mut_object(&mut self, index: usize) -> Option<&mut Sphere> {
+        self.objects.get_mut(index)
+    }
+
     pub fn shade_hit(&self, comps: Computations<Sphere>) -> Option<Color> {
         if let Some(light) = self.light {
             Some(lighting(
@@ -205,5 +213,21 @@ mod tests {
         };
         let c = color_at(&w, &r).unwrap();
         assert_eq!(Color::new(0.38066, 0.47583, 0.2855), c);
+    }
+
+    #[test]
+    fn color_with_intersection_behind_ray() {
+        let mut w: World = Default::default();
+        let outer = w.get_mut_object(0).unwrap();
+        outer.set_ambient(1.0);
+        let inner = w.get_mut_object(1).unwrap();
+        inner.set_ambient(1.0);
+        let output_color = inner.get_color().clone();
+        let r = Ray {
+            origin: point(0.0, 0.0, 0.75),
+            direction: vector(0.0, 0.0, -1.0),
+        };
+        let c = color_at(&w, &r).unwrap();
+        assert_eq!(output_color, c);
     }
 }
