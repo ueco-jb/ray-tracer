@@ -1,7 +1,5 @@
-extern crate ray_tracer as rt;
-
+use ray_tracer::TupleT;
 use ray_tracer::{canvas_to_ppm, point, rotation_z, save, Canvas, Color, PI};
-use rt::TupleT;
 
 fn main() {
     let mut c = Canvas::new(550, 550);

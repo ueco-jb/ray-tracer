@@ -1,9 +1,7 @@
-extern crate ray_tracer as rt;
-
+use ray_tracer::TupleT;
 use ray_tracer::{
     canvas_to_ppm, eq_with_eps, normalize, point, save, vector, Canvas, Color, Tuple,
 };
-use rt::TupleT;
 
 #[derive(Debug)]
 struct Projectile {

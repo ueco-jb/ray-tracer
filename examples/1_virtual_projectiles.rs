@@ -1,7 +1,5 @@
-extern crate ray_tracer as rt;
-
+use ray_tracer::TupleT;
 use ray_tracer::{eq_with_eps, normalize, point, vector, Tuple};
-use rt::TupleT;
 
 #[derive(Debug)]
 struct Projectile {

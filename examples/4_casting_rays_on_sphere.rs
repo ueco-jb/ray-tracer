@@ -1,5 +1,3 @@
-extern crate ray_tracer as rt;
-
 use ray_tracer::{
     canvas_to_ppm, intersect, normalize, point, save, scaling, shearing, Canvas, Color, Ray, Shape,
     Sphere,
