@@ -1,5 +1,5 @@
 use crate::{
-    color::Color,
+    color::{Color, BLACK},
     intersections::{intersect, Computations, Intersections},
     light::PointLight,
     material::{lighting, Material},
@@ -62,7 +62,6 @@ impl World {
     }
 }
 
-#[allow(dead_code)]
 fn intersect_world(
     world: &World,
     ray: &Ray,
@@ -74,6 +73,17 @@ fn intersect_world(
     }
     intersections.sort();
     Ok(())
+}
+
+fn color_at(world: &World, ray: &Ray) -> Result<Color, MatrixError> {
+    let mut intersections: Intersections<Sphere> = Intersections::new();
+    intersect_world(world, ray, &mut intersections)?;
+    if let Some(intersection) = intersections.hit() {
+        let comps = Computations::prepare_computation(intersection.clone(), *ray)?;
+        Ok(world.shade_hit(comps).unwrap())
+    } else {
+        Ok(BLACK)
+    }
 }
 
 #[cfg(test)]
@@ -173,5 +183,27 @@ mod tests {
         let comps = Computations::prepare_computation(i, r).unwrap();
         let c = w.shade_hit(comps).unwrap();
         assert_eq!(Color::new(00.90498, 0.90498, 0.90498), c);
+    }
+
+    #[test]
+    fn color_when_ray_misses() {
+        let w: World = Default::default();
+        let r = Ray {
+            origin: point(0.0, 0.0, -5.0),
+            direction: vector(0.0, 1.0, 0.0),
+        };
+        let c = color_at(&w, &r).unwrap();
+        assert_eq!(BLACK, c);
+    }
+
+    #[test]
+    fn color_when_ray_hits() {
+        let w: World = Default::default();
+        let r = Ray {
+            origin: point(0.0, 0.0, -5.0),
+            direction: vector(0.0, 0.0, 1.0),
+        };
+        let c = color_at(&w, &r).unwrap();
+        assert_eq!(Color::new(0.38066, 0.47583, 0.2855), c);
     }
 }
