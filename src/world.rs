@@ -90,7 +90,7 @@ fn color_at(world: &World, ray: &Ray) -> Result<Color, MatrixError> {
     intersect_world(world, ray, &mut intersections)?;
     if let Some(intersection) = intersections.hit() {
         let comps = Computations::prepare_computation(intersection.clone(), *ray)?;
-        Ok(world.shade_hit(comps).unwrap())
+        Ok(world.shade_hit(comps).unwrap_or(BLACK))
     } else {
         Ok(BLACK)
     }
