@@ -1,10 +1,16 @@
 use crate::color::Color;
 use crate::tuple::Tuple;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct PointLight {
     pub intensity: Color,
     pub position: Tuple,
+}
+
+impl PartialEq for PointLight {
+    fn eq(&self, other: &PointLight) -> bool {
+        self.intensity == other.intensity && self.position == other.position
+    }
 }
 
 #[cfg(test)]

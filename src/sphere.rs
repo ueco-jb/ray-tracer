@@ -41,12 +41,20 @@ impl Shape for Sphere {
         self.material = m;
     }
 
-    fn get_material(&mut self) -> &Material {
+    fn get_material(&self) -> &Material {
         &self.material
     }
 
     fn set_color(&mut self, c: Color) {
         self.material.color = c;
+    }
+
+    fn get_color(&self) -> &Color {
+        &self.material.color
+    }
+
+    fn set_ambient(&mut self, a: f64) {
+        self.material.ambient = a;
     }
 }
 
