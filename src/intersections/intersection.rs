@@ -6,64 +6,49 @@ use crate::{
     utils::eq_with_eps,
 };
 use std::{
+    boxed::Box,
     cell::RefCell,
     ops::{Deref, DerefMut},
     rc::Rc,
 };
 
+type RcRefCellBox<T> = Rc<RefCell<Box<T>>>;
+
 #[derive(Clone, Debug)]
-pub struct Intersection<T>
-where
-    T: Shape,
-{
+pub struct Intersection {
     pub t: f64,
-    pub object: Rc<RefCell<T>>,
+    pub object: RcRefCellBox<dyn Shape>,
 }
 
-impl<T> PartialEq for Intersection<T>
-where
-    T: Shape + PartialEq,
-{
+impl PartialEq for Intersection {
     fn eq(&self, other: &Self) -> bool {
-        eq_with_eps(self.t, other.t) && self.object == other.object
+        eq_with_eps(self.t, other.t) && **(*self.object).borrow() == **(*other.object).borrow()
     }
 }
 
 #[repr(transparent)]
-pub struct Intersections<T: Shape>(Vec<Intersection<T>>);
+pub struct Intersections(Vec<Intersection>);
 
-impl<T: Shape> Deref for Intersections<T> {
-    type Target = Vec<Intersection<T>>;
+impl Deref for Intersections {
+    type Target = Vec<Intersection>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<T: Shape> DerefMut for Intersections<T> {
+impl DerefMut for Intersections {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-// impl<'a, T: Shape> IntoIterator for &Intersections<'a, T> {
-//     type Item = Intersection<'a, T>;
-//     type IntoIter = std::vec::IntoIter<Self::Item>;
-//
-//     fn into_iter(self) -> Self::IntoIter {
-//         self.0.into_iter()
-//     }
-// }
-
-impl<T> Intersections<T>
-where
-    T: Shape,
-{
-    pub fn new() -> Intersections<T> {
+impl Intersections {
+    pub fn new() -> Intersections {
         Intersections(Vec::new())
     }
 
-    pub fn add(&mut self, elem: Intersection<T>) {
+    pub fn add(&mut self, elem: Intersection) {
         (*self).push(elem);
     }
 
@@ -72,10 +57,7 @@ where
         self
     }
 
-    pub fn hit(&mut self) -> Option<&Intersection<T>>
-    where
-        T: Shape,
-    {
+    pub fn hit(&mut self) -> Option<&Intersection> {
         self.sort();
         for intersection in &self.0 {
             if intersection.t > 0.0 || eq_with_eps(intersection.t, 0.0) {
@@ -86,7 +68,7 @@ where
     }
 }
 
-impl<T: Shape> Default for Intersections<T> {
+impl Default for Intersections {
     fn default() -> Self {
         Self::new()
     }
@@ -98,10 +80,7 @@ impl<T: Shape> Default for Intersections<T> {
 /// the sphere
 /// In order to calculate proper intersection on scaled object, you need to apply inverse of
 /// sphere's transformation onto ray
-pub fn intersect<T>(object: T, ray: &Ray) -> Result<Intersections<T>, MatrixError>
-where
-    T: Shape,
-{
+pub fn intersect(object: dyn Shape, ray: &Ray) -> Result<Intersections, MatrixError> {
     let ray2 = transform(*ray, object.get_transform().inverse()?);
     // Vector from the sphere's center to the ray origin
     let sphere_to_ray = ray2.origin - point(0.0, 0.0, 0.0);
@@ -116,7 +95,7 @@ where
         let sqrt_discriminant = discriminant.sqrt();
         let t1 = (-b - sqrt_discriminant) / (2.0 * a);
         let t2 = (-b + sqrt_discriminant) / (2.0 * a);
-        let rc_object = Rc::new(RefCell::new(object));
+        let rc_object = Rc::new(RefCell::new(Box::new(object)));
         Ok(Intersections(vec![
             Intersection {
                 t: t1,
