@@ -5,29 +5,28 @@ use crate::{
     shape::Shape,
     tuple::{dot, Tuple},
 };
-use std::{cell::RefCell, rc::Rc};
+use std::{boxed::Box, cell::RefCell, rc::Rc};
 
-pub struct Computations<T>
-where
-    T: Shape,
-{
+type RcRefCellBox<T> = Rc<RefCell<Box<T>>>;
+
+pub struct Computations {
     pub t: f64,
-    pub object: Rc<RefCell<T>>,
+    pub object: RcRefCellBox<dyn Shape>,
     pub point: Tuple,
     pub eyev: Tuple,
     pub normalv: Tuple,
     pub inside: bool,
 }
 
-impl<T: Shape> Computations<T> {
+impl Computations {
     fn is_inside(normalv: &Tuple, eyev: &Tuple) -> bool {
         dot(normalv, eyev) < 0.0
     }
 
     pub fn prepare_computation(
-        intersection: Intersection<T>,
+        intersection: Intersection,
         ray: Ray,
-    ) -> Result<Computations<T>, MatrixError> {
+    ) -> Result<Computations, MatrixError> {
         let t = intersection.t;
         let ray_position = ray.position(t);
         let eyev = -ray.direction;
@@ -65,7 +64,7 @@ mod tests {
         let shape = Sphere::default();
         let i = Intersection {
             t: 4.0,
-            object: Rc::new(RefCell::new(shape)),
+            object: Rc::new(RefCell::new(Box::new(shape))),
         };
         let comps = Computations::prepare_computation(i.clone(), r).unwrap();
         assert!(eq_with_eps(i.t, comps.t));
@@ -84,7 +83,7 @@ mod tests {
         let shape = Sphere::default();
         let i = Intersection {
             t: 4.0,
-            object: Rc::new(RefCell::new(shape)),
+            object: Rc::new(RefCell::new(Box::new(shape))),
         };
         let comps = Computations::prepare_computation(i, r).unwrap();
         assert_eq!(false, comps.inside);
@@ -99,7 +98,7 @@ mod tests {
         let shape = Sphere::default();
         let i = Intersection {
             t: 1.0,
-            object: Rc::new(RefCell::new(shape)),
+            object: Rc::new(RefCell::new(Box::new(shape))),
         };
         let comps = Computations::prepare_computation(i, r).unwrap();
         assert_eq!(point(0.0, 0.0, 1.0), comps.point);

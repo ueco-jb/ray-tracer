@@ -55,7 +55,7 @@ impl World {
         self.objects.get_mut(index)
     }
 
-    pub fn shade_hit(&self, comps: Computations<Sphere>) -> Option<Color> {
+    pub fn shade_hit(&self, comps: Computations) -> Option<Color> {
         if let Some(light) = self.light {
             Some(lighting(
                 (*comps.object).borrow().get_material(),
@@ -74,10 +74,10 @@ impl World {
 fn intersect_world(
     world: &World,
     ray: &Ray,
-    intersections: &mut Intersections<Sphere>,
+    intersections: &mut Intersections,
 ) -> Result<(), MatrixError> {
     for o in world.objects.iter() {
-        let mut intersection = intersect(*o, ray)?;
+        let mut intersection = intersect(Box::new(*o), ray)?;
         intersections.append(&mut intersection);
     }
     intersections.sort();
@@ -86,7 +86,7 @@ fn intersect_world(
 
 #[allow(dead_code)]
 fn color_at(world: &World, ray: &Ray) -> Result<Color, MatrixError> {
-    let mut intersections: Intersections<Sphere> = Intersections::new();
+    let mut intersections = Intersections::new();
     intersect_world(world, ray, &mut intersections)?;
     if let Some(intersection) = intersections.hit() {
         let comps = Computations::prepare_computation(intersection.clone(), *ray)?;
