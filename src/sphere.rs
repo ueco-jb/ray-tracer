@@ -56,6 +56,10 @@ impl Shape for Sphere {
     fn set_ambient(&mut self, a: f64) {
         self.material.ambient = a;
     }
+
+    fn get_id(&self) -> &Uuid {
+        &self.id
+    }
 }
 
 impl PartialEq for Sphere {

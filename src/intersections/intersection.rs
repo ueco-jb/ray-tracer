@@ -14,7 +14,7 @@ use std::{
 
 type RcRefCellBox<T> = Rc<RefCell<Box<T>>>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Intersection {
     pub t: f64,
     pub object: RcRefCellBox<dyn Shape>,
@@ -22,7 +22,8 @@ pub struct Intersection {
 
 impl PartialEq for Intersection {
     fn eq(&self, other: &Self) -> bool {
-        eq_with_eps(self.t, other.t) && **(*self.object).borrow() == **(*other.object).borrow()
+        eq_with_eps(self.t, other.t)
+            && (*self.object).borrow().get_id() == (*other.object).borrow().get_id()
     }
 }
 
@@ -80,7 +81,7 @@ impl Default for Intersections {
 /// the sphere
 /// In order to calculate proper intersection on scaled object, you need to apply inverse of
 /// sphere's transformation onto ray
-pub fn intersect(object: dyn Shape, ray: &Ray) -> Result<Intersections, MatrixError> {
+pub fn intersect(object: Box<dyn Shape>, ray: &Ray) -> Result<Intersections, MatrixError> {
     let ray2 = transform(*ray, object.get_transform().inverse()?);
     // Vector from the sphere's center to the ray origin
     let sphere_to_ray = ray2.origin - point(0.0, 0.0, 0.0);
@@ -95,7 +96,7 @@ pub fn intersect(object: dyn Shape, ray: &Ray) -> Result<Intersections, MatrixEr
         let sqrt_discriminant = discriminant.sqrt();
         let t1 = (-b - sqrt_discriminant) / (2.0 * a);
         let t2 = (-b + sqrt_discriminant) / (2.0 * a);
-        let rc_object = Rc::new(RefCell::new(Box::new(object)));
+        let rc_object = Rc::new(RefCell::new(object));
         Ok(Intersections(vec![
             Intersection {
                 t: t1,
