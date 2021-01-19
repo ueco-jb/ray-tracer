@@ -120,10 +120,10 @@ mod tests {
         let s = Sphere::default();
         let i = Intersection {
             t: 3.5,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         assert!(eq_with_eps(3.5, i.t));
-        assert_eq!(s, (*(*i.object).borrow()));
+        assert_eq!(s.get_id(), (*i.object).borrow().get_id());
     }
 
     #[test]
@@ -131,11 +131,11 @@ mod tests {
         let s = Sphere::default();
         let i1 = Intersection {
             t: 1.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let i2 = Intersection {
             t: 2.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let xs = Intersections(vec![i1, i2]);
         assert_eq!(2, xs.0.len());
@@ -148,11 +148,11 @@ mod tests {
         let s = Sphere::default();
         let i1 = Intersection {
             t: 1.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let i2 = Intersection {
             t: 2.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let mut xs = Intersections(vec![i2, i1.clone()]);
         let i = xs.hit();
@@ -164,11 +164,11 @@ mod tests {
         let s = Sphere::default();
         let i1 = Intersection {
             t: -1.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let i2 = Intersection {
             t: 2.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let mut xs = Intersections(vec![i2.clone(), i1]);
         let i = xs.hit();
@@ -180,11 +180,11 @@ mod tests {
         let s = Sphere::default();
         let i1 = Intersection {
             t: -2.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let i2 = Intersection {
             t: -1.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let mut xs = Intersections(vec![i2, i1]);
         let i = xs.hit();
@@ -196,19 +196,19 @@ mod tests {
         let s = Sphere::default();
         let i1 = Intersection {
             t: 5.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let i2 = Intersection {
             t: 7.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let i3 = Intersection {
             t: -3.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let i4 = Intersection {
             t: 2.0,
-            object: Rc::new(RefCell::new(s)),
+            object: Rc::new(RefCell::new(Box::new(s))),
         };
         let mut xs = Intersections(vec![i1, i2, i3, i4.clone()]);
         let i = xs.hit();

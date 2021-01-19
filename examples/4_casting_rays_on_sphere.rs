@@ -2,6 +2,7 @@ use ray_tracer::{
     canvas_to_ppm, intersect, normalize, point, save, scaling, shearing, Canvas, Color, Ray, Shape,
     Sphere,
 };
+use std::boxed::Box;
 
 const CANVAS_SIZE: usize = 100;
 
@@ -33,7 +34,7 @@ fn main() {
                 origin: ray_origin,
                 direction: normalize(&(position - ray_origin)),
             };
-            let xs = intersect(s, &r).unwrap();
+            let xs = intersect(Box::new(s), &r).unwrap();
             if !(*xs).is_empty() {
                 c.write_pixel(x, y, Color::new(0.85, 0.54, 0.48))
                     .expect("Out of canvas border");
