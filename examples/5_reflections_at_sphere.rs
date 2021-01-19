@@ -2,6 +2,7 @@ use ray_tracer::{
     canvas_to_ppm, intersect, lighting, normalize, point, save, Canvas, Color, PointLight, Ray,
     Shape, Sphere,
 };
+use std::boxed::Box;
 
 const CANVAS_SIZE: usize = 100;
 
@@ -33,7 +34,7 @@ fn main() {
                 origin: ray_origin,
                 direction: normalize(&(position - ray_origin)),
             };
-            let mut xs = intersect(s, &r).unwrap();
+            let mut xs = intersect(Box::new(s), &r).unwrap();
             let hit = xs.hit();
             if let Some(hit) = hit {
                 let point = r.position(hit.t);
