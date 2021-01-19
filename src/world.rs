@@ -10,6 +10,7 @@ use crate::{
     transformations::scaling,
     tuple::point,
 };
+use std::boxed::Box;
 
 pub struct World {
     pub light: Option<PointLight>,
@@ -148,7 +149,7 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let mut i: Intersections<Sphere> = Intersections::new();
+        let mut i = Intersections::new();
         intersect_world(&w, &r, &mut i).unwrap();
         assert_eq!(4, (*i).len());
         assert!(eq_with_eps(4.0, (*i)[0].t));
@@ -167,7 +168,7 @@ mod tests {
         let shape: Sphere = w.objects[0];
         let i = Intersection {
             t: 4.0,
-            object: Rc::new(RefCell::new(shape)),
+            object: Rc::new(RefCell::new(Box::new(shape))),
         };
         let comps = Computations::prepare_computation(i, r).unwrap();
         let c = w.shade_hit(comps).unwrap();
@@ -188,7 +189,7 @@ mod tests {
         let shape: Sphere = w.objects[1];
         let i = Intersection {
             t: 0.5,
-            object: Rc::new(RefCell::new(shape)),
+            object: Rc::new(RefCell::new(Box::new(shape))),
         };
         let comps = Computations::prepare_computation(i, r).unwrap();
         let c = w.shade_hit(comps).unwrap();
