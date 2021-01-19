@@ -4,6 +4,7 @@ use crate::{
     matrix::{Matrix4, MatrixError},
     tuple::Tuple,
 };
+use uuid::Uuid;
 
 pub trait Shape {
     fn get_transform(&self) -> Matrix4;
@@ -14,4 +15,5 @@ pub trait Shape {
     fn get_color(&self) -> &Color;
     fn set_color(&mut self, c: Color);
     fn set_ambient(&mut self, a: f64);
+    fn get_id(&self) -> &Uuid;
 }
