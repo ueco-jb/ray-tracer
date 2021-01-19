@@ -14,7 +14,7 @@ use std::boxed::Box;
 
 pub struct World {
     pub light: Option<PointLight>,
-    pub objects: Vec<Sphere>,
+    pub objects: Vec<Box<dyn Shape>>,
 }
 
 impl Default for World {
@@ -34,7 +34,7 @@ impl Default for World {
                 position: point(-10.0, -10.0, -10.0),
                 intensity: Color::new(1.0, 1.0, 1.0),
             }),
-            objects: vec![s1, s2],
+            objects: vec![Box::new(s1), Box::new(s2)],
         }
     }
 }
@@ -49,11 +49,11 @@ impl World {
     }
 
     pub fn get_object(&self, index: usize) -> Option<&Sphere> {
-        self.objects.get(index)
+        (*self.objects).get(index)
     }
 
     pub fn get_mut_object(&mut self, index: usize) -> Option<&mut Sphere> {
-        self.objects.get_mut(index)
+        (*self.objects).get_mut(index)
     }
 
     pub fn shade_hit(&self, comps: Computations) -> Option<Color> {
@@ -78,7 +78,7 @@ fn intersect_world(
     intersections: &mut Intersections,
 ) -> Result<(), MatrixError> {
     for o in world.objects.iter() {
-        let mut intersection = intersect(Box::new(*o), ray)?;
+        let mut intersection = intersect(o, ray)?;
         intersections.append(&mut intersection);
     }
     intersections.sort();
