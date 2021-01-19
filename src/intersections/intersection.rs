@@ -8,6 +8,7 @@ use crate::{
 use std::{
     boxed::Box,
     cell::RefCell,
+    fmt,
     ops::{Deref, DerefMut},
     rc::Rc,
 };
@@ -24,6 +25,15 @@ impl PartialEq for Intersection {
     fn eq(&self, other: &Self) -> bool {
         eq_with_eps(self.t, other.t)
             && (*self.object).borrow().get_id() == (*other.object).borrow().get_id()
+    }
+}
+
+impl fmt::Debug for Intersection {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Intersection")
+            .field("t", &self.t)
+            .field("Object:", (&*self.object).borrow().get_id())
+            .finish()
     }
 }
 
