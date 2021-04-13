@@ -284,9 +284,10 @@ mod tests {
     #[test]
     fn sphere_may_have_assigned_material() {
         let mut s = Sphere::default();
-        let mut m = Material::default();
-        m.ambient = 1.0;
-        let m = s.material;
+        let m = Material {
+            ambient: 1.0,
+            ..Default::default()
+        };
         s.set_material(m);
         assert_eq!(m, s.material);
     }
