@@ -176,11 +176,14 @@ mod tests {
 
     #[test]
     fn shading_intersection_from_inside() {
-        let mut w = World::default();
-        w.light = Some(PointLight {
+        let light = Some(PointLight {
             position: point(0.0, 0.25, 0.0),
             intensity: Color::new(1.0, 1.0, 1.0),
         });
+        let w = World {
+            light,
+            ..Default::default()
+        };
         let r = Ray {
             origin: point(0.0, 0.0, 0.0),
             direction: vector(0.0, 0.0, 1.0),

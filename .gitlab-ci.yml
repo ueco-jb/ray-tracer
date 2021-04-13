@@ -1,4 +1,4 @@
-image: rust:1.44-slim
+image: rust:1.51-slim
 
 stages:
 - test
