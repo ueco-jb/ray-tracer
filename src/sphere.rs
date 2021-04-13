@@ -57,6 +57,10 @@ impl Shape for Sphere {
         self.material.ambient = a;
     }
 
+    fn get_ambient(&self) -> f64 {
+        self.material.ambient
+    }
+
     fn get_id(&self) -> &Uuid {
         &self.id
     }
@@ -88,7 +92,7 @@ mod tests {
         tuple::vector,
         utils::{eq_with_eps, PI},
     };
-    use std::boxed::Box;
+    use std::rc::Rc;
 
     #[test]
     fn ray_intersects_sphere_at_two_points() {
@@ -97,10 +101,10 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s = Sphere::default();
-        let xs = intersect(Box::new(s), &r).unwrap();
-        assert_eq!(2, (*xs).len());
-        assert!(eq_with_eps(4.0, (*xs)[0].t));
-        assert!(eq_with_eps(6.0, (*xs)[1].t));
+        let xs = intersect(Rc::new(s), &r).unwrap();
+        assert_eq!(2, xs.len());
+        assert!(eq_with_eps(4.0, xs[0].t));
+        assert!(eq_with_eps(6.0, xs[1].t));
     }
 
     #[test]
@@ -110,10 +114,10 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s = Sphere::default();
-        let xs = intersect(Box::new(s), &r).unwrap();
-        assert_eq!(2, (*xs).len());
-        assert!(eq_with_eps(5.0, (*xs)[0].t));
-        assert!(eq_with_eps(5.0, (*xs)[1].t));
+        let xs = intersect(Rc::new(s), &r).unwrap();
+        assert_eq!(2, xs.len());
+        assert!(eq_with_eps(5.0, xs[0].t));
+        assert!(eq_with_eps(5.0, xs[1].t));
     }
 
     #[test]
@@ -123,8 +127,8 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s = Sphere::default();
-        let xs = intersect(Box::new(s), &r).unwrap();
-        assert_eq!(0, (*xs).len());
+        let xs = intersect(Rc::new(s), &r).unwrap();
+        assert_eq!(0, xs.len());
     }
 
     #[test]
@@ -134,10 +138,10 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s = Sphere::default();
-        let xs = intersect(Box::new(s), &r).unwrap();
-        assert_eq!(2, (*xs).len());
-        assert!(eq_with_eps(-1.0, (*xs)[0].t));
-        assert!(eq_with_eps(1.0, (*xs)[1].t));
+        let xs = intersect(Rc::new(s), &r).unwrap();
+        assert_eq!(2, xs.len());
+        assert!(eq_with_eps(-1.0, xs[0].t));
+        assert!(eq_with_eps(1.0, xs[1].t));
     }
 
     #[test]
@@ -147,10 +151,10 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s = Sphere::default();
-        let xs = intersect(Box::new(s), &r).unwrap();
-        assert_eq!(2, (*xs).len());
-        assert!(eq_with_eps(-6.0, (*xs)[0].t));
-        assert!(eq_with_eps(-4.0, (*xs)[1].t));
+        let xs = intersect(Rc::new(s), &r).unwrap();
+        assert_eq!(2, xs.len());
+        assert!(eq_with_eps(-6.0, xs[0].t));
+        assert!(eq_with_eps(-4.0, xs[1].t));
     }
 
     #[test]
@@ -160,10 +164,10 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let s = Sphere::default();
-        let xs = intersect(Box::new(s), &r).unwrap();
-        assert_eq!(2, (*xs).len());
-        assert_eq!(s.get_id(), (*(*xs)[0].object).borrow().get_id());
-        assert_eq!(s.get_id(), (*(*xs)[1].object).borrow().get_id());
+        let xs = intersect(Rc::new(s), &r).unwrap();
+        assert_eq!(2, xs.len());
+        assert_eq!(s.get_id(), xs[0].object.borrow().get_id());
+        assert_eq!(s.get_id(), xs[1].object.borrow().get_id());
     }
 
     #[test]
@@ -188,10 +192,10 @@ mod tests {
         };
         let mut s = Sphere::default();
         s.set_transform(scaling(2.0, 2.0, 2.0));
-        let xs = intersect(Box::new(s), &r).unwrap();
-        assert_eq!(2, (*xs).len());
-        assert!(eq_with_eps(3.0, (*xs)[0].t));
-        assert!(eq_with_eps(7.0, (*xs)[1].t));
+        let xs = intersect(Rc::new(s), &r).unwrap();
+        assert_eq!(2, xs.len());
+        assert!(eq_with_eps(3.0, xs[0].t));
+        assert!(eq_with_eps(7.0, xs[1].t));
     }
 
     #[test]
@@ -202,8 +206,8 @@ mod tests {
         };
         let mut s = Sphere::default();
         s.set_transform(translation(5.0, 0.0, 0.0));
-        let xs = intersect(Box::new(s), &r).unwrap();
-        assert_eq!(0, (*xs).len());
+        let xs = intersect(Rc::new(s), &r).unwrap();
+        assert_eq!(0, xs.len());
     }
 
     #[test]

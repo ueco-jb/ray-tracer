@@ -10,8 +10,7 @@ use crate::{
     transformations::scaling,
     tuple::point,
 };
-use std::{boxed::Box, cell::RefCell, rc::Rc};
-type RcRefCellBox<T> = Rc<RefCell<Box<T>>>;
+use std::rc::Rc;
 
 pub struct World {
     pub light: Option<PointLight>,
@@ -111,7 +110,7 @@ mod tests {
     #[test]
     fn creating_world() {
         let w = World::new();
-        let v: Vec<Sphere> = Vec::new();
+        let v: Vec<Rc<Sphere>> = Vec::new();
         assert_eq!(None, w.light);
         assert_eq!(v, w.objects);
     }
@@ -149,13 +148,13 @@ mod tests {
 
     #[test]
     fn intersecting_world_with_ray() {
-        let w = World::default();
+        let mut w = World::default();
         let r = Ray {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
         let mut i = Intersections::new();
-        intersect_world(&w, &r, &mut i).unwrap();
+        intersect_world(&mut w, &r, &mut i).unwrap();
         assert_eq!(4, (*i).len());
         assert!(eq_with_eps(4.0, (*i)[0].t));
         assert!(eq_with_eps(4.5, (*i)[1].t));
@@ -173,7 +172,7 @@ mod tests {
         let shape: Sphere = w.objects[0];
         let i = Intersection {
             t: 4.0,
-            object: Rc::new(RefCell::new(Box::new(shape))),
+            object: RefCell::new(Rc::new(shape)),
         };
         let comps = Computations::prepare_computation(i, r).unwrap();
         let c = w.shade_hit(comps).unwrap();
@@ -197,7 +196,7 @@ mod tests {
         let shape: Sphere = w.objects[1];
         let i = Intersection {
             t: 0.5,
-            object: Rc::new(RefCell::new(Box::new(shape))),
+            object: RefCell::new(Rc::new(shape)),
         };
         let comps = Computations::prepare_computation(i, r).unwrap();
         let c = w.shade_hit(comps).unwrap();
@@ -206,23 +205,23 @@ mod tests {
 
     #[test]
     fn color_when_ray_misses() {
-        let w = World::default();
+        let mut w = World::default();
         let r = Ray {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 1.0, 0.0),
         };
-        let c = color_at(&w, &r).unwrap();
+        let c = color_at(&mut w, &r).unwrap();
         assert_eq!(BLACK, c);
     }
 
     #[test]
     fn color_when_ray_hits() {
-        let w = World::default();
+        let mut w = World::default();
         let r = Ray {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let c = color_at(&w, &r).unwrap();
+        let c = color_at(&mut w, &r).unwrap();
         assert_eq!(Color::new(0.38066, 0.47583, 0.2855), c);
     }
 
@@ -238,7 +237,7 @@ mod tests {
             origin: point(0.0, 0.0, 0.75),
             direction: vector(0.0, 0.0, -1.0),
         };
-        let c = color_at(&w, &r).unwrap();
+        let c = color_at(&mut w, &r).unwrap();
         assert_eq!(output_color, c);
     }
 }

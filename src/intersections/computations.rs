@@ -5,7 +5,7 @@ use crate::{
     shape::Shape,
     tuple::{dot, Tuple},
 };
-use std::{boxed::Box, cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 pub struct Computations {
     pub t: f64,
@@ -62,13 +62,13 @@ mod tests {
         let shape = Sphere::default();
         let i = Intersection {
             t: 4.0,
-            object: Rc::new(RefCell::new(Box::new(shape))),
+            object: RefCell::new(Rc::new(shape)),
         };
         let comps = Computations::prepare_computation(i.clone(), r).unwrap();
         assert!(eq_with_eps(i.t, comps.t));
         assert_eq!(
-            (*i.object).borrow().get_id(),
-            (*comps.object).borrow().get_id()
+            i.object.borrow().get_id(),
+            comps.object.borrow().get_id()
         );
         assert_eq!(point(0.0, 0.0, -1.0), comps.point);
         assert_eq!(vector(0.0, 0.0, -1.0), comps.eyev);
@@ -84,7 +84,7 @@ mod tests {
         let shape = Sphere::default();
         let i = Intersection {
             t: 4.0,
-            object: Rc::new(RefCell::new(Box::new(shape))),
+            object: RefCell::new(Rc::new(shape)),
         };
         let comps = Computations::prepare_computation(i, r).unwrap();
         assert_eq!(false, comps.inside);
@@ -99,7 +99,7 @@ mod tests {
         let shape = Sphere::default();
         let i = Intersection {
             t: 1.0,
-            object: Rc::new(RefCell::new(Box::new(shape))),
+            object: RefCell::new(Rc::new(shape)),
         };
         let comps = Computations::prepare_computation(i, r).unwrap();
         assert_eq!(point(0.0, 0.0, 1.0), comps.point);
