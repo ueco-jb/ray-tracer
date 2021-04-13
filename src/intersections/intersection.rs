@@ -18,13 +18,13 @@ type RcRefCellBox<T> = Rc<RefCell<Box<T>>>;
 #[derive(Clone)]
 pub struct Intersection {
     pub t: f64,
-    pub object: RcRefCellBox<dyn Shape>,
+    pub object: RefCell<Rc<dyn Shape>>,
 }
 
 impl PartialEq for Intersection {
     fn eq(&self, other: &Self) -> bool {
         eq_with_eps(self.t, other.t)
-            && (*self.object).borrow().get_id() == (*other.object).borrow().get_id()
+            && self.object.borrow().get_id() == other.object.borrow().get_id()
     }
 }
 
@@ -32,7 +32,7 @@ impl fmt::Debug for Intersection {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Intersection")
             .field("t", &self.t)
-            .field("Object:", (&*self.object).borrow().get_id())
+            .field("Object:", self.object.borrow().get_id())
             .finish()
     }
 }
@@ -91,7 +91,7 @@ impl Default for Intersections {
 /// the sphere
 /// In order to calculate proper intersection on scaled object, you need to apply inverse of
 /// sphere's transformation onto ray
-pub fn intersect(object: Box<dyn Shape>, ray: &Ray) -> Result<Intersections, MatrixError> {
+pub fn intersect(object: Rc<dyn Shape>, ray: &Ray) -> Result<Intersections, MatrixError> {
     let ray2 = transform(*ray, object.get_transform().inverse()?);
     // Vector from the sphere's center to the ray origin
     let sphere_to_ray = ray2.origin - point(0.0, 0.0, 0.0);
@@ -106,15 +106,14 @@ pub fn intersect(object: Box<dyn Shape>, ray: &Ray) -> Result<Intersections, Mat
         let sqrt_discriminant = discriminant.sqrt();
         let t1 = (-b - sqrt_discriminant) / (2.0 * a);
         let t2 = (-b + sqrt_discriminant) / (2.0 * a);
-        let rc_object = Rc::new(RefCell::new(object));
         Ok(Intersections(vec![
             Intersection {
                 t: t1,
-                object: Rc::clone(&rc_object),
+                object: RefCell::new(object),
             },
             Intersection {
                 t: t2,
-                object: Rc::clone(&rc_object),
+                object: RefCell::new(object),
             },
         ]))
     }

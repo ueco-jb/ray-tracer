@@ -10,11 +10,12 @@ use crate::{
     transformations::scaling,
     tuple::point,
 };
-use std::boxed::Box;
+use std::{boxed::Box, cell::RefCell, rc::Rc};
+type RcRefCellBox<T> = Rc<RefCell<Box<T>>>;
 
 pub struct World {
     pub light: Option<PointLight>,
-    pub objects: Vec<Box<dyn Shape>>,
+    pub objects: Vec<Rc<dyn Shape>>,
 }
 
 impl Default for World {
@@ -34,7 +35,7 @@ impl Default for World {
                 position: point(-10.0, -10.0, -10.0),
                 intensity: Color::new(1.0, 1.0, 1.0),
             }),
-            objects: vec![Box::new(s1), Box::new(s2)],
+            objects: vec![Rc::new(s1), Rc::new(s2)],
         }
     }
 }
@@ -48,18 +49,21 @@ impl World {
         }
     }
 
-    pub fn get_object(&self, index: usize) -> Option<&Sphere> {
-        (*self.objects).get(index)
-    }
+    // pub fn get_object(&self, index: usize) -> Option<&dyn Shape> {
+    //     RefCell::get_mut(self.objects.get(index).unwrap())
+    // }
 
-    pub fn get_mut_object(&mut self, index: usize) -> Option<&mut Sphere> {
-        (*self.objects).get_mut(index)
+    pub fn get_mut_object(&'static mut self, index: usize) -> Option<&'static mut dyn Shape> {
+        match self.objects.get_mut(index) {
+            Some(rc_object) => Rc::get_mut(rc_object),
+            None => None,
+        }
     }
 
     pub fn shade_hit(&self, comps: Computations) -> Option<Color> {
         if let Some(light) = self.light {
             Some(lighting(
-                (*comps.object).borrow().get_material(),
+                comps.object.borrow().get_material(),
                 light,
                 comps.point,
                 comps.eyev,
@@ -73,20 +77,21 @@ impl World {
 
 #[allow(dead_code)]
 fn intersect_world(
-    world: &World,
+    world: &mut World,
     ray: &Ray,
     intersections: &mut Intersections,
 ) -> Result<(), MatrixError> {
     for o in world.objects.iter() {
-        let mut intersection = intersect(o, ray)?;
+        let mut intersection = intersect(o.clone(), ray)?;
         intersections.append(&mut intersection);
     }
+    //intersections.extend(world.objects.iter().cloned().map(|o| intersect(o, ray).unwrap()));
     intersections.sort();
     Ok(())
 }
 
 #[allow(dead_code)]
-fn color_at(world: &World, ray: &Ray) -> Result<Color, MatrixError> {
+fn color_at(world: &mut World, ray: &Ray) -> Result<Color, MatrixError> {
     let mut intersections = Intersections::new();
     intersect_world(world, ray, &mut intersections)?;
     if let Some(intersection) = intersections.hit() {

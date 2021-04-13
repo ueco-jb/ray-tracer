@@ -7,11 +7,9 @@ use crate::{
 };
 use std::{boxed::Box, cell::RefCell, rc::Rc};
 
-type RcRefCellBox<T> = Rc<RefCell<Box<T>>>;
-
 pub struct Computations {
     pub t: f64,
-    pub object: RcRefCellBox<dyn Shape>,
+    pub object: RefCell<Rc<dyn Shape>>,
     pub point: Tuple,
     pub eyev: Tuple,
     pub normalv: Tuple,
@@ -30,14 +28,14 @@ impl Computations {
         let t = intersection.t;
         let ray_position = ray.position(t);
         let eyev = -ray.direction;
-        let mut normalv = (*intersection.object).borrow().normal_at(ray_position)?;
+        let mut normalv = intersection.object.borrow().normal_at(ray_position)?;
         let inside = Self::is_inside(&eyev, &normalv);
         if inside {
             normalv = -normalv;
         };
         Ok(Computations {
             t,
-            object: Rc::clone(&intersection.object),
+            object: intersection.object.clone(),
             point: ray_position,
             eyev,
             normalv,
