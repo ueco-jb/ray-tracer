@@ -22,8 +22,8 @@ mod tests {
         let intensity = Color::new(1.0, 1.0, 1.0);
         let position = point(0.0, 0.0, 0.0);
         let light = PointLight {
-            position,
             intensity,
+            position,
         };
         assert_eq!(position, light.position);
         assert_eq!(intensity, light.intensity);
