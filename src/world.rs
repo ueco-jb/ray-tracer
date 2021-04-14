@@ -48,16 +48,15 @@ impl World {
         }
     }
 
-    // pub fn get_object(&self, index: usize) -> Option<&dyn Shape> {
-    //     RefCell::get_mut(self.objects.get(index).unwrap())
-    // }
+    #[allow(dead_code)]
+    pub fn get_rco(&self, index: usize) -> Option<&Rc<dyn Shape>> {
+        self.objects.get(index)
+    }
 
-    // pub fn get_mut_object(&self, index: usize) -> Option<&'static mut (dyn Shape+'_)> {
-    //     match self.objects.get(index) {
-    //         Some(rc_object) => Rc::get_mut(rc_object),
-    //         None => None,
-    //     }
-    // }
+    #[allow(dead_code)]
+    pub fn get_mut_rco(&mut self, index: usize) -> Option<&mut Rc<dyn Shape>> {
+        self.objects.get_mut(index)
+    }
 
     pub fn shade_hit(&self, comps: Computations) -> Option<Color> {
         if let Some(light) = self.light {
@@ -73,7 +72,6 @@ impl World {
         }
     }
 
-    #[allow(dead_code)]
     fn intersect_world(
         &mut self,
         ray: &Ray,
@@ -169,10 +167,7 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let shape: Sphere = *w.objects[0]
-            .as_any()
-            .downcast_ref::<Sphere>()
-            .unwrap();
+        let shape: Sphere = *w.objects[0].as_any().downcast_ref::<Sphere>().unwrap();
         let i = Intersection {
             t: 4.0,
             object: RefCell::new(Rc::new(shape)),
@@ -196,10 +191,7 @@ mod tests {
             origin: point(0.0, 0.0, 0.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let shape: Sphere = *w.objects[1]
-            .as_any()
-            .downcast_ref::<Sphere>()
-            .unwrap();
+        let shape: Sphere = *w.objects[1].as_any().downcast_ref::<Sphere>().unwrap();
         let i = Intersection {
             t: 0.5,
             object: RefCell::new(Rc::new(shape)),
@@ -234,9 +226,9 @@ mod tests {
     #[test]
     fn color_with_intersection_behind_ray() {
         let mut w = World::default();
-        let o = w.objects.get_mut(0).unwrap();
+        let o = w.get_mut_rco(0).unwrap();
         Rc::get_mut(o).unwrap().set_ambient(1.0);
-        let inner = w.objects.get_mut(1).unwrap();
+        let inner = w.get_mut_rco(1).unwrap();
         Rc::get_mut(inner).unwrap().set_ambient(1.0);
         let output_color = *inner.get_color();
         let r = Ray {

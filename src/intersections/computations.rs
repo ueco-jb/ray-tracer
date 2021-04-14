@@ -66,10 +66,7 @@ mod tests {
         };
         let comps = Computations::prepare_computation(i.clone(), r).unwrap();
         assert!(eq_with_eps(i.t, comps.t));
-        assert_eq!(
-            i.object.borrow().get_id(),
-            comps.object.borrow().get_id()
-        );
+        assert_eq!(i.object.borrow().get_id(), comps.object.borrow().get_id());
         assert_eq!(point(0.0, 0.0, -1.0), comps.point);
         assert_eq!(vector(0.0, 0.0, -1.0), comps.eyev);
         assert_eq!(vector(0.0, 0.0, -1.0), comps.normalv);
