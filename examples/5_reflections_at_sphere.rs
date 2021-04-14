@@ -2,6 +2,7 @@ use ray_tracer::{
     canvas_to_ppm, intersect, lighting, normalize, point, save, Canvas, Color, PointLight, Ray,
     Shape, Sphere,
 };
+use std::rc::Rc;
 
 const CANVAS_SIZE: usize = 100;
 
@@ -33,14 +34,14 @@ fn main() {
                 origin: ray_origin,
                 direction: normalize(&(position - ray_origin)),
             };
-            let mut xs = intersect(s, &r).unwrap();
+            let mut xs = intersect(Rc::new(s), &r).unwrap();
             let hit = xs.hit();
             if let Some(hit) = hit {
                 let point = r.position(hit.t);
-                let normal = (*hit.object).borrow().normal_at(point).unwrap();
+                let normal = hit.object.borrow().normal_at(point).unwrap();
                 let eye = -r.direction;
                 let col = lighting(
-                    (*hit.object).borrow_mut().get_material(),
+                    hit.object.borrow_mut().get_material(),
                     light,
                     point,
                     eye,
