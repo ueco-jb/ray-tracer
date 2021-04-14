@@ -7,3 +7,10 @@ edition = "2018"
 [dependencies]
 thiserror = "1.0.24"
 uuid = { version = "0.8.2", default-features = false, features = ["v4"] }
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "benchmark"
+harness = false
