@@ -52,12 +52,12 @@ impl World {
     //     RefCell::get_mut(self.objects.get(index).unwrap())
     // }
 
-    pub fn get_mut_object(&'static mut self, index: usize) -> Option<&'static mut dyn Shape> {
-        match self.objects.get_mut(index) {
-            Some(rc_object) => Rc::get_mut(rc_object),
-            None => None,
-        }
-    }
+    // pub fn get_mut_object(&self, index: usize) -> Option<&'static mut (dyn Shape+'_)> {
+    //     match self.objects.get(index) {
+    //         Some(rc_object) => Rc::get_mut(rc_object),
+    //         None => None,
+    //     }
+    // }
 
     pub fn shade_hit(&self, comps: Computations) -> Option<Color> {
         if let Some(light) = self.light {
@@ -72,32 +72,32 @@ impl World {
             None
         }
     }
-}
 
-#[allow(dead_code)]
-fn intersect_world(
-    world: &mut World,
-    ray: &Ray,
-    intersections: &mut Intersections,
-) -> Result<(), MatrixError> {
-    for o in world.objects.iter() {
-        let mut intersection = intersect(o.clone(), ray)?;
-        intersections.append(&mut intersection);
+    #[allow(dead_code)]
+    fn intersect_world(
+        &mut self,
+        ray: &Ray,
+        intersections: &mut Intersections,
+    ) -> Result<(), MatrixError> {
+        for o in self.objects.iter() {
+            let mut intersection = intersect(o.clone(), ray)?;
+            intersections.append(&mut intersection);
+        }
+        //intersections.extend(world.objects.iter().cloned().map(|o| intersect(o, ray).unwrap()));
+        intersections.sort();
+        Ok(())
     }
-    //intersections.extend(world.objects.iter().cloned().map(|o| intersect(o, ray).unwrap()));
-    intersections.sort();
-    Ok(())
-}
 
-#[allow(dead_code)]
-fn color_at(world: &mut World, ray: &Ray) -> Result<Color, MatrixError> {
-    let mut intersections = Intersections::new();
-    intersect_world(world, ray, &mut intersections)?;
-    if let Some(intersection) = intersections.hit() {
-        let comps = Computations::prepare_computation(intersection.clone(), *ray)?;
-        Ok(world.shade_hit(comps).unwrap_or(BLACK))
-    } else {
-        Ok(BLACK)
+    #[allow(dead_code)]
+    fn color_at(&mut self, ray: &Ray) -> Result<Color, MatrixError> {
+        let mut intersections = Intersections::new();
+        self.intersect_world(ray, &mut intersections)?;
+        if let Some(intersection) = intersections.hit() {
+            let comps = Computations::prepare_computation(intersection.clone(), *ray)?;
+            Ok(self.shade_hit(comps).unwrap_or(BLACK))
+        } else {
+            Ok(BLACK)
+        }
     }
 }
 
@@ -107,13 +107,13 @@ mod tests {
     use crate::{intersections::Intersection, tuple::vector, utils::eq_with_eps};
     use std::{cell::RefCell, rc::Rc};
 
-    #[test]
-    fn creating_world() {
-        let w = World::new();
-        let v: Vec<Rc<Sphere>> = Vec::new();
-        assert_eq!(None, w.light);
-        assert_eq!(v, w.objects);
-    }
+    // #[test]
+    // fn creating_world() {
+    //     let w = World::new();
+    //     let v: Vec<Rc<Sphere>> = Vec::new();
+    //     assert_eq!(None, w.light);
+    //     assert_eq!(v, w.objects);
+    // }
 
     #[test]
     fn default_world() {
@@ -137,12 +137,12 @@ mod tests {
         assert!(w
             .objects
             .iter()
-            .any(|&i| i.get_transform() == s1.get_transform()
+            .any(|i| i.get_transform() == s1.get_transform()
                 && i.get_material() == s1.get_material()));
         assert!(w
             .objects
             .iter()
-            .any(|&i| i.get_transform() == s2.get_transform()
+            .any(|i| i.get_transform() == s2.get_transform()
                 && i.get_material() == s2.get_material()));
     }
 
@@ -154,7 +154,7 @@ mod tests {
             direction: vector(0.0, 0.0, 1.0),
         };
         let mut i = Intersections::new();
-        intersect_world(&mut w, &r, &mut i).unwrap();
+        w.intersect_world(&r, &mut i).unwrap();
         assert_eq!(4, (*i).len());
         assert!(eq_with_eps(4.0, (*i)[0].t));
         assert!(eq_with_eps(4.5, (*i)[1].t));
@@ -169,7 +169,10 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let shape: Sphere = w.objects[0];
+        let shape: Sphere = *w.objects[0]
+            .as_any()
+            .downcast_ref::<Sphere>()
+            .unwrap();
         let i = Intersection {
             t: 4.0,
             object: RefCell::new(Rc::new(shape)),
@@ -193,7 +196,10 @@ mod tests {
             origin: point(0.0, 0.0, 0.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let shape: Sphere = w.objects[1];
+        let shape: Sphere = *w.objects[1]
+            .as_any()
+            .downcast_ref::<Sphere>()
+            .unwrap();
         let i = Intersection {
             t: 0.5,
             object: RefCell::new(Rc::new(shape)),
@@ -210,7 +216,7 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 1.0, 0.0),
         };
-        let c = color_at(&mut w, &r).unwrap();
+        let c = w.color_at(&r).unwrap();
         assert_eq!(BLACK, c);
     }
 
@@ -221,23 +227,23 @@ mod tests {
             origin: point(0.0, 0.0, -5.0),
             direction: vector(0.0, 0.0, 1.0),
         };
-        let c = color_at(&mut w, &r).unwrap();
+        let c = w.color_at(&r).unwrap();
         assert_eq!(Color::new(0.38066, 0.47583, 0.2855), c);
     }
 
     #[test]
     fn color_with_intersection_behind_ray() {
         let mut w = World::default();
-        let outer = w.get_mut_object(0).unwrap();
-        outer.set_ambient(1.0);
-        let inner = w.get_mut_object(1).unwrap();
-        inner.set_ambient(1.0);
+        let o = w.objects.get_mut(0).unwrap();
+        Rc::get_mut(o).unwrap().set_ambient(1.0);
+        let inner = w.objects.get_mut(1).unwrap();
+        Rc::get_mut(inner).unwrap().set_ambient(1.0);
         let output_color = *inner.get_color();
         let r = Ray {
             origin: point(0.0, 0.0, 0.75),
             direction: vector(0.0, 0.0, -1.0),
         };
-        let c = color_at(&mut w, &r).unwrap();
+        let c = w.color_at(&r).unwrap();
         assert_eq!(output_color, c);
     }
 }

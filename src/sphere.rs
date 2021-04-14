@@ -5,6 +5,7 @@ use crate::{
     shape::Shape,
     tuple::{normalize, point, Tuple, TupleT},
 };
+use std::any::Any;
 use uuid::Uuid;
 
 // For simplicity, Sphere currently has radius 1 and center on (0, 0, 0)
@@ -16,6 +17,10 @@ pub struct Sphere {
 }
 
 impl Shape for Sphere {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
     fn set_transform(&mut self, transform: Matrix4) {
         self.transform = transform;
     }
@@ -55,10 +60,6 @@ impl Shape for Sphere {
 
     fn set_ambient(&mut self, a: f64) {
         self.material.ambient = a;
-    }
-
-    fn get_ambient(&self) -> f64 {
-        self.material.ambient
     }
 
     fn get_id(&self) -> &Uuid {
