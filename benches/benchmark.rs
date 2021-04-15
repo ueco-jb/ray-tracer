@@ -1,8 +1,8 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use matches::assert_matches;
 use ray_tracer::{
-    canvas_to_ppm, intersect, normalize, point, vector, Canvas, Color, Computations, Intersection,
-    Matrix, Matrix4, Ray, Sphere,
+    canvas_to_ppm, intersect, lighting, normalize, point, vector, Canvas, Color, Computations,
+    Intersection, Material, Matrix, Matrix4, PointLight, Ray, Sphere, World,
 };
 use std::{cell::RefCell, rc::Rc};
 
@@ -86,5 +86,42 @@ pub fn canvas(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benchmark, hit, computations, matrix, canvas);
+pub fn reflections(c: &mut Criterion) {
+    let m = Material::default();
+    let position = point(0.0, 0.0, 0.0);
+    let eyev = vector(0.0, 0.0, -1.0);
+    let normalv = vector(0.0, 0.0, -1.0);
+    let light = PointLight {
+        position: point(0.0, 0.0, -10.0),
+        intensity: Color::new(1.0, 1.0, 1.0),
+    };
+    c.bench_function("Reflections on light using Phong model", |b| {
+        b.iter(|| {
+            lighting(&m, light, position, eyev, normalv);
+        })
+    });
+}
+
+#[allow(unused_variables)]
+pub fn world_intersections(c: &mut Criterion) {
+    let mut w = World::default();
+    let r = Ray {
+        origin: point(0.0, 0.0, -5.0),
+        direction: vector(0.0, 0.0, 1.0),
+    };
+    let result_color = Color::new(0.38066, 0.47583, 0.2855);
+    c.bench_function("Color at object inside World when ray hits", |b| {
+        b.iter(|| assert_matches!(w.color_at(&r), Ok(result_color)))
+    });
+}
+
+criterion_group!(
+    benchmark,
+    hit,
+    computations,
+    matrix,
+    canvas,
+    reflections,
+    world_intersections
+);
 criterion_main!(benchmark);
