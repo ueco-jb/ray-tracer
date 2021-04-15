@@ -39,3 +39,12 @@ coverage:
   - cargo tarpaulin -v --all-features --force-clean --offline
   only:
   - master
+
+benchmark:
+  <<: *prepare
+  stage: test
+  script:
+    - cargo bench
+  artifacts:
+    paths:
+      - target/criterion
