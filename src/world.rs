@@ -87,7 +87,7 @@ impl World {
     }
 
     #[allow(dead_code)]
-    fn color_at(&mut self, ray: &Ray) -> Result<Color, MatrixError> {
+    pub fn color_at(&mut self, ray: &Ray) -> Result<Color, MatrixError> {
         let mut intersections = Intersections::new();
         self.intersect_world(ray, &mut intersections)?;
         if let Some(intersection) = intersections.hit() {
