@@ -10,6 +10,7 @@ uuid = { version = "0.8.2", default-features = false, features = ["v4"] }
 
 [dev-dependencies]
 criterion = "0.3"
+matches = "0.1.8"
 
 [[bench]]
 name = "benchmark"
